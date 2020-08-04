@@ -5,7 +5,7 @@ from zvt.contract.api import get_db_session
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.utils.time_utils import to_pd_timestamp, now_time_str, TIME_FORMAT_DAY1
 from zvt.utils.utils import json_callback_param, to_float
-from zvt.utils.request_utils import get_http_session, request_get
+from zvt.utils.request_utils import request_get
 from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.domain import Index, BlockCategory, Block
 

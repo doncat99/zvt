@@ -22,17 +22,19 @@ class ChinaIndexListSpider(Recorder):
         super().__init__(batch_size, force_update, sleeping_time)
 
     def run(self):
+        http_session = get_http_session()
+
         # 上证、中证
-        self.fetch_csi_index()
+        self.fetch_csi_index(http_session)
 
         # 深证
-        self.fetch_szse_index()
+        self.fetch_szse_index(http_session)
 
         # 国证
         # FIXME:已不可用
-        # self.fetch_cni_index()
+        # self.fetch_cni_index(http_session)
 
-    def fetch_csi_index(self) -> None:
+    def fetch_csi_index(self, http_session) -> None:
         """
         抓取上证、中证指数列表
         """
@@ -43,7 +45,6 @@ class ChinaIndexListSpider(Recorder):
         page = 1
         page_size = 50
 
-        http_session = get_http_session()
         while True:
             query_url = url.format(page, page_size)
             response = request_get(http_session, query_url)
@@ -70,16 +71,14 @@ class ChinaIndexListSpider(Recorder):
         self.logger.info('上证、中证指数列表抓取完成...')
 
         # 抓取上证、中证指数成分股
-        self.fetch_csi_index_component(df)
+        self.fetch_csi_index_component(df, http_session)
         self.logger.info('上证、中证指数成分股抓取完成...')
 
-    def fetch_csi_index_component(self, df: pd.DataFrame):
+    def fetch_csi_index_component(self, df: pd.DataFrame, http_session):
         """
         抓取上证、中证指数成分股
         """
         query_url = 'http://www.csindex.com.cn/uploads/file/autofile/cons/{}cons.xls'
-
-        http_session = get_http_session()
 
         for _, index in df.iterrows():
             index_code = index['code']
@@ -116,12 +115,11 @@ class ChinaIndexListSpider(Recorder):
 
             self.sleep()
 
-    def fetch_szse_index(self) -> None:
+    def fetch_szse_index(self, http_session) -> None:
         """
         抓取深证指数列表
         """
         url = 'http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1812_zs&TABKEY=tab1'
-        http_session = get_http_session()
         response = request_get(http_session, url)
         df = pd.read_excel(io.BytesIO(response.content), dtype='str')
 
@@ -132,16 +130,14 @@ class ChinaIndexListSpider(Recorder):
         self.logger.info('深证指数列表抓取完成...')
 
         # 抓取深证指数成分股
-        self.fetch_szse_index_component(df)
+        self.fetch_szse_index_component(df, http_session)
         self.logger.info('深证指数成分股抓取完成...')
 
-    def fetch_szse_index_component(self, df: pd.DataFrame):
+    def fetch_szse_index_component(self, df: pd.DataFrame, http_session):
         """
         抓取深证指数成分股
         """
         query_url = 'http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1747_zs&TABKEY=tab1&ZSDM={}'
-
-        http_session = get_http_session()
 
         for _, index in df.iterrows():
             index_code = index['code']
@@ -170,13 +166,11 @@ class ChinaIndexListSpider(Recorder):
 
             self.sleep()
 
-    def fetch_cni_index(self) -> None:
+    def fetch_cni_index(self, http_session) -> None:
         """
         抓取国证指数列表
         """
         url = 'http://www.cnindex.com.cn/zstx/jcxl/'
-
-        http_session = get_http_session()
 
         response = request_get(http_session, url)
         response.encoding = 'utf-8'
@@ -205,10 +199,10 @@ class ChinaIndexListSpider(Recorder):
         self.logger.info('国证指数列表抓取完成...')
 
         # 抓取国证指数成分股
-        self.fetch_cni_index_component(result_df)
+        self.fetch_cni_index_component(result_df, http_session)
         self.logger.info('国证指数成分股抓取完成...')
 
-    def fetch_cni_index_component(self, df: pd.DataFrame):
+    def fetch_cni_index_component(self, df: pd.DataFrame, http_session):
         """
         抓取国证指数成分股
         """
@@ -220,7 +214,6 @@ class ChinaIndexListSpider(Recorder):
             url = query_url.format(index_code)
 
             try:
-                http_session = get_http_session()
                 response = request_get(http_session, url)
                 response.raise_for_status()
             except requests.HTTPError as error:

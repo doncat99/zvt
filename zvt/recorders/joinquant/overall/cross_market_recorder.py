@@ -35,7 +35,7 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
     def init_entities(self):
         super().init_entities()
 
-    def record(self, entity, start, end, size, timestamps):
+    def record(self, entity, start, end, size, timestamps, http_session):
 
         q = query(finance.STK_ML_QUOTA).filter(
             finance.STK_ML_QUOTA.link_id == entity.code,

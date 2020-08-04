@@ -22,17 +22,17 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
 
     def __init__(self, entity_type='stock', exchanges=None, entity_ids=None, codes=None, batch_size=10,
                  force_update=False, sleeping_time=5, default_size=2000, real_time=False, fix_duplicate_way='add',
-                 start_timestamp=None, end_timestamp=None, close_hour=0, close_minute=0) -> None:
+                 start_timestamp=None, end_timestamp=None, close_hour=0, close_minute=0, process_index=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute)
+                         close_minute, process_index)
         auth(zvt_env['jq_username'], zvt_env['jq_password'])
 
     def on_finish(self):
         super().on_finish()
         logout()
 
-    def record(self, entity, start, end, size, timestamps):
+    def record(self, entity, start, end, size, timestamps, http_session):
         q = query(
             valuation
         ).filter(

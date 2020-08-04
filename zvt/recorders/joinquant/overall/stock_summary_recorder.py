@@ -43,7 +43,7 @@ class StockSummaryRecorder(TimeSeriesDataRecorder):
 
         auth(zvt_env['jq_username'], zvt_env['jq_password'])
 
-    def record(self, entity, start, end, size, timestamps):
+    def record(self, entity, start, end, size, timestamps, http_session):
         jq_code = code_map_jq.get(entity.code)
 
         q = query(finance.STK_EXCHANGE_TRADE_INFO).filter(

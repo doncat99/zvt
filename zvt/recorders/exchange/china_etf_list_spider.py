@@ -35,7 +35,7 @@ class ChinaETFListSpider(Recorder):
         self.logger.info('沪市 ETF 列表抓取完成...')
 
         # 抓取沪市 ETF 成分股
-        self.download_sh_etf_component(df)
+        self.download_sh_etf_component(df, http_session)
         self.logger.info('沪市 ETF 成分股抓取完成...')
 
         # 抓取深市 ETF 列表
@@ -47,7 +47,7 @@ class ChinaETFListSpider(Recorder):
         self.logger.info('深市 ETF 列表抓取完成...')
 
         # 抓取深市 ETF 成分股
-        self.download_sz_etf_component(df)
+        self.download_sz_etf_component(df, http_session)
         self.logger.info('深市 ETF 成分股抓取完成...')
 
     def persist_etf_list(self, df: pd.DataFrame, exchange: str):
@@ -72,7 +72,7 @@ class ChinaETFListSpider(Recorder):
 
         df_to_db(df=df, data_schema=Etf, provider=self.provider, force_update=False)
 
-    def download_sh_etf_component(self, df: pd.DataFrame):
+    def download_sh_etf_component(self, df: pd.DataFrame, http_session):
         """
         ETF_CLASS => 1. 单市场 ETF 2.跨市场 ETF 3. 跨境 ETF
                         5. 债券 ETF 6. 黄金 ETF
@@ -83,9 +83,7 @@ class ChinaETFListSpider(Recorder):
                     'isPagination=false&type={}&etfClass={}'
 
         etf_df = df[(df['ETF_CLASS'] == '1') | (df['ETF_CLASS'] == '2')]
-        etf_df = self.populate_sh_etf_type(etf_df)
-
-        http_session = get_http_session()
+        etf_df = self.populate_sh_etf_type(etf_df, http_session)
 
         for _, etf in etf_df.iterrows():
             url = query_url.format(etf['ETF_TYPE'], etf['ETF_CLASS'])
@@ -114,9 +112,7 @@ class ChinaETFListSpider(Recorder):
 
             # self.sleep()
 
-    def download_sz_etf_component(self, df: pd.DataFrame):
-        http_session = get_http_session()
-
+    def download_sz_etf_component(self, df: pd.DataFrame, http_session):
         query_url = 'http://vip.stock.finance.sina.com.cn/corp/go.php/vII_NewestComponent/indexid/{}.phtml'
 
         self.parse_sz_etf_underlying_index(df)
@@ -166,14 +162,12 @@ class ChinaETFListSpider(Recorder):
             # self.sleep()
 
     @staticmethod
-    def populate_sh_etf_type(df: pd.DataFrame):
+    def populate_sh_etf_type(df: pd.DataFrame, http_session):
         """
         填充沪市 ETF 代码对应的 TYPE 到列表数据中
         :param df: ETF 列表数据
         :return: 包含 ETF 对应 TYPE 的列表数据
         """
-        http_session = get_http_session()
-
         query_url = 'http://query.sse.com.cn/infodisplay/queryETFNewAllInfo.do?' \
                     'isPagination=false&type={}&pageHelp.pageSize=25'
 
