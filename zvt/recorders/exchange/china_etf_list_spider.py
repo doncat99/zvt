@@ -110,7 +110,7 @@ class ChinaETFListSpider(Recorder):
             df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
             self.logger.info(f'{etf["FUND_NAME"]} - {etf_code} 成分股抓取完成...')
 
-            # self.sleep()
+            self.sleep()
 
     def download_sz_etf_component(self, df: pd.DataFrame, http_session):
         query_url = 'http://vip.stock.finance.sina.com.cn/corp/go.php/vII_NewestComponent/indexid/{}.phtml'
@@ -159,7 +159,7 @@ class ChinaETFListSpider(Recorder):
             df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
             self.logger.info(f'{etf["证券简称"]} - {etf_code} 成分股抓取完成...')
 
-            # self.sleep()
+            self.sleep()
 
     @staticmethod
     def populate_sh_etf_type(df: pd.DataFrame, http_session):
