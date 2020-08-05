@@ -23,6 +23,7 @@ class EastmoneyChinaBlockRecorder(Recorder):
 
     def run(self):
         http_session = get_http_session()
+        
         for category, url in self.category_map_url.items():
             resp = request_get(http_session, url)
             results = json_callback_param(resp.text)

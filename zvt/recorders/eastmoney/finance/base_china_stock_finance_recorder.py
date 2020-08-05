@@ -7,7 +7,7 @@ from zvt.api.quote import to_jq_report_period
 from zvt.contract.api import get_data
 from zvt.domain import FinanceFactor
 from zvt.recorders.eastmoney.common import company_type_flag, get_fc, EastmoneyTimestampsDataRecorder, \
-    call_eastmoney_api, get_from_path_fields
+                                           call_eastmoney_api, get_from_path_fields
 from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.pd_utils import index_df
 from zvt.utils.pd_utils import pd_is_not_null
@@ -130,8 +130,8 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
         except Exception as e:
             self.logger.error(e)
 
-    def on_finish_entity(self, entity):
-        super().on_finish_entity(entity)
+    def on_finish_entity(self, entity, http_session):
+        super().on_finish_entity(entity, http_session)
 
         if not self.fetch_jq_timestamp:
             return

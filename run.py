@@ -134,7 +134,7 @@ if __name__ == '__main__':
                  [8, interface.get_top_ten_tradable_holder_data, "Top Ten Tradable Holder"],
                 ]
 
-    pool = Pool(len(param_set), initializer=init, initargs=(l,))
+    pool = Pool(3, initializer=init, initargs=(l,))
     pool.map(run, param_set)
     pool.close()
     pool.join()

@@ -6,7 +6,7 @@ import pandas as pd
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.utils.time_utils import to_time_str
-from zvt.utils.request_utils import get_http_session, request_get
+from zvt.utils.request_utils import request_get
 from zvt import init_log
 from zvt.api.quote import generate_kdata_id
 from zvt.api import get_kdata
@@ -38,7 +38,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
     def generate_domain_id(self, entity, original_data):
         return generate_kdata_id(entity_id=entity.id, timestamp=original_data['timestamp'], level=self.level)
 
-    def on_finish_entity(self, entity):
+    def on_finish_entity(self, entity, http_session):
         kdatas = get_kdata(entity_id=entity.id, level=IntervalLevel.LEVEL_1DAY.value,
                            order=Etf1dKdata.timestamp.asc(),
                            return_type='domain', session=self.session,
@@ -49,7 +49,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             end = kdatas[-1].timestamp
 
             # 从东方财富获取基金累计净值
-            df = self.fetch_cumulative_net_value(entity, start, end)
+            df = self.fetch_cumulative_net_value(entity, start, end, http_session)
 
             if df is not None and not df.empty:
                 for kdata in kdatas:
@@ -59,14 +59,12 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
                 self.session.commit()
                 self.logger.info(f'{entity.code} - {entity.name}累计净值更新完成...')
 
-    def fetch_cumulative_net_value(self, security_item, start, end) -> pd.DataFrame:
+    def fetch_cumulative_net_value(self, security_item, start, end, http_session) -> pd.DataFrame:
         query_url = 'http://api.fund.eastmoney.com/f10/lsjz?' \
                     'fundCode={}&pageIndex={}&pageSize=200&startDate={}&endDate={}'
 
         page = 1
         df = pd.DataFrame()
-
-        http_session = get_http_session()
 
         while True:
             url = query_url.format(security_item.code, page, to_time_str(start), to_time_str(end))

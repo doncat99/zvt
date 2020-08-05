@@ -46,6 +46,7 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
 
         with tqdm(total=len(self.entities), leave=False, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
             http_session = get_http_session()
+            
             for security_item in self.entities:
                 assert isinstance(security_item, StockDetail)
 

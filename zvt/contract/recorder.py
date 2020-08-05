@@ -354,7 +354,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         except Exception as e:
             self.logger.error(e)
 
-    def on_finish_entity(self, entity):
+    def on_finish_entity(self, entity, http_session):
         pass
 
     def do_run(self):
@@ -394,7 +394,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                                     self.data_schema,
                                     entity_item.id,
                                     start_timestamp))
-                            self.on_finish_entity(entity_item)
+                            self.on_finish_entity(entity_item, http_session)
 
                             self.process_index[2].acquire()
                             pbar.update()
@@ -469,7 +469,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                                     self.data_schema,
                                     entity_item.id,
                                     start_timestamp))
-                            self.on_finish_entity(entity_item)
+                            self.on_finish_entity(entity_item, http_session)
 
                             self.process_index[2].acquire()
                             pbar.update()
