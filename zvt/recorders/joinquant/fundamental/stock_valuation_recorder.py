@@ -26,7 +26,7 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        auth(zvt_env['jq_username1'], zvt_env['jq_password1'])
 
     def on_finish(self):
         super().on_finish()

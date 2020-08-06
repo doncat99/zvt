@@ -22,7 +22,7 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, ['000001'], batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        auth(zvt_env['jq_username2'], zvt_env['jq_password2'])
 
     def record(self, entity, start, end, size, timestamps, http_session):
         df = pd.DataFrame()

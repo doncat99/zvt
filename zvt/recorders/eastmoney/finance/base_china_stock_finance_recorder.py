@@ -31,7 +31,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                          close_minute, process_index=process_index)
 
         try:
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+            auth(zvt_env['jq_username3'], zvt_env['jq_password3'])
             self.fetch_jq_timestamp = True
         except Exception as e:
             self.fetch_jq_timestamp = False

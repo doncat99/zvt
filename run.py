@@ -119,27 +119,103 @@ class interface():
 
     @staticmethod
     def get_etf_stock_data(arg1, arg2, arg3):
+        # ETF股票
         EtfStock.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
     def get_etf_valuation_data(arg1, arg2, arg3):
+        # ETF估值数据
         EtfValuation.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
     def get_stock_1d_k_data(arg1, arg2, arg3):
+        # 日线
         Stock1dKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
     def get_stock_1d_hfq_k_data(arg1, arg2, arg3):
+        # 日线复权
         Stock1dHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
+    def get_stock_1d_ma_data(arg1, arg2, arg3):
+        # 日线MA
+        Stock1dMaStateStats.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
     def get_stock_1w_k_data(arg1, arg2, arg3):
+        # 周线
         Stock1wkKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
     def get_stock_1w_hfq_k_data(arg1, arg2, arg3):
+        # 周线复权
         Stock1wkHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+    
+    @staticmethod
+    def get_stock_1w_ma_data(arg1, arg2, arg3):
+        # 周线MA
+        Stock1wkMaStateStats.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1mon_k_data(arg1, arg2, arg3):
+        # 月线
+        Stock1monKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1mon_hfq_k_data(arg1, arg2, arg3):
+        # 月线复权
+        Stock1monHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1m_k_data(arg1, arg2, arg3):
+        # 1分钟线
+        Stock1mKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1m_hfq_k_data(arg1, arg2, arg3):
+        # 1分钟线复权
+        Stock1mHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_5m_k_data(arg1, arg2, arg3):
+        # 5分钟线
+        Stock5mKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_5m_hfq_k_data(arg1, arg2, arg3):
+        # 5分钟线复权
+        Stock5mHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_15m_k_data(arg1, arg2, arg3):
+        # 15分钟线
+        Stock15mKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_15m_hfq_k_data(arg1, arg2, arg3):
+        # 15分钟线复权
+        Stock15mHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_30m_k_data(arg1, arg2, arg3):
+        # 30分钟线
+        Stock30mKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_30m_hfq_k_data(arg1, arg2, arg3):
+        # 30分钟线复权
+        Stock30mHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_4h_k_data(arg1, arg2, arg3):
+        # 4小时线
+        Stock4hKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_4h_hfq_k_data(arg1, arg2, arg3):
+        # 4小时线复权
+        Stock4hHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
     def get_etf_1d_k_data(arg1, arg2, arg3):
@@ -162,9 +238,9 @@ if __name__ == '__main__':
     print("*    Start Fetching General Stock information...")
     print("*"*60)
 
-    # interface.get_stock_list_data("joinquant")
-    # interface.get_etf_list()
-    # interface.get_stock_trade_day(l)
+    interface.get_stock_list_data("joinquant")
+    interface.get_etf_list()
+    interface.get_stock_trade_day(l)
 
     summary_set = [
         [0, interface.get_stock_summary_data, "Stock Summary"],
@@ -191,17 +267,33 @@ if __name__ == '__main__':
     detail_set = [
         [0, interface.get_stock_1d_k_data, "Stock Daily K-Data"], 
         [1, interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data"],
-        [2, interface.get_stock_1w_k_data, "Stock Weekly K-Data"],
-        [3, interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data"],
-        [4, interface.get_etf_1d_k_data, "ETF Daily K-Data"],
+        [2, interface.get_stock_1d_ma_data, "Stock Daily Ma Data"],
+        [3, interface.get_stock_1w_k_data, "Stock Weekly K-Data"],
+        [4, interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data"],
+        [5, interface.get_stock_1w_ma_data, "Stock Weekly Ma Data"],
+        [6, interface.get_stock_1mon_k_data, "Stock Monthly K-Data"], 
+        [7, interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data"],
+        [8, interface.get_stock_1m_k_data, "Stock 1 mins K-Data"], 
+        [9, interface.get_stock_1m_hfq_k_data, "Stock 1 mins HFQ K-Data"],
+        [10, interface.get_stock_5m_k_data, "Stock 5 mins K-Data"], 
+        [11, interface.get_stock_5m_hfq_k_data, "Stock 5 mins HFQ K-Data"],
+        [12, interface.get_stock_15m_k_data, "Stock 15 mins K-Data"], 
+        [13, interface.get_stock_15m_hfq_k_data, "Stock 15 mins HFQ K-Data"],
+        [14, interface.get_stock_30m_k_data, "Stock 30 mins K-Data"], 
+        [15, interface.get_stock_30m_hfq_k_data, "Stock Daily 30 mins K-Data"],
+        [16, interface.get_stock_4h_k_data, "Stock 4 hours K-Data"], 
+        [17, interface.get_stock_4h_hfq_k_data, "Stock 4 hours HFQ K-Data"],
+        [18, interface.get_etf_1d_k_data, "ETF Daily K-Data"],
     ]
                 
-    pool = Pool(3, initializer=init, initargs=(l,))
-    pool.imap_unordered(run, summary_set)
+    pool = Pool(len(summary_set), initializer=init, initargs=(l,))
+    for _ in pool.imap_unordered(run, summary_set):
+        time.sleep(5)
     pool.close()
     pool.join()
 
     pool = Pool(3, initializer=init, initargs=(l,))
-    pool.imap_unordered(run, detail_set)
+    for _ in pool.imap_unordered(run, detail_set):
+        time.sleep(5)
     pool.close()
     pool.join()

@@ -55,7 +55,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                          close_minute, level, kdata_use_begin_time, one_day_trading_minutes, process_index=process_index)
         self.adjust_type = adjust_type
 
-        auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        auth(zvt_env['jq_username1'], zvt_env['jq_password1'])
 
     def generate_domain_id(self, entity, original_data):
         return generate_kdata_id(entity_id=entity.id, timestamp=original_data['timestamp'], level=self.level)

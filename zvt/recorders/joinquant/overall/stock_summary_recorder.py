@@ -40,7 +40,7 @@ class StockSummaryRecorder(TimeSeriesDataRecorder):
         super().__init__('index', ['cn'], None, codes, batch_size,
                          force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, process_index=process_index)
-        auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        auth(zvt_env['jq_username2'], zvt_env['jq_password2'])
 
     def record(self, entity, start, end, size, timestamps, http_session):
         jq_code = code_map_jq.get(entity.code)

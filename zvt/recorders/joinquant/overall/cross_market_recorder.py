@@ -30,7 +30,7 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
                          force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, process_index=process_index)
 
-        auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        auth(zvt_env['jq_username4'], zvt_env['jq_password4'])
 
     def init_entities(self):
         super().init_entities()
@@ -42,7 +42,7 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
             finance.STK_ML_QUOTA.day >= to_time_str(start)).limit(2000)
 
         df = finance.run_query(q)
-        print(df)
+        # print(df)
 
         json_results = []
 
