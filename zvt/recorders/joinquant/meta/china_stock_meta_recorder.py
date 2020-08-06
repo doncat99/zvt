@@ -14,7 +14,7 @@ from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 class BaseJqChinaMetaRecorder(Recorder):
     provider = 'joinquant'
 
-    def __init__(self, batch_size=10, force_update=True, sleeping_time=10) -> None:
+    def __init__(self, batch_size=10, force_update=True, sleeping_time=10, process_index=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
 
         auth(zvt_env['jq_username'], zvt_env['jq_password'])

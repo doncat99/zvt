@@ -15,6 +15,10 @@ class interface():
         Stock.record_data(provider=provider, sleeping_time=0)
 
     @staticmethod
+    def get_etf_list():
+        Etf.record_data(provider='joinquant', sleeping_time=0)
+
+    @staticmethod
     def get_stock_trade_day(lock):
         # 交易日
         StockTradeDay.record_data(provider='joinquant', process_index=(0, 'Trade Day', lock), sleeping_time=0)
@@ -108,12 +112,6 @@ class interface():
         # 前十可交易股东表
         TopTenTradableHolder.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
-
-    @staticmethod
-    def get_margin_trading_data(arg1, arg2, arg3):
-        # 融资融券
-        MarginTrading.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
-
     @staticmethod
     def get_1d_k_data(arg1, arg2, arg3):
         Stock1dKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
@@ -134,10 +132,6 @@ class interface():
     def get_stock_valuation_data(arg1, arg2, arg3):
         # 个股估值数据
         StockValuation.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
-
-    @staticmethod
-    def get_etf_data(arg1, arg2, arg3):
-        Etf.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
     def get_etf_stock_data(arg1, arg2, arg3):
@@ -164,8 +158,8 @@ if __name__ == '__main__':
     print("*    Start Fetching General Stock information...")
     print("*"*60)
 
-    interface.get_stock_list_data("eastmoney")
-    # interface.get_stock_list_data("joinquant")
+    interface.get_stock_list_data("joinquant")
+    interface.get_etf_list()
     interface.get_stock_trade_day(l)
 
     summary_set = [
@@ -188,18 +182,16 @@ if __name__ == '__main__':
     ]
                  
     detail_set = [
-        [0, interface.get_margin_trading_data, "Margin Trading k-Data"], 
-        [1, interface.get_1d_k_data, "Daily K-Data"], 
-        [2, interface.get_1d_hfq_k_data, "Daily HFQ K-Data"],
-        [3, interface.get_1w_k_data, "Weekly K-Data"],
-        [4, interface.get_1w_hfq_k_data, "Weekly HFQ K-Data"],
-        [5, interface.get_stock_valuation_data, "Stock Valuation"],
-        [6, interface.get_etf_data, "ETF"],
-        [7, interface.get_etf_stock_data, "ETF Stock"],
-        [8, interface.get_etf_valuation_data, "ETF Valuation"],
+        [0, interface.get_1d_k_data, "Daily K-Data"], 
+        [1, interface.get_1d_hfq_k_data, "Daily HFQ K-Data"],
+        [2, interface.get_1w_k_data, "Weekly K-Data"],
+        [3, interface.get_1w_hfq_k_data, "Weekly HFQ K-Data"],
+        [4, interface.get_stock_valuation_data, "Stock Valuation"],
+        [5, interface.get_etf_stock_data, "ETF Stock"],
+        [6, interface.get_etf_valuation_data, "ETF Valuation"],
     ]
                 
-    pool = Pool(1, initializer=init, initargs=(l,))
+    pool = Pool(3, initializer=init, initargs=(l,))
     pool.imap_unordered(run, summary_set)
     pool.close()
     pool.join()
