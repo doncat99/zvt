@@ -113,22 +113,6 @@ class interface():
         TopTenTradableHolder.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
     @staticmethod
-    def get_1d_k_data(arg1, arg2, arg3):
-        Stock1dKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
-
-    @staticmethod
-    def get_1d_hfq_k_data(arg1, arg2, arg3):
-        Stock1dHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
-
-    @staticmethod
-    def get_1w_k_data(arg1, arg2, arg3):
-        Stock1wkKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
-
-    @staticmethod
-    def get_1w_hfq_k_data(arg1, arg2, arg3):
-        Stock1wkHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
-
-    @staticmethod
     def get_stock_valuation_data(arg1, arg2, arg3):
         # 个股估值数据
         StockValuation.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
@@ -140,6 +124,26 @@ class interface():
     @staticmethod
     def get_etf_valuation_data(arg1, arg2, arg3):
         EtfValuation.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1d_k_data(arg1, arg2, arg3):
+        Stock1dKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1d_hfq_k_data(arg1, arg2, arg3):
+        Stock1dHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1w_k_data(arg1, arg2, arg3):
+        Stock1wkKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_stock_1w_hfq_k_data(arg1, arg2, arg3):
+        Stock1wkHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3), sleeping_time=0)
+
+    @staticmethod
+    def get_etf_1d_k_data(arg1, arg2, arg3):
+        Etf1dKdata.record_data(provider='sina', process_index=(arg1, arg2, arg3), sleeping_time=0)
 
 
 def run(param):
@@ -158,9 +162,9 @@ if __name__ == '__main__':
     print("*    Start Fetching General Stock information...")
     print("*"*60)
 
-    interface.get_stock_list_data("joinquant")
-    interface.get_etf_list()
-    interface.get_stock_trade_day(l)
+    # interface.get_stock_list_data("joinquant")
+    # interface.get_etf_list()
+    # interface.get_stock_trade_day(l)
 
     summary_set = [
         [0, interface.get_stock_summary_data, "Stock Summary"],
@@ -179,16 +183,17 @@ if __name__ == '__main__':
         [13, interface.get_holder_trading_data, "Holder Trading"],
         [14, interface.get_top_ten_holder_data, "Top Ten Holder"],
         [15, interface.get_top_ten_tradable_holder_data, "Top Ten Tradable Holder"],
+        [16, interface.get_stock_valuation_data, "Stock Valuation"],
+        [17, interface.get_etf_stock_data, "ETF Stock"],
+        [18, interface.get_etf_valuation_data, "ETF Valuation"],
     ]
                  
     detail_set = [
-        [0, interface.get_1d_k_data, "Daily K-Data"], 
-        [1, interface.get_1d_hfq_k_data, "Daily HFQ K-Data"],
-        [2, interface.get_1w_k_data, "Weekly K-Data"],
-        [3, interface.get_1w_hfq_k_data, "Weekly HFQ K-Data"],
-        [4, interface.get_stock_valuation_data, "Stock Valuation"],
-        [5, interface.get_etf_stock_data, "ETF Stock"],
-        [6, interface.get_etf_valuation_data, "ETF Valuation"],
+        [0, interface.get_stock_1d_k_data, "Stock Daily K-Data"], 
+        [1, interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data"],
+        [2, interface.get_stock_1w_k_data, "Stock Weekly K-Data"],
+        [3, interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data"],
+        [4, interface.get_etf_1d_k_data, "ETF Daily K-Data"],
     ]
                 
     pool = Pool(3, initializer=init, initargs=(l,))
