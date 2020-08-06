@@ -170,11 +170,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         self.close_minute = close_minute
 
         self.fix_duplicate_way = fix_duplicate_way
-
         self.start_timestamp = to_pd_timestamp(start_timestamp)
         self.end_timestamp = to_pd_timestamp(end_timestamp)
 
-        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time, process_index)
+        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time, process_index=process_index)
 
     def get_latest_saved_record(self, entity):
         order = eval('self.data_schema.{}.desc()'.format(self.get_evaluated_time_field()))
@@ -364,7 +363,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         http_session = get_http_session()
 
         while True:
-            with tqdm(total=len(unfinished_items), leave=False, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
+            with tqdm(total=len(unfinished_items), leave=True, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
                 for entity_item in unfinished_items:
                     try:
                         start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, http_session)
@@ -498,7 +497,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         #     raise raising_exception
     
     def run(self):
-        # asyncio.run(self.do_run())
         self.do_run()
 
 
@@ -525,7 +523,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                  process_index=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, process_index)
+                         close_minute, process_index=process_index)
 
         self.level = IntervalLevel(level)
         self.kdata_use_begin_time = kdata_use_begin_time

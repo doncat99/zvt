@@ -28,7 +28,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                  close_minute=0, process_index=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, process_index)
+                         close_minute, process_index=process_index)
 
         try:
             auth(zvt_env['jq_username'], zvt_env['jq_password'])

@@ -40,11 +40,8 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                                          return_type='domain',
                                          provider=self.provider)
 
-    def do_run(self):        
-        if self.process_index is None:
-            return
-
-        with tqdm(total=len(self.entities), leave=False, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
+    def do_run(self):
+        with tqdm(total=len(self.entities), leave=True, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
             http_session = get_http_session()
             
             for security_item in self.entities:
@@ -98,7 +95,6 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 
 
     def run(self):
-        # asyncio.run(self.do_run())
         self.do_run()
 
 __all__ = ['EastmoneyChinaStockListRecorder', 'EastmoneyChinaStockDetailRecorder']

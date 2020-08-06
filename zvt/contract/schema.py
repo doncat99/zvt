@@ -145,7 +145,9 @@ class Mixin(object):
 
                 kw['level'] = level
 
+            kw['process_index'] = process_index
             # print(recorder_class)
+            # print(*kw)  
             r = recorder_class(**kw)
             r.run()
             return

@@ -52,7 +52,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
 
         super().__init__('stock', exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, level, kdata_use_begin_time, one_day_trading_minutes, process_index)
+                         close_minute, level, kdata_use_begin_time, one_day_trading_minutes, process_index=process_index)
         self.adjust_type = adjust_type
 
         auth(zvt_env['jq_username'], zvt_env['jq_password'])
