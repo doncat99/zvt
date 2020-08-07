@@ -20,4 +20,7 @@ ZVT 源項目地址：https://github.com/zvtvz/zvt
 
 为更好管控控制台信息输出，需要对jqdatasdk项目进行部分修改，详见：https://github.com/doncat99/jqdatasdk
 
+界面如图：
+<p align="center"><img src='./docs/imgs/screen-cut.gif'/></p>
+
 
