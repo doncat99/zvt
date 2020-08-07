@@ -223,7 +223,7 @@ class interface():
 
 
 def run(param):
-    param[1](param[0], param[2], lock)
+    param[1](param[0], param[2], lock, param[3])
 
 def init(l):
     global lock
@@ -282,17 +282,17 @@ if __name__ == '__main__':
     print("*"*60)
     print("*    Start Fetching General Stock information...")
     print("*"*60)
-    
+
     interface.get_stock_list_data("joinquant")
     interface.get_etf_list()
     interface.get_stock_trade_day(l)
 
-    # pool = Pool(len(summary_set), initializer=init, initargs=(l,))
-    # pool.imap_unordered(run, summary_set)
-    # pool.close()
-    # pool.join()
-
-    pool = Pool(3, initializer=init, initargs=(l,))
-    pool.imap_unordered(run, detail_set)
+    pool = Pool(len(summary_set), initializer=init, initargs=(l,))
+    pool.map_async(run, summary_set)
     pool.close()
     pool.join()
+
+    # pool = Pool(3, initializer=init, initargs=(l,))
+    # pool.map_async(run, detail_set)
+    # pool.close()
+    # pool.join()
