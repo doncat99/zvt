@@ -31,7 +31,7 @@ class MarginTradingSummaryRecorder(TimeSeriesDataRecorder):
                          force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, process_index=process_index)
 
-        auth(zvt_env['jq_username5'], zvt_env['jq_password5'])
+        auth(zvt_env['jq_username4'], zvt_env['jq_password4'])
 
     def record(self, entity, start, end, size, timestamps, http_session):
         jq_code = code_map_jq.get(entity.code)

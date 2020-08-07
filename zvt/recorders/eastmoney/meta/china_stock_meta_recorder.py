@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
-
 from zvt.contract.recorder import Recorder
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import to_float, pct_to_float
@@ -8,7 +6,6 @@ from zvt.utils.request_utils import get_http_session, request_post
 from zvt.contract.api import get_entities
 from zvt.domain.meta.stock_meta import StockDetail, Stock
 from zvt.recorders.exchange.china_stock_list_spider import ExchangeChinaStockListRecorder
-from zvt import zvt_env
 
 from tqdm import tqdm
 

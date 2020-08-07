@@ -97,10 +97,7 @@ class EastmoneyChinaBlockStockRecorder(TimeSeriesDataRecorder):
             self.logger.info('finish recording block:{},{}'.format(entity.category, entity.name))
 
         except Exception as e:
-            self.logger.error("error:,resp.text:", e, resp.text)
-        
-        self.sleep()
-
+            self.logger.error("error:{}, resp.text:{}".format(e, resp.text))
 
 
 __all__ = ['EastmoneyChinaBlockRecorder', 'EastmoneyChinaBlockStockRecorder']

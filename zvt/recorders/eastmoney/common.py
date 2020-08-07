@@ -79,8 +79,8 @@ def call_eastmoney_api(http_session, url=None, method='post', param=None, path_f
 
     try:
         origin_result = resp.json().get('Result')
-        if origin_result is None:
-            origin_result = {}
+        # if origin_result is None:
+        #     origin_result = {}
     except Exception as e:
         logger.exception('code:{},content:{}'.format(resp.status_code, resp.text))
         # raise e
