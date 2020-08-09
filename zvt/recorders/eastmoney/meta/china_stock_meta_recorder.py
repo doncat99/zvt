@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import multiprocessing
+
 from zvt.contract.recorder import Recorder
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import to_float, pct_to_float
@@ -38,7 +40,14 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                                          provider=self.provider)
 
     def do_run(self):
-        with tqdm(total=len(self.entities), leave=True, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
+        if len(multiprocessing.current_process()._identity) > 0:
+            #  The worker process tqdm bar shall start at Position 1
+            worker_id = (multiprocessing.current_process()._identity[0]-1)%self.process_index[0] + 1
+        else:
+            worker_id = 0
+        desc = "{:02d} : {}".format(worker_id, self.process_index[1])
+
+        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
             http_session = get_http_session()
             
             for security_item in self.entities:
@@ -85,6 +94,7 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 
                 self.session.commit()
                 self.logger.info('finish recording stock meta for:{}'.format(security_item.code))
+
 
                 self.process_index[2].acquire()
                 pbar.update()

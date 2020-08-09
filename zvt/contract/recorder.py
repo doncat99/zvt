@@ -6,6 +6,7 @@ from typing import List
 
 import pandas as pd
 from sqlalchemy.orm import Session
+import multiprocessing
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_db_session, get_schema_columns
@@ -363,7 +364,13 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         http_session = get_http_session()
 
         while True:
-            with tqdm(total=len(unfinished_items), leave=True, ncols=80, position=self.process_index[0], desc=self.process_index[1]) as pbar:
+            if len(multiprocessing.current_process()._identity) > 0:
+                #  The worker process tqdm bar shall start at Position 1
+                worker_id = (multiprocessing.current_process()._identity[0]-1)%self.process_index[0] + 1
+            else:
+                worker_id = 0
+            desc = "{:02d}: {}".format(worker_id, self.process_index[1])
+            with tqdm(total=len(unfinished_items), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
                 for entity_item in unfinished_items:
                     try:
                         start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, http_session)
