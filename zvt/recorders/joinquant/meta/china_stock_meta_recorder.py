@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from jqdatasdk import auth, get_all_securities, logout, query, finance
+from jqdatasdk import is_auth, auth, get_all_securities, logout, query, finance
 
 from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
@@ -16,8 +16,10 @@ class BaseJqChinaMetaRecorder(Recorder):
 
     def __init__(self, batch_size=10, force_update=True, sleeping_time=10, process_index=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
-
-        auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        if not is_auth():
+            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        else:
+            self.logger.info("already auth with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
     def to_zvt_entity(self, df, entity_type, category=None):
         df.index.name = 'entity_id'
@@ -85,7 +87,10 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        auth(zvt_env['jq_username3'], zvt_env['jq_password3'])
+        if not is_auth():
+            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        else:
+            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
     def on_finish(self):
         super().on_finish()

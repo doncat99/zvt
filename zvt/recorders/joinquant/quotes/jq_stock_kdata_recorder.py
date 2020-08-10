@@ -2,7 +2,7 @@
 import argparse
 
 import pandas as pd
-from jqdatasdk import auth, logout, get_bars
+from jqdatasdk import is_auth, auth, logout, get_bars
 
 from zvt import init_log, zvt_env
 from zvt.api import get_kdata, AdjustType
@@ -54,8 +54,10 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, level, kdata_use_begin_time, one_day_trading_minutes, process_index=process_index)
         self.adjust_type = adjust_type
-
-        auth(zvt_env['jq_username1'], zvt_env['jq_password1'])
+        if not is_auth():
+            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        else:
+            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
     def generate_domain_id(self, entity, original_data):
         return generate_kdata_id(entity_id=entity.id, timestamp=original_data['timestamp'], level=self.level)

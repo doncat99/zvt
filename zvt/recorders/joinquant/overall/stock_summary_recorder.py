@@ -1,4 +1,4 @@
-from jqdatasdk import auth, query, finance
+from jqdatasdk import is_auth, auth, query, finance
 
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.time_utils import to_time_str
@@ -40,7 +40,10 @@ class StockSummaryRecorder(TimeSeriesDataRecorder):
         super().__init__('index', ['cn'], None, codes, batch_size,
                          force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, process_index=process_index)
-        auth(zvt_env['jq_username2'], zvt_env['jq_password2'])
+        if not is_auth():
+            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        else:
+            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
     def record(self, entity, start, end, size, timestamps, http_session):
         jq_code = code_map_jq.get(entity.code)

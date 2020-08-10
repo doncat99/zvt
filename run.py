@@ -137,10 +137,10 @@ class interface():
         # 日线复权
         Stock1dHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
-    @staticmethod
-    def get_stock_1d_ma_data(arg1, arg2, arg3, arg4):
-        # 日线MA
-        Stock1dMaStateStats.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+    # @staticmethod
+    # def get_stock_1d_ma_data(arg1, arg2, arg3, arg4):
+    #     # 日线MA
+    #     Stock1dMaStateStats.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
     @staticmethod
     def get_stock_1w_k_data(arg1, arg2, arg3, arg4):
@@ -152,10 +152,10 @@ class interface():
         # 周线复权
         Stock1wkHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
     
-    @staticmethod
-    def get_stock_1w_ma_data(arg1, arg2, arg3, arg4):
-        # 周线MA
-        Stock1wkMaStateStats.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+    # @staticmethod
+    # def get_stock_1w_ma_data(arg1, arg2, arg3, arg4):
+    #     # 周线MA
+    #     Stock1wkMaStateStats.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
     @staticmethod
     def get_stock_1mon_k_data(arg1, arg2, arg3, arg4):
@@ -239,12 +239,7 @@ def run(args):
     pc, shared, argset = args
     argset[0](pc, argset[1], lock, shared[0])
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    l = multiprocessing.Lock()
-    cpus = 8
-    sleep = 0
-
+def fetch_summary_data(lock):
     summary_set = [
         [interface.get_stock_summary_data, "Stock Summary"],
         [interface.get_stock_detail_data, "Stock Detail"], 
@@ -266,14 +261,29 @@ if __name__ == '__main__':
         [interface.get_etf_stock_data, "ETF Stock"],
         [interface.get_etf_valuation_data, "ETF Valuation"],
     ]
-                 
+
+    print("*"*60)
+    print("*    Start Fetching General Stock information...")
+    print("*"*60)
+
+    interface.get_stock_list_data("joinquant")
+    interface.get_etf_list()
+    interface.get_stock_trade_day(l)
+
+    print("")
+    print("parallel processing...")
+    print("")
+
+    sleep = 0
+
+    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=4, reset=True)
+
+def fetch_detail_data(lock):
     detail_set = [
         [interface.get_stock_1d_k_data, "Stock Daily K-Data"], 
         [interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data"],
-        [interface.get_stock_1d_ma_data, "Stock Daily Ma Data"],
         [interface.get_stock_1w_k_data, "Stock Weekly K-Data"],
         [interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data"],
-        [interface.get_stock_1w_ma_data, "Stock Weekly Ma Data"],
         [interface.get_stock_1mon_k_data, "Stock Monthly K-Data"], 
         [interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data"],
         [interface.get_stock_1m_k_data, "Stock 1 mins K-Data"], 
@@ -290,15 +300,24 @@ if __name__ == '__main__':
     ]
 
     print("*"*60)
-    print("*    Start Fetching General Stock information...")
+    print("*    Start Fetching Detail Stock Dataset...")
     print("*"*60)
 
-    interface.get_stock_list_data("joinquant")
-    interface.get_etf_list()
-    interface.get_stock_trade_day(l)
+    sleep=0
 
-    print("")
-    print("parallel processing...")
-    print("")
+    mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=3, reset=True)
 
-    mp_tqdm(run, l, shared=[sleep], args=summary_set, pc=cpus, reset=True)
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    l = multiprocessing.Lock()
+
+    fetch_summary_data(l)
+
+    # fetch_detail_data(l)
+      
+    
+
+    
+
+    

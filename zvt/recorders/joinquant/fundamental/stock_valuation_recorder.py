@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from jqdatasdk import auth, logout, query, valuation, get_fundamentals_continuously
+from jqdatasdk import is_auth, auth, logout, query, valuation, get_fundamentals_continuously
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
@@ -26,7 +26,10 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        auth(zvt_env['jq_username1'], zvt_env['jq_password1'])
+        if not is_auth():
+            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        else:
+            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
     def on_finish(self):
         super().on_finish()

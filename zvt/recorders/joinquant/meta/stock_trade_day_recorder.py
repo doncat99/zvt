@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from jqdatasdk import auth, get_trade_days
+from jqdatasdk import is_auth, auth, get_trade_days
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
@@ -22,7 +22,10 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, ['000001'], batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        auth(zvt_env['jq_username2'], zvt_env['jq_password2'])
+        if not is_auth():
+            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        else:
+            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
     def record(self, entity, start, end, size, timestamps, http_session):
         df = pd.DataFrame()

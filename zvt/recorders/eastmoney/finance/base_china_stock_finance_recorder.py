@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from jqdatasdk import auth, query, indicator, get_fundamentals, logout
+from jqdatasdk import is_auth, auth, query, indicator, get_fundamentals, logout
 
 from zvt import zvt_env
 from zvt.api.quote import to_jq_report_period
@@ -31,7 +31,10 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                          close_minute, process_index=process_index)
 
         try:
-            auth(zvt_env['jq_username3'], zvt_env['jq_password3'])
+            if not is_auth():
+                auth(zvt_env['jq_username'], zvt_env['jq_password'])
+            else:
+                self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
             self.fetch_jq_timestamp = True
         except Exception as e:
             self.fetch_jq_timestamp = False
