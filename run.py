@@ -226,7 +226,7 @@ def init(l):
     global lock
     lock = l
 
-def mp_tqdm(func, lock, shared=[], args=[], pc=2, reset=False):
+def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
     with multiprocessing.Pool(pc, initializer=init, initargs=(lock,), maxtasksperchild = 1 if reset else None) as p:
         # The master process tqdm bar is at Position 0
         with tqdm(total=len(args), desc="total", leave=True) as pbar:
@@ -242,7 +242,7 @@ def run(args):
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
-    cpus = 6
+    cpus = 8
     sleep = 0
 
     summary_set = [
@@ -297,6 +297,7 @@ if __name__ == '__main__':
     interface.get_etf_list()
     interface.get_stock_trade_day(l)
 
+    print("")
     print("parallel processing...")
     print("")
 

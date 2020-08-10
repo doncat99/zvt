@@ -611,7 +611,7 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
     def evaluate_start_end_size_timestamps(self, entity, http_session):
         timestamps = self.security_timestamps_map.get(entity.id)
         if not timestamps:
-            timestamps = self.init_timestamps(entity)
+            timestamps = self.init_timestamps(entity, http_session)
             if self.start_timestamp:
                 timestamps = [t for t in timestamps if t >= self.start_timestamp]
 
