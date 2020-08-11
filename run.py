@@ -1,14 +1,42 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+import os
+from datetime import datetime, timedelta
+from functools import wraps
 import multiprocessing
 
 from tqdm import tqdm
+import pickle
 
 from zvt.domain import *
+from zvt import zvt_env
+
+
+def valid(func_name):
+    file = zvt_env['cache_path'] + '/' + 'cache.pkl'
+    if os.path.exists(file) and os.path.getsize(file) > 0:
+        with open(file, 'rb') as handle:
+            data = pickle.load(handle)
+            lasttime = data.get(func_name, None)
+            if lasttime is None:
+                return False
+            if lasttime > (datetime.now() - timedelta(hours=24)):
+                return True
+    return False
+
+def dump(func_name):
+    file = zvt_env['cache_path'] + '/' + 'cache.pkl'
+    with open(file, 'wb+') as handle:
+        if not os.path.exists(file) or os.path.getsize(file) == 0:
+            data = {}
+        else:
+            data = pickle.load(handle)
+        data.update({func_name:datetime.now()})
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 class interface():
-
     @staticmethod
     def get_stock_list_data(provider):
         # 股票列表
@@ -228,16 +256,19 @@ def init(l):
 
 def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
     with multiprocessing.Pool(pc, initializer=init, initargs=(lock,), maxtasksperchild = 1 if reset else None) as p:
+        args = [arg for arg in args if not valid(arg[0].__name__)]
         # The master process tqdm bar is at Position 0
-        with tqdm(total=len(args), desc="total", leave=True) as pbar:
-            for _ in p.imap_unordered(func, [[pc, shared, arg] for arg in args]):
+        with tqdm(total=len(args), ncols=80, desc="total", leave=True) as pbar:
+            for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args]):
                 lock.acquire()
                 pbar.update()
+                dump(func_name)
                 lock.release()
 
 def run(args):
     pc, shared, argset = args
     argset[0](pc, argset[1], lock, shared[0])
+    return argset[0].__name__
 
 def fetch_summary_data(lock):
     summary_set = [
@@ -276,7 +307,7 @@ def fetch_summary_data(lock):
 
     sleep = 0
 
-    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=4, reset=True)
+    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=8, reset=True)
 
 def fetch_detail_data(lock):
     detail_set = [
