@@ -12,26 +12,25 @@ import pickle
 from zvt.domain import *
 from zvt import zvt_env
 
-
-def valid(func_name):
+def get_cache():
     file = zvt_env['cache_path'] + '/' + 'cache.pkl'
     if os.path.exists(file) and os.path.getsize(file) > 0:
         with open(file, 'rb') as handle:
-            data = pickle.load(handle)
-            lasttime = data.get(func_name, None)
-            if lasttime is None:
-                return False
-            if lasttime > (datetime.now() - timedelta(hours=24)):
-                return True
+            return pickle.load(handle)
+    return {}
+
+def valid(func_name, valid_time, data):
+    lasttime = data.get(func_name, None)
+    if lasttime is not None:
+        # print("****** valid prove *****", func_name, lasttime)
+        if lasttime > (datetime.now() - timedelta(hours=valid_time)):
+            return True
     return False
 
-def dump(func_name):
+def dump(func_name, data):
     file = zvt_env['cache_path'] + '/' + 'cache.pkl'
     with open(file, 'wb+') as handle:
-        if not os.path.exists(file) or os.path.getsize(file) == 0:
-            data = {}
-        else:
-            data = pickle.load(handle)
+        # print("****** dump *****", func_name, "Value : %s"%data.keys())
         data.update({func_name:datetime.now()})
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -49,27 +48,32 @@ class interface():
     @staticmethod
     def get_stock_trade_day(lock):
         # 交易日
-        StockTradeDay.record_data(provider='joinquant', process_index=(0, 'Trade Day', lock, True), sleeping_time=0)
+        # StockTradeDay.record_data(provider='joinquant', process_index=(0, 'Trade Day', lock, True), sleeping_time=0)
+        pass
 
     @staticmethod
     def get_stock_summary_data(arg1, arg2, arg3, arg4):
         # 市场整体估值
-        StockSummary.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        # StockSummary.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        pass
 
     @staticmethod
     def get_stock_detail_data(arg1, arg2, arg3, arg4):
         # 个股详情
-        StockDetail.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        # StockDetail.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        pass
 
     @staticmethod
     def get_finance_data(arg1, arg2, arg3, arg4):
         # 主要财务指标
-        FinanceFactor.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        # FinanceFactor.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        pass
 
     @staticmethod
     def get_balance_data(arg1, arg2, arg3, arg4):
         # 资产负债表
-        BalanceSheet.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        # BalanceSheet.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
+        pass
 
     @staticmethod
     def get_income_data(arg1, arg2, arg3, arg4):
@@ -256,13 +260,14 @@ def init(l):
 
 def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
     with multiprocessing.Pool(pc, initializer=init, initargs=(lock,), maxtasksperchild = 1 if reset else None) as p:
-        args = [arg for arg in args if not valid(arg[0].__name__)]
+        data = get_cache()
+        args = [arg for arg in args if not valid(arg[0].__name__, arg[2], data)]
         # The master process tqdm bar is at Position 0
         with tqdm(total=len(args), ncols=80, desc="total", leave=True) as pbar:
             for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args]):
                 lock.acquire()
                 pbar.update()
-                dump(func_name)
+                dump(func_name, data)
                 lock.release()
 
 def run(args):
@@ -272,25 +277,25 @@ def run(args):
 
 def fetch_summary_data(lock):
     summary_set = [
-        [interface.get_stock_summary_data, "Stock Summary"],
-        [interface.get_stock_detail_data, "Stock Detail"], 
-        [interface.get_finance_data, "Finance Factor"],
-        [interface.get_balance_data, "Balance Sheet"],
-        [interface.get_income_data, "Income Statement"],
-        [interface.get_cashflow_data, "CashFlow Statement"],
-        [interface.get_moneyflow_data, "MoneyFlow Statement"],
-        [interface.get_dividend_financing_data, "Divdend Financing"],
-        [interface.get_dividend_detail_data, "Divdend Detail"],
-        [interface.get_spo_detail_data, "SPO Detail"],
-        [interface.get_rights_issue_detail_data, "Rights Issue Detail"],
-        [interface.get_margin_trading_summary_data, "Margin Trading Summary"],
-        [interface.get_cross_market_summary_data, "Cross Market Summary"],
-        [interface.get_holder_trading_data, "Holder Trading"],
-        [interface.get_top_ten_holder_data, "Top Ten Holder"],
-        [interface.get_top_ten_tradable_holder_data, "Top Ten Tradable Holder"],
-        [interface.get_stock_valuation_data, "Stock Valuation"],
-        [interface.get_etf_stock_data, "ETF Stock"],
-        [interface.get_etf_valuation_data, "ETF Valuation"],
+        [interface.get_stock_summary_data, "Stock Summary", 24],
+        [interface.get_stock_detail_data, "Stock Detail", 24], 
+        [interface.get_finance_data, "Finance Factor", 24],
+        [interface.get_balance_data, "Balance Sheet", 24],
+        [interface.get_income_data, "Income Statement", 24],
+        [interface.get_cashflow_data, "CashFlow Statement", 24],
+        [interface.get_moneyflow_data, "MoneyFlow Statement", 24],
+        [interface.get_dividend_financing_data, "Divdend Financing", 24],
+        [interface.get_dividend_detail_data, "Divdend Detail", 24],
+        [interface.get_spo_detail_data, "SPO Detail", 24],
+        [interface.get_rights_issue_detail_data, "Rights Issue Detail", 24],
+        [interface.get_margin_trading_summary_data, "Margin Trading Summary", 24],
+        [interface.get_cross_market_summary_data, "Cross Market Summary", 24],
+        [interface.get_holder_trading_data, "Holder Trading", 24],
+        [interface.get_top_ten_holder_data, "Top Ten Holder", 24],
+        [interface.get_top_ten_tradable_holder_data, "Top Ten Tradable Holder", 24],
+        [interface.get_stock_valuation_data, "Stock Valuation", 24],
+        [interface.get_etf_stock_data, "ETF Stock", 24],
+        [interface.get_etf_valuation_data, "ETF Valuation", 24],
     ]
 
     print("*"*60)
@@ -311,23 +316,23 @@ def fetch_summary_data(lock):
 
 def fetch_detail_data(lock):
     detail_set = [
-        [interface.get_stock_1d_k_data, "Stock Daily K-Data"], 
-        [interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data"],
-        [interface.get_stock_1w_k_data, "Stock Weekly K-Data"],
-        [interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data"],
-        [interface.get_stock_1mon_k_data, "Stock Monthly K-Data"], 
-        [interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data"],
-        [interface.get_stock_1m_k_data, "Stock 1 mins K-Data"], 
-        [interface.get_stock_1m_hfq_k_data, "Stock 1 mins HFQ K-Data"],
-        [interface.get_stock_5m_k_data, "Stock 5 mins K-Data"], 
-        [interface.get_stock_5m_hfq_k_data, "Stock 5 mins HFQ K-Data"],
-        [interface.get_stock_15m_k_data, "Stock 15 mins K-Data"], 
-        [interface.get_stock_15m_hfq_k_data, "Stock 15 mins HFQ K-Data"],
-        [interface.get_stock_30m_k_data, "Stock 30 mins K-Data"], 
-        [interface.get_stock_30m_hfq_k_data, "Stock Daily 30 mins K-Data"],
-        [interface.get_stock_4h_k_data, "Stock 4 hours K-Data"], 
-        [interface.get_stock_4h_hfq_k_data, "Stock 4 hours HFQ K-Data"],
-        [interface.get_etf_1d_k_data, "ETF Daily K-Data"],
+        [interface.get_stock_1d_k_data, "Stock Daily K-Data", 24], 
+        [interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data", 24],
+        [interface.get_stock_1w_k_data, "Stock Weekly K-Data", 24],
+        [interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data", 24],
+        [interface.get_stock_1mon_k_data, "Stock Monthly K-Data", 24], 
+        [interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data", 24],
+        [interface.get_stock_1m_k_data, "Stock 1 mins K-Data", 24], 
+        [interface.get_stock_1m_hfq_k_data, "Stock 1 mins HFQ K-Data", 24],
+        [interface.get_stock_5m_k_data, "Stock 5 mins K-Data", 24], 
+        [interface.get_stock_5m_hfq_k_data, "Stock 5 mins HFQ K-Data", 24],
+        [interface.get_stock_15m_k_data, "Stock 15 mins K-Data", 24], 
+        [interface.get_stock_15m_hfq_k_data, "Stock 15 mins HFQ K-Data", 24],
+        [interface.get_stock_30m_k_data, "Stock 30 mins K-Data", 24], 
+        [interface.get_stock_30m_hfq_k_data, "Stock Daily 30 mins K-Data", 24],
+        [interface.get_stock_4h_k_data, "Stock 4 hours K-Data", 24], 
+        [interface.get_stock_4h_hfq_k_data, "Stock 4 hours HFQ K-Data", 24],
+        [interface.get_etf_1d_k_data, "ETF Daily K-Data", 24],
     ]
 
     print("*"*60)

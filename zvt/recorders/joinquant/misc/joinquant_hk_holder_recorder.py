@@ -42,6 +42,10 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
         else:
             self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
 
+    def on_finish(self):
+        super().on_finish()
+        logout()
+		
     def init_timestamps(self, entity, http_session):
         # 聚宽数据从2017年3月17开始
         return pd.date_range(start=to_pd_timestamp('2017-3-17'),
