@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from jqdatasdk import is_auth, auth, get_all_securities, logout, query, finance
+from jqdatasdk import finance
 
 from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
-from zvt import zvt_env
 from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.domain import EtfStock, Stock, Etf, StockDetail
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
+from zvt.utils.request_utils import jq_auth, jq_get_all_securities, jq_query, jq_logout
 
 
 class BaseJqChinaMetaRecorder(Recorder):
@@ -16,10 +16,7 @@ class BaseJqChinaMetaRecorder(Recorder):
 
     def __init__(self, batch_size=10, force_update=True, sleeping_time=10, process_index=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
-        else:
-            self.logger.info("already auth with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+        jq_auth()
 
     def to_zvt_entity(self, df, entity_type, category=None):
         df.index.name = 'entity_id'
@@ -48,7 +45,7 @@ class JqChinaStockRecorder(BaseJqChinaMetaRecorder):
 
     def run(self):
         # 抓取股票列表
-        df_stock = self.to_zvt_entity(get_all_securities(['stock']), entity_type='stock')
+        df_stock = self.to_zvt_entity(jq_get_all_securities(['stock']), entity_type='stock')
         df_to_db(df_stock, data_schema=Stock, provider=self.provider, force_update=self.force_update)
         # persist StockDetail too
         df_to_db(df=df_stock, data_schema=StockDetail, provider=self.provider, force_update=self.force_update)
@@ -56,7 +53,7 @@ class JqChinaStockRecorder(BaseJqChinaMetaRecorder):
         # self.logger.info(df_stock)
         self.logger.info("persist stock list success")
 
-        logout()
+        jq_logout()
 
 
 class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
@@ -64,12 +61,12 @@ class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
 
     def run(self):
         # 抓取etf列表
-        df_index = self.to_zvt_entity(get_all_securities(['etf']), entity_type='etf', category='etf')
+        df_index = self.to_zvt_entity(jq_get_all_securities(['etf']), entity_type='etf', category='etf')
         df_to_db(df_index, data_schema=Etf, provider=self.provider, force_update=self.force_update)
 
         # self.logger.info(df_index)
         self.logger.info("persist etf list success")
-        logout()
+        jq_logout()
 
 
 class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
@@ -87,17 +84,14 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
-        else:
-            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+        jq_auth()
 
     def on_finish(self):
         super().on_finish()
-        logout()
+        jq_logout()
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        q = query(finance.FUND_PORTFOLIO_STOCK).filter(finance.FUND_PORTFOLIO_STOCK.pub_date >= start).filter(
+        q = jq_query(finance.FUND_PORTFOLIO_STOCK).filter(finance.FUND_PORTFOLIO_STOCK.pub_date >= start).filter(
             finance.FUND_PORTFOLIO_STOCK.code == entity.code)
         df = finance.run_query(q)
         if pd_is_not_null(df):

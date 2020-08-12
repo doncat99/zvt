@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from jqdatasdk import is_auth, auth, query, indicator, get_fundamentals, logout
+from jqdatasdk import indicator
 
-from zvt import zvt_env
 from zvt.api.quote import to_jq_report_period
 from zvt.contract.api import get_data
 from zvt.domain import FinanceFactor
@@ -12,6 +11,7 @@ from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.pd_utils import index_df
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, to_pd_timestamp
+from zvt.utils.request_utils import jq_auth, jq_query, jq_get_fundamentals, jq_logout
 
 
 class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
@@ -29,18 +29,8 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-
-        try:
-            if not is_auth():
-                auth(zvt_env['jq_username'], zvt_env['jq_password'])
-            else:
-                self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
-            self.fetch_jq_timestamp = True
-        except Exception as e:
-            self.fetch_jq_timestamp = False
-            self.logger.warning(
-                f'joinquant account not ok,the timestamp(publish date) for finance would be not correct', e)
-
+        self.fetch_jq_timestamp = jq_auth()
+            
     def init_timestamps(self, entity, http_session):
         param = {
             "color": "w",
@@ -116,13 +106,13 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
     def fill_timestamp_with_jq(self, security_item, the_data):
         # get report published date from jq
         try:
-            q = query(
+            q = jq_query(
                 indicator.pubDate
             ).filter(
                 indicator.code == to_jq_entity_id(security_item),
             )
 
-            df = get_fundamentals(q, statDate=to_jq_report_period(the_data.report_date))
+            df = jq_get_fundamentals(q, statDate=to_jq_report_period(the_data.report_date))
             if not df.empty and pd.isna(df).empty:
                 the_data.timestamp = to_pd_timestamp(df['pubDate'][0])
                 self.logger.info(
@@ -183,4 +173,4 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
 
     def on_finish(self):
         super().on_finish()
-        logout()
+        jq_logout()

@@ -1,5 +1,5 @@
 import pandas as pd
-from jqdatasdk import is_auth, auth, query, finance
+from jqdatasdk import finance
 
 from zvt import zvt_env
 from zvt.contract.api import df_to_db, get_data
@@ -9,6 +9,7 @@ from zvt.domain.misc.holder import HkHolder
 from zvt.recorders.joinquant.common import to_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, to_pd_timestamp
+from zvt.utils.request_utils import jq_auth, jq_query, jq_logout
 
 
 # 这里选择继承TimestampsDataRecorder是因为
@@ -37,14 +38,11 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
 
         super().__init__('index', ['cn'], None, codes, 10, force_update, sleeping_time,
                          default_size, real_time, 'ignore', start_timestamp, end_timestamp, 0, 0)
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
-        else:
-            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+        jq_auth()
 
     def on_finish(self):
         super().on_finish()
-        logout()
+        jq_logout()
 		
     def init_timestamps(self, entity, http_session):
         # 聚宽数据从2017年3月17开始
@@ -69,9 +67,9 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
 
     def record(self, entity, start, end, size, timestamps):
         for timestamp in timestamps:
-            q = query(finance.STK_HK_HOLD_INFO).filter(
-                finance.STK_HK_HOLD_INFO.link_id == entity.code,
-                finance.STK_HK_HOLD_INFO.day == to_time_str(timestamp))
+            q = jq_query(finance.STK_HK_HOLD_INFO).filter(
+                  finance.STK_HK_HOLD_INFO.link_id == entity.code,
+                  finance.STK_HK_HOLD_INFO.day == to_time_str(timestamp))
 
             df = finance.run_query(q)
             print(df)

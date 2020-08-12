@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from jqdatasdk import is_auth, auth, logout, query, valuation, get_fundamentals_continuously
+from jqdatasdk import valuation
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.time_utils import now_pd_timestamp, now_time_str, to_time_str
-from zvt import zvt_env
 from zvt.domain import Stock, StockValuation, Etf
 from zvt.recorders.joinquant.common import to_jq_entity_id
-
+from zvt.utils.request_utils import jq_auth, jq_query, jq_get_fundamentals_continuously, jq_logout
 
 class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
     entity_provider = 'joinquant'
@@ -26,23 +25,20 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
-        else:
-            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+        jq_auth()
 
     def on_finish(self):
         super().on_finish()
-        logout()
+        jq_logout()
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        q = query(
+        q = jq_query(
             valuation
         ).filter(
             valuation.code == to_jq_entity_id(entity)
         )
         count: pd.Timedelta = now_pd_timestamp() - start
-        df = get_fundamentals_continuously(q, end_date=now_time_str(), count=count.days + 1, panel=False)
+        df = jq_get_fundamentals_continuously(q, end_date=now_time_str(), count=count.days + 1, panel=False)
         df['entity_id'] = entity.id
         df['timestamp'] = pd.to_datetime(df['day'])
         df['code'] = entity.code

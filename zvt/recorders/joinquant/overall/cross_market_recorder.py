@@ -1,9 +1,9 @@
-from jqdatasdk import is_auth, auth, query, finance
+from jqdatasdk import finance
 
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import multiple_number
-from zvt import zvt_env
+from zvt.utils.request_utils import jq_auth, jq_query
 from zvt.domain import Index, CrossMarketSummary
 
 
@@ -29,19 +29,16 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
         super().__init__('index', ['cn'], None, codes, batch_size,
                          force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, process_index=process_index)
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
-        else:
-            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+        jq_auth()
 
     def init_entities(self):
         super().init_entities()
 
     def record(self, entity, start, end, size, timestamps, http_session):
 
-        q = query(finance.STK_ML_QUOTA).filter(
-            finance.STK_ML_QUOTA.link_id == entity.code,
-            finance.STK_ML_QUOTA.day >= to_time_str(start)).limit(2000)
+        q = jq_query(finance.STK_ML_QUOTA).filter(
+                finance.STK_ML_QUOTA.link_id == entity.code,
+                finance.STK_ML_QUOTA.day >= to_time_str(start)).limit(2000)
 
         df = finance.run_query(q)
         # print(df)

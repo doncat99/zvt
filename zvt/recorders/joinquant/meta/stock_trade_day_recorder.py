@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from jqdatasdk import is_auth, auth, get_trade_days
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.time_utils import to_time_str
-from zvt import zvt_env
+from zvt.utils.request_utils import jq_auth, jq_get_trade_days
 from zvt.domain import StockTradeDay, Stock
 
 
@@ -22,14 +21,11 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
         super().__init__(entity_type, exchanges, entity_ids, ['000001'], batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, process_index=process_index)
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
-        else:
-            self.logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+        jq_auth()
 
     def record(self, entity, start, end, size, timestamps, http_session):
         df = pd.DataFrame()
-        dates = get_trade_days(start_date=start)
+        dates = jq_get_trade_days(start_date=start)
         self.logger.info(f'add dates:{dates}')
         df['timestamp'] = pd.to_datetime(dates)
         df['id'] = [to_time_str(date) for date in dates]
