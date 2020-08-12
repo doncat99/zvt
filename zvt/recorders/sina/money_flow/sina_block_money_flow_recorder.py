@@ -68,7 +68,7 @@ class SinaBlockMoneyFlowRecorder(FixedCycleDataRecorder):
         except Exception as e:
             resp.encoding = 'GBK'
             self.logger.error(resp.text)
-            time.sleep(60 * 5)
+            # time.sleep(60 * 5)
 
         result_list = []
         for item in json_list:

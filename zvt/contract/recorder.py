@@ -360,7 +360,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def do_run(self):
         finished_items = []
         unfinished_items = self.entities
-        # raising_exception = None
+        raising_exception = None
         http_session = get_http_session()
 
         while True:
@@ -485,7 +485,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                     except Exception as e:
                         self.logger.exception(
                             "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
-                        # raising_exception = e
+                        raising_exception = e
                         finished_items = unfinished_items
                         break
 
@@ -500,8 +500,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         self.on_finish()
 
-        # if raising_exception:
-        #     raise raising_exception
+        if raising_exception:
+            raise raising_exception
     
     def run(self):
         self.do_run()

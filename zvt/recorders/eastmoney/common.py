@@ -83,8 +83,8 @@ def call_eastmoney_api(http_session, url=None, method='post', param=None, path_f
         #     origin_result = {}
     except Exception as e:
         logger.exception('code:{},content:{}'.format(resp.status_code, resp.text))
-        # raise e
-        origin_result = {}
+        raise e
+        # origin_result = {}
 
     if path_fields:
         the_data = get_from_path_fields(origin_result, path_fields)

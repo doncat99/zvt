@@ -137,7 +137,7 @@ class StockDetail(StockMetaBase, BaseSecurity):
     net_winning_rate = Column(Float)
 
 
-register_schema(providers=['joinquant', 'eastmoney', 'exchange', 'sina'], db_name='stock_meta',
+register_schema(providers=['joinquant', 'eastmoney', 'exchange', 'sina', 'tushare'], db_name='stock_meta',
                 schema_base=StockMetaBase)
 
 __all__ = ['Stock', 'Index', 'Block', 'Etf', 'IndexStock', 'BlockStock', 'EtfStock', 'StockDetail']

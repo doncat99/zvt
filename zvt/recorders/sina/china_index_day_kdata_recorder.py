@@ -61,11 +61,11 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
                 dfs = pd.read_html(response.text)
             except ValueError as error:
                 self.logger.error(f'skip ({year}-{quarter:02d}){security_item.code}{security_item.name}({error})')
-                time.sleep(10.0)
+                # time.sleep(10.0)
                 continue
 
             if len(dfs) < 5:
-                time.sleep(10.0)
+                # time.sleep(10.0)
                 continue
 
             df = dfs[4].copy()
@@ -79,7 +79,7 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
             result_df = pd.concat([result_df, df])
 
             self.logger.info(f'({security_item.code}{security_item.name})({year}-{quarter:02d})')
-            time.sleep(10.0)
+            # time.sleep(10.0)
 
         result_df = result_df.sort_values(by='timestamp')
 

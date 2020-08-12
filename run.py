@@ -22,7 +22,6 @@ def get_cache():
 def valid(func_name, valid_time, data):
     lasttime = data.get(func_name, None)
     if lasttime is not None:
-        # print("****** valid prove *****", func_name, lasttime)
         if lasttime > (datetime.now() - timedelta(hours=valid_time)):
             return True
     return False
@@ -30,7 +29,6 @@ def valid(func_name, valid_time, data):
 def dump(func_name, data):
     file = zvt_env['cache_path'] + '/' + 'cache.pkl'
     with open(file, 'wb+') as handle:
-        # print("****** dump *****", func_name, "Value : %s"%data.keys())
         data.update({func_name:datetime.now()})
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -267,13 +265,16 @@ def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
             for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args]):
                 lock.acquire()
                 pbar.update()
-                dump(func_name, data)
+                if func_name is not None: dump(func_name, data) 
                 lock.release()
 
 def run(args):
     pc, shared, argset = args
-    argset[0](pc, argset[1], lock, shared[0])
-    return argset[0].__name__
+    try:
+        argset[0](pc, argset[1], lock, shared[0])
+        return argset[0].__name__
+    except Exception as e:
+        return None
 
 def fetch_summary_data(lock):
     summary_set = [
@@ -341,16 +342,15 @@ def fetch_detail_data(lock):
 
     sleep=0
 
-    mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=3, reset=True)
+    mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=2, reset=True)
 
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
 
-    fetch_summary_data(l)
-
-    # fetch_detail_data(l)
+    # fetch_summary_data(l)
+    fetch_detail_data(l)
       
     
 

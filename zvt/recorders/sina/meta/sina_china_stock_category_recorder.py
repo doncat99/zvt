@@ -106,7 +106,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
                 self.logger.info('finish recording BlockStock:{},{}'.format(entity.category, entity.name))
 
             except Exception as e:
-                self.logger.error("error:,resp.text:", e, resp.text)
+                self.logger.error("error:{},resp.text:{}".format(e, resp.text))
             self.sleep()
 
 
