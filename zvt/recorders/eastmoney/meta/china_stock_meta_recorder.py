@@ -99,8 +99,8 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 self.process_index[2].acquire()
                 pbar.update()
                 self.process_index[2].release()
-				
-				self.sleep()
+                
+                self.sleep()
 
 
 __all__ = ['EastmoneyChinaStockListRecorder', 'EastmoneyChinaStockDetailRecorder']

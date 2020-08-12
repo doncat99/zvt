@@ -99,8 +99,7 @@ class EastmoneyChinaBlockStockRecorder(TimeSeriesDataRecorder):
         except Exception as e:
             self.logger.error("error:{}, resp.text:{}".format(e, resp.text))
 		
-		self.sleep()
-
+        self.sleep()
 
 __all__ = ['EastmoneyChinaBlockRecorder', 'EastmoneyChinaBlockStockRecorder']
 

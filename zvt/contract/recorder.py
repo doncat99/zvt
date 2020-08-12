@@ -381,8 +381,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             return
 
 		# sleep for a while to next entity
-        if index != 0:
-			self.sleep()
+        self.sleep()
 
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                     timestamps=timestamps, http_session=http_session)
