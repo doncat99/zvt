@@ -347,7 +347,7 @@ def fetch_detail_data(lock):
 
     sleep=3
 
-    mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=2, reset=True)
+    mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=3, reset=True)
 
 
 if __name__ == '__main__':

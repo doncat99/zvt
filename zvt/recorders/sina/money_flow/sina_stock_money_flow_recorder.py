@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
-
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.utils.time_utils import to_pd_timestamp, is_same_date, now_pd_timestamp
@@ -80,7 +78,7 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
         except Exception as e:
             resp.encoding = 'GBK'
             self.logger.error("text:{}, error:{}".format(resp.text, e))
-            # time.sleep(60 * 5)
+            self.sleep()
 
         result_list = []
         for item in json_list:

@@ -380,6 +380,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.process_index[2].release()
             return
 
+		# sleep for a while to next entity
+        if index != 0:
+			self.sleep()
+
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                     timestamps=timestamps, http_session=http_session)
 
@@ -448,7 +452,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             pbar.update()
             self.process_index[2].release()
 
-    def do_run(self):
+    def run(self):
         finished_items = []
         unfinished_items = self.entities
         raising_exception = None
@@ -487,9 +491,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         if raising_exception:
             raise raising_exception
-    
-    def run(self):
-        self.do_run()
 
 
 class FixedCycleDataRecorder(TimeSeriesDataRecorder):

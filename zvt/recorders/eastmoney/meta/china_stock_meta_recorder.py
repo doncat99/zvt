@@ -39,7 +39,7 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                                          return_type='domain',
                                          provider=self.provider)
 
-    def do_run(self):
+    def run(self):
         if len(multiprocessing.current_process()._identity) > 0:
             #  The worker process tqdm bar shall start at Position 1
             worker_id = (multiprocessing.current_process()._identity[0]-1)%self.process_index[0] + 1
@@ -99,10 +99,9 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 self.process_index[2].acquire()
                 pbar.update()
                 self.process_index[2].release()
-                
+				
+				self.sleep()
 
-    def run(self):
-        self.do_run()
 
 __all__ = ['EastmoneyChinaStockListRecorder', 'EastmoneyChinaStockDetailRecorder']
 
