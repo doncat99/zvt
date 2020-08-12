@@ -9,8 +9,18 @@ import multiprocessing
 from tqdm import tqdm
 import pickle
 
-from zvt.domain import *
 from zvt import zvt_env
+from zvt.domain import Stock, Etf, StockTradeDay, StockSummary, StockDetail, FinanceFactor, \
+                       BalanceSheet, IncomeStatement, CashFlowStatement, StockMoneyFlow, \
+                       DividendFinancing, DividendDetail, RightsIssueDetail, SpoDetail, \
+                       MarginTradingSummary, CrossMarketSummary, HolderTrading, TopTenHolder, \
+                       TopTenTradableHolder, StockValuation, EtfStock, EtfValuation, Stock1dKdata, \
+                       Stock1dHfqKdata, Stock1dHfqKdata, Stock1wkKdata, Stock1wkHfqKdata, \
+                       Stock1monKdata, Stock1monHfqKdata, Stock1monHfqKdata, Stock1monHfqKdata, \
+                       Stock1mKdata, Stock1mHfqKdata, Stock1mHfqKdata, Stock5mKdata, Stock5mHfqKdata, \
+                       Stock15mKdata, Stock15mHfqKdata, Stock30mKdata, Stock30mHfqKdata, \
+                       Stock4hKdata, Stock4hHfqKdata, Etf1dKdata
+
 
 def get_cache():
     file = zvt_env['cache_path'] + '/' + 'cache.pkl'
@@ -46,32 +56,27 @@ class interface():
     @staticmethod
     def get_stock_trade_day(lock):
         # 交易日
-        # StockTradeDay.record_data(provider='joinquant', process_index=(0, 'Trade Day', lock, True), sleeping_time=0)
-        pass
+        StockTradeDay.record_data(provider='joinquant', process_index=(0, 'Trade Day', lock, True), sleeping_time=0)
 
     @staticmethod
     def get_stock_summary_data(arg1, arg2, arg3, arg4):
         # 市场整体估值
-        # StockSummary.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
-        pass
+        StockSummary.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
     @staticmethod
     def get_stock_detail_data(arg1, arg2, arg3, arg4):
         # 个股详情
-        # StockDetail.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
-        pass
+        StockDetail.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
     @staticmethod
     def get_finance_data(arg1, arg2, arg3, arg4):
         # 主要财务指标
-        # FinanceFactor.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
-        pass
+        FinanceFactor.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
     @staticmethod
     def get_balance_data(arg1, arg2, arg3, arg4):
         # 资产负债表
-        # BalanceSheet.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
-        pass
+        BalanceSheet.record_data(provider='eastmoney', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4)
 
     @staticmethod
     def get_income_data(arg1, arg2, arg3, arg4):
@@ -273,7 +278,7 @@ def run(args):
     try:
         argset[0](pc, argset[1], lock, shared[0])
         return argset[0].__name__
-    except Exception as e:
+    except Exception as _:
         return None
 
 def fetch_summary_data(lock):
@@ -340,7 +345,7 @@ def fetch_detail_data(lock):
     print("*    Start Fetching Detail Stock Dataset...")
     print("*"*60)
 
-    sleep=0
+    sleep=3
 
     mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=2, reset=True)
 

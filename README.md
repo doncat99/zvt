@@ -20,6 +20,8 @@ ZVT 源項目地址：https://github.com/zvtvz/zvt
 
 为更好管控控制台信息输出，需要对jqdatasdk项目进行部分修改，详见：https://github.com/doncat99/jqdatasdk
 
+python3.8在多进程处理上有较大改动与提升，建议使用python 3.8版本运行本项目。
+
 界面如图：
 <p align="center"><img src='./docs/imgs/screen-cut.gif'/></p>
 

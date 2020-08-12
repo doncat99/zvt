@@ -58,20 +58,20 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
         # {opendate:"2019-04-29",trade:"10.8700",changeratio:"-0.0431338",turnover:"74.924",netamount:"-2903349.8500",
         # ratioamount:"-0.155177",r0:"0.0000",r1:"2064153.0000",r2:"6485031.0000",r3:"10622169.2100",r0_net:"0.0000",
         # r1_net:"2064153.0000",r2_net:"-1463770.0000",r3_net:"-3503732.8500"}
-        opendate = "opendate"
-        trade = "trade"
-        changeratio = 'changeratio'
-        turnover = 'turnover'
-        netamount = 'netamount'
-        ratioamount = 'ratioamount'
-        r0 = 'r0'
-        r1 = 'r1'
-        r2 = 'r2'
-        r3 = 'r3'
-        r0_net = 'r0_net'
-        r1_net = 'r1_net'
-        r2_net = 'r2_net'
-        r3_net = 'r3_net'
+        # opendate = "opendate"
+        # trade = "trade"
+        # changeratio = 'changeratio'
+        # turnover = 'turnover'
+        # netamount = 'netamount'
+        # ratioamount = 'ratioamount'
+        # r0 = 'r0'
+        # r1 = 'r1'
+        # r2 = 'r2'
+        # r3 = 'r3'
+        # r0_net = 'r0_net'
+        # r1_net = 'r1_net'
+        # r2_net = 'r2_net'
+        # r3_net = 'r3_net'
 
         json_list = []
 
@@ -79,7 +79,7 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
             json_list = eval(resp.text)
         except Exception as e:
             resp.encoding = 'GBK'
-            self.logger.error(resp.text)
+            self.logger.error("text:{}, error:{}".format(resp.text, e))
             # time.sleep(60 * 5)
 
         result_list = []

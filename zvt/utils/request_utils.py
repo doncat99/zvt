@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import time
 from http import client
 import requests
 from requests.adapters import HTTPAdapter
@@ -29,12 +30,18 @@ def request_post(http_session, url, data=None, json=None):
     logger.info("HTTP POST: {}".format(url))
     return http_session.post(url=url, data=data, json=json, timeout=(5, 15))
 
+
+jq_index = 1
+
 def jq_auth():
     try:
-        if not is_auth():
-            auth(zvt_env['jq_username'], zvt_env['jq_password'])
+        global jq_index
+        account = 'jq_username{}'.format(jq_index)
+        password = 'jq_password{}'.format(jq_index)
+        if not is_auth():    
+            auth(zvt_env[account], zvt_env[password])
         else:
-            logger.info("already auth, attempt with {}:{}".format(zvt_env['jq_username'], zvt_env['jq_password']))
+            logger.info("already auth, attempt with {}:{}".format(zvt_env[account], zvt_env[password]))
         return True
     except Exception as e:
         logger.warning(f'joinquant account not ok,the timestamp(publish date) for finance would be not correct', e)
@@ -43,6 +50,25 @@ def jq_auth():
 def jq_logout():
     pass
 
+def jq_swap_account(lock):
+    global jq_index
+    
+    lock.acquire()
+    jq_index = 1 if jq_index > 5 else jq_index + 1
+    account = 'jq_username{}'.format(jq_index)
+    password = 'jq_password{}'.format(jq_index)
+
+    try:
+        logout()
+        logger.info("swap auth with {}:{}".format(zvt_env[account], zvt_env[password]))
+        if auth(zvt_env[account], zvt_env[password]):
+            logger.info("swap auth done")
+    except Exception as e:
+        logger.exception("auth failed, {}".format(e))
+    
+    time.sleep(10)
+    lock.release()
+    
 def jq_query(*args, **kwargs):
     logger.info("HTTP QUERY")
     return query(*args, **kwargs)

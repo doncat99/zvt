@@ -177,16 +177,16 @@ def table_name_to_domain_name(table_name: str) -> DeclarativeMeta:
     return domain_name
 
 
-def get_entity_schema(entity_type: str) -> object:
-    """
-    get entity schema from name
+# def get_entity_schema(entity_type: str) -> object:
+#     """
+#     get entity schema from name
 
-    :param entity_type:
-    :type entity_type:
-    :return:
-    :rtype:
-    """
-    return zvt_context.zvt_entity_schema_map[entity_type]
+#     :param entity_type:
+#     :type entity_type:
+#     :return:
+#     :rtype:
+#     """
+#     return zvt_context.zvt_entity_schema_map[entity_type]
 
 
 def get_schema_by_name(name: str) -> DeclarativeMeta:
@@ -317,7 +317,7 @@ def get_data(data_schema,
             if type(level) == IntervalLevel:
                 level = level.value
             query = query.filter(data_schema.level == level)
-        except Exception as e:
+        except Exception as _:
             pass
 
     query = common_filter(query, data_schema=data_schema, start_timestamp=start_timestamp,

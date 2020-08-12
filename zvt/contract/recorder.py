@@ -14,7 +14,7 @@ from zvt.contract.api import get_entities, get_data
 from zvt.utils.time_utils import to_pd_timestamp, TIME_FORMAT_DAY, to_time_str, \
     evaluate_size_from_timestamp, is_in_same_interval, now_pd_timestamp
 from zvt.utils.utils import fill_domain_from_dict
-from zvt.utils.request_utils import get_http_session
+from zvt.utils.request_utils import get_http_session, jq_swap_account
 
 from tqdm import tqdm
 
@@ -357,6 +357,97 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
+    def update(self, entity_item, finished_items, http_session, pbar):
+        start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, http_session)
+        size = int(size)
+
+        if timestamps:
+            self.logger.info('entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}-{}'.format(
+                entity_item.id, start_timestamp, end_timestamp, size, timestamps[0], timestamps[-1]))
+        else:
+            self.logger.info('entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}'.format(
+                entity_item.id, start_timestamp, end_timestamp, size, timestamps))
+
+        # no more to record
+        if size == 0:
+            finished_items.append(entity_item)
+            self.logger.info("finish recording {} for entity_id:{},latest_timestamp:{}".format(
+                self.data_schema, entity_item.id, start_timestamp))
+            self.on_finish_entity(entity_item, http_session)
+
+            self.process_index[2].acquire()
+            pbar.update()
+            self.process_index[2].release()
+            return
+
+        original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
+                                    timestamps=timestamps, http_session=http_session)
+
+        all_duplicated = True
+
+        if original_list:
+            domain_list = []
+            for original_item in original_list:
+                got_new_data, domain_item = self.generate_domain(entity_item, original_item)
+
+                if got_new_data:
+                    all_duplicated = False
+
+                # handle the case  generate_domain_id generate duplicate id
+                if domain_item:
+                    duplicate = [item for item in domain_list if item.id == domain_item.id]
+                    if duplicate:
+                        # regenerate the id
+                        if self.fix_duplicate_way == 'add':
+                            domain_item.id = "{}_{}".format(domain_item.id, uuid.uuid1())
+                        # ignore
+                        else:
+                            self.logger.info(f'ignore original duplicate item:{domain_item.id}')
+
+                            self.process_index[2].acquire()
+                            pbar.update()
+                            self.process_index[2].release()
+                            return
+
+                    domain_list.append(domain_item)
+
+            if domain_list:
+                self.persist(entity_item, domain_list)
+            else:
+                self.logger.info('just got {} duplicated data in this cycle'.format(len(original_list)))
+
+        # could not get more data
+        entity_finished = False
+        if not original_list or all_duplicated:
+            # not realtime
+            if not self.real_time:
+                entity_finished = True
+
+            # realtime and to the close time
+            if self.real_time and (self.close_hour is not None) and (self.close_minute is not None):
+                current_timestamp = pd.Timestamp.now()
+                if current_timestamp.hour >= self.close_hour:
+                    if current_timestamp.minute - self.close_minute >= 5:
+                        self.logger.info('{} now is the close time:{}'.format(entity_item.id, current_timestamp))
+
+                        entity_finished = True
+
+        # add finished entity to finished_items
+        if entity_finished:
+            latest_saved_record = self.get_latest_saved_record(entity=entity_item)
+            if latest_saved_record:
+                start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
+
+            self.logger.info("finish recording {} for entity_id:{},latest_timestamp:{}".format(
+                self.data_schema, entity_item.id, start_timestamp))
+            self.on_finish_entity(entity_item, http_session)
+
+            finished_items.append(entity_item)
+
+            self.process_index[2].acquire()
+            pbar.update()
+            self.process_index[2].release()
+
     def do_run(self):
         finished_items = []
         unfinished_items = self.entities
@@ -373,125 +464,19 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             with tqdm(total=len(unfinished_items), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
                 for entity_item in unfinished_items:
                     try:
-                        start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, http_session)
-                        size = int(size)
-
-                        if timestamps:
-                            self.logger.info('entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}-{}'.format(
-                                entity_item.id,
-                                start_timestamp,
-                                end_timestamp,
-                                size,
-                                timestamps[0],
-                                timestamps[-1]))
-                        else:
-                            self.logger.info('entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}'.format(
-                                entity_item.id,
-                                start_timestamp,
-                                end_timestamp,
-                                size,
-                                timestamps))
-
-                        # no more to record
-                        if size == 0:
-                            finished_items.append(entity_item)
-                            self.logger.info(
-                                "finish recording {} for entity_id:{},latest_timestamp:{}".format(
-                                    self.data_schema,
-                                    entity_item.id,
-                                    start_timestamp))
-                            self.on_finish_entity(entity_item, http_session)
-
-                            self.process_index[2].acquire()
-                            pbar.update()
-                            self.process_index[2].release()
-                            continue
-
-                        original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
-                                                    timestamps=timestamps, http_session=http_session)
-
-                        all_duplicated = True
-
-                        if original_list:
-                            domain_list = []
-                            for original_item in original_list:
-                                got_new_data, domain_item = self.generate_domain(entity_item, original_item)
-
-                                if got_new_data:
-                                    all_duplicated = False
-
-                                # handle the case  generate_domain_id generate duplicate id
-                                if domain_item:
-                                    duplicate = [item for item in domain_list if item.id == domain_item.id]
-                                    if duplicate:
-                                        # regenerate the id
-                                        if self.fix_duplicate_way == 'add':
-                                            domain_item.id = "{}_{}".format(domain_item.id, uuid.uuid1())
-                                        # ignore
-                                        else:
-                                            self.logger.info(f'ignore original duplicate item:{domain_item.id}')
-
-                                            self.process_index[2].acquire()
-                                            pbar.update()
-                                            self.process_index[2].release()
-                                            continue
-
-                                    domain_list.append(domain_item)
-
-                            if domain_list:
-                                self.persist(entity_item, domain_list)
-                            else:
-                                self.logger.info('just got {} duplicated data in this cycle'.format(len(original_list)))
-
-                        # could not get more data
-                        entity_finished = False
-                        if not original_list or all_duplicated:
-                            # not realtime
-                            if not self.real_time:
-                                entity_finished = True
-
-                            # realtime and to the close time
-                            if self.real_time and \
-                                    (self.close_hour is not None) and \
-                                    (self.close_minute is not None):
-                                current_timestamp = pd.Timestamp.now()
-                                if current_timestamp.hour >= self.close_hour:
-                                    if current_timestamp.minute - self.close_minute >= 5:
-                                        self.logger.info(
-                                            '{} now is the close time:{}'.format(entity_item.id, current_timestamp))
-
-                                        entity_finished = True
-
-                        # add finished entity to finished_items
-                        if entity_finished:
-                            finished_items.append(entity_item)
-
-                            latest_saved_record = self.get_latest_saved_record(entity=entity_item)
-                            if latest_saved_record:
-                                start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
-
-                            self.logger.info(
-                                "finish recording {} for entity_id:{},latest_timestamp:{}".format(
-                                    self.data_schema,
-                                    entity_item.id,
-                                    start_timestamp))
-                            self.on_finish_entity(entity_item, http_session)
-
-                            self.process_index[2].acquire()
-                            pbar.update()
-                            self.process_index[2].release()
-                            continue
-
+                        self.update(entity_item, finished_items, http_session, pbar)
                     except Exception as e:
-                        self.logger.exception(
-                            "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
-                        raising_exception = e
-                        finished_items = unfinished_items
-                        break
-
-                    self.process_index[2].acquire()
-                    pbar.update()
-                    self.process_index[2].release()
+                        self.logger.info("error:{}".format(str(e)))
+                        if str(e)[:6] == "您当天的查询":
+                            jq_swap_account(self.process_index[2])
+                            break
+                            # self.update(entity_item, finished_items, http_session, pbar)
+                        else:
+                            self.logger.exception(
+                                "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
+                            raising_exception = e
+                            finished_items = unfinished_items
+                            break
 
             unfinished_items = set(unfinished_items) - set(finished_items)
 
