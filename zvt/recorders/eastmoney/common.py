@@ -113,7 +113,7 @@ class EastmoneyApiWrapper(ApiWrapper):
         return call_eastmoney_api(http_session, url=url, method=method, param=param, path_fields=path_fields)
 
 
-class BaseEastmoneyRecorder(object):
+class BaseEastmoneyRecorder(TimestampsDataRecorder):
     request_method = 'post'
     path_fields = None
     api_wrapper = EastmoneyApiWrapper()
@@ -128,9 +128,8 @@ class BaseEastmoneyRecorder(object):
                 param = self.generate_request_param(entity_item, start, end, size, the_timestamp)
                 tmp_list = self.api_wrapper.request(http_session, url=self.url, param=param, method=self.request_method,
                                                     path_fields=self.path_fields)
-                self.logger.info(
-                    "record {} for entity_id:{},timestamp:{}".format(
-                        self.data_schema, entity_item.id, the_timestamp))
+                self.logger.info("record {} for entity_id:{},timestamp:{}".format(
+                    self.data_schema, entity_item.id, the_timestamp))
                 # fill timestamp field
                 for tmp in tmp_list:
                     tmp[self.get_evaluated_time_field()] = the_timestamp
@@ -145,7 +144,7 @@ class BaseEastmoneyRecorder(object):
                                             path_fields=self.path_fields)
 
 
-class EastmoneyTimestampsDataRecorder(BaseEastmoneyRecorder, TimestampsDataRecorder):
+class EastmoneyTimestampsDataRecorder(BaseEastmoneyRecorder):
     entity_provider = 'joinquant'
     entity_schema = StockDetail
 
@@ -172,7 +171,7 @@ class EastmoneyTimestampsDataRecorder(BaseEastmoneyRecorder, TimestampsDataRecor
         return []
 
 
-class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder):
+class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder):
     entity_provider = 'joinquant'
     entity_schema = StockDetail
 
@@ -214,7 +213,7 @@ class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder
         }
 
 
-class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder):
+class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder):
     entity_provider = 'joinquant'
     entity_schema = StockDetail
 

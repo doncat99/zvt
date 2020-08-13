@@ -210,7 +210,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         size = self.default_size
         if self.end_timestamp:
-            if latest_timestamp > self.end_timestamp:
+            if latest_timestamp >= self.end_timestamp:
                 size = 0
 
         return latest_timestamp, self.end_timestamp, size, None
@@ -363,10 +363,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         if timestamps:
             self.logger.info('entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}-{}'.format(
-                entity_item.id, start_timestamp, end_timestamp, size, timestamps[0], timestamps[-1]))
+                entity_item.id, size, start_timestamp, end_timestamp, timestamps[0], timestamps[-1]))
         else:
             self.logger.info('entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}'.format(
-                entity_item.id, start_timestamp, end_timestamp, size, timestamps))
+                entity_item.id, size, start_timestamp, end_timestamp, timestamps))
 
         # no more to record
         if size == 0:
@@ -393,7 +393,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 if got_new_data:
                     all_duplicated = False
 
-                # handle the case  generate_domain_id generate duplicate id
+                # handle the case generate_domain_id generate duplicate id
                 if domain_item:
                     duplicate = [item for item in domain_list if item.id == domain_item.id]
                     if duplicate:

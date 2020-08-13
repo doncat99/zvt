@@ -136,7 +136,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                                  order=self.data_schema.timestamp.asc(),
                                  return_type='domain',
                                  session=self.session,
-                                 filters=[self.data_schema.timestamp == self.data_schema.report_date,
+                                 filters=[self.data_schema.timestamp != self.data_schema.report_date,
                                           self.data_schema.timestamp >= to_pd_timestamp('2005-01-01')])
         if the_data_list:
             if self.data_schema == FinanceFactor:
