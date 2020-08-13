@@ -380,9 +380,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.process_index[2].release()
             return
 
-		# sleep for a while to next entity
-        self.sleep()
-
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                     timestamps=timestamps, http_session=http_session)
 
@@ -467,19 +464,22 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             with tqdm(total=len(unfinished_items), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
                 for entity_item in unfinished_items:
                     try:
+                        now = time.time()
                         self.update(entity_item, finished_items, http_session, pbar)
+                        if time.time() - now < self.sleeping_time:
+                            # sleep for a while to next entity
+                            self.sleep()
                     except Exception as e:
                         self.logger.info("error:{}".format(str(e)))
                         if str(e)[:6] == "您当天的查询":
-                            jq_swap_account(self.process_index[2])
+                            jq_swap_account()
                             break
-                            # self.update(entity_item, finished_items, http_session, pbar)
                         else:
                             self.logger.exception(
                                 "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
                             raising_exception = e
                             finished_items = unfinished_items
-                            break
+                        break
 
             unfinished_items = set(unfinished_items) - set(finished_items)
 

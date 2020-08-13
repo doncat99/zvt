@@ -113,7 +113,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
             )
 
             df = jq_get_fundamentals(q, statDate=to_jq_report_period(the_data.report_date))
-            if not df.empty and pd.isna(df).empty:
+            if pd_is_not_null(df) and pd.isna(df).empty:
                 the_data.timestamp = to_pd_timestamp(df['pubDate'][0])
                 self.logger.info(
                     'jq fill {} {} timestamp:{} for report_date:{}'.format(self.data_schema, security_item.id,
@@ -155,7 +155,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                     index_df(df, index='report_date', time_field='report_date')
 
                 for the_data in the_data_list:
-                    if (df is not None) and (not df.empty) and the_data.report_date in df.index:
+                    if pd_is_not_null(df) and the_data.report_date in df.index:
                         the_data.timestamp = df.at[the_data.report_date, 'timestamp']
                         self.logger.info(
                             'db fill {} {} timestamp:{} for report_date:{}'.format(self.data_schema, entity.id,

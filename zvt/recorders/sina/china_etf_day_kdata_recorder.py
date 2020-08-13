@@ -6,6 +6,7 @@ import pandas as pd
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.utils.time_utils import to_time_str
+from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.request_utils import request_get
 from zvt import init_log
 from zvt.api.quote import generate_kdata_id
@@ -51,7 +52,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             # 从东方财富获取基金累计净值
             df = self.fetch_cumulative_net_value(entity, start, end, http_session)
 
-            if df is not None and not df.empty:
+            if pd_is_not_null(df):
                 for kdata in kdatas:
                     if kdata.timestamp in df.index:
                         kdata.cumulative_net_value = df.loc[kdata.timestamp, 'LJJZ']
@@ -74,7 +75,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             response_df = pd.DataFrame(response_json['Data']['LSJZList'])
 
             # 最后一页
-            if response_df.empty:
+            if not pd_is_not_null(response_df):
                 break
 
             response_df['FSRQ'] = pd.to_datetime(response_df['FSRQ'])
@@ -101,25 +102,25 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             'size': size
         }
 
-        security_item = param['security_item']
-        size = param['size']
+        # security_item = param['security_item']
+        # size = param['size']
 
-        url = url.format(security_item.exchange, security_item.code, size)
+        # url = url.format(security_item.exchange, security_item.code, size)
 
-        response = request_get(http_session, url)
-        response_json = demjson.decode(response.text)
+        # response = request_get(http_session, url)
+        # response_json = demjson.decode(response.text)
 
-        if response_json is None or len(response_json) == 0:
-            return []
+        # if response_json is None or len(response_json) == 0:
+        #     return []
 
-        df = pd.DataFrame(response_json)
-        df.rename(columns={'day': 'timestamp'}, inplace=True)
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-        df['name'] = security_item.name
-        df['provider'] = 'sina'
-        df['level'] = param['level']
+        # df = pd.DataFrame(response_json)
+        # df.rename(columns={'day': 'timestamp'}, inplace=True)
+        # df['timestamp'] = pd.to_datetime(df['timestamp'])
+        # df['name'] = security_item.name
+        # df['provider'] = 'sina'
+        # df['level'] = param['level']
 
-        return df.to_dict(orient='records')
+        # return df.to_dict(orient='records')
 
 
 __all__ = ['ChinaETFDayKdataRecorder']

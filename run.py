@@ -316,9 +316,9 @@ def fetch_summary_data(lock):
     print("parallel processing...")
     print("")
 
-    sleep = 0
+    sleep = 1
 
-    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=8, reset=True)
+    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=3, reset=True)
 
 def fetch_detail_data(lock):
     detail_set = [
@@ -345,7 +345,7 @@ def fetch_detail_data(lock):
     print("*    Start Fetching Detail Stock Dataset...")
     print("*"*60)
 
-    sleep=3
+    sleep = 1
 
     mp_tqdm(run, lock, shared=[sleep], args=detail_set, pc=3, reset=True)
 
@@ -354,8 +354,8 @@ if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
 
-    # fetch_summary_data(l)
-    fetch_detail_data(l)
+    fetch_summary_data(l)
+    # fetch_detail_data(l)
       
     
 
