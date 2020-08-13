@@ -318,7 +318,7 @@ def fetch_summary_data(lock):
 
     sleep = 1
 
-    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=3, reset=True)
+    mp_tqdm(run, lock, shared=[sleep], args=summary_set, pc=1, reset=True)
 
 def fetch_detail_data(lock):
     detail_set = [

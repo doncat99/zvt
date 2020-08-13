@@ -471,10 +471,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                             self.sleep()
                     except Exception as e:
                         self.logger.info("error:{}".format(str(e)))
-                        if str(e)[:6] == "您当天的查询":
-                            jq_swap_account()
-                            break
-                        else:
+                        if not jq_swap_account(e):
                             self.logger.exception(
                                 "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
                             raising_exception = e

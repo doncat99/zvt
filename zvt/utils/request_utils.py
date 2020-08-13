@@ -4,6 +4,7 @@ import time
 from http import client
 import requests
 from requests.adapters import HTTPAdapter
+from functools import wraps
 
 from jqdatasdk import is_auth, auth, query, logout, \
                       get_fundamentals, get_mtss, get_fundamentals_continuously, \
@@ -50,7 +51,10 @@ def jq_auth():
 def jq_logout():
     pass
 
-def jq_swap_account():
+def jq_swap_account(error):
+    if str(error)[:6] == "您当天的查询":
+        return False
+
     global jq_index
     
     # lock.acquire()
@@ -68,94 +72,56 @@ def jq_swap_account():
     
     time.sleep(5)
     # lock.release()
-    
+    return True
+
+def swap_wrapper(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        while True:
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                if not jq_swap_account(e):
+                    logger.exception("func.__name__ failed, {}".format(e))
+                    raise e
+    return wrapper 
+
+@swap_wrapper    
 def jq_query(*args, **kwargs):
     logger.info("HTTP QUERY, with args={}, kwargs={}".format(args, kwargs))
-    while True:
-        try:
-            return query(*args, **kwargs)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_query failed, {}".format(e))
-                raise e
+    return query(*args, **kwargs)
 
+@swap_wrapper
 def jq_get_fundamentals(query_object, date=None, statDate=None):
     logger.info("HTTP GET: fundamentals, with date={}, statDate={}".format(date, statDate))
-    while True:
-        try:
-            return get_fundamentals(query_object, date=date, statDate=statDate)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_get_fundamentals failed, {}".format(e))
-                raise e
+    return get_fundamentals(query_object, date=date, statDate=statDate)
 
+@swap_wrapper
 def jq_get_mtss(security_list, start_date=None, end_date=None, fields=None, count=None):
-    logger.info("HTTP GET: mtss, with security_list={}, start_date={}, end_date={}, fields={}, count={}".format(security_list, start_date, end_date, fields, count))
-    while True:
-        try:
-            return get_mtss(security_list, start_date=start_date, end_date=end_date, fields=fields, count=count)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_get_mtss failed, {}".format(e))
-                raise e
+    logger.info("HTTP GET: mtss, with security_list={}, start_date={}, end_date={}, \
+        fields={}, count={}".format(security_list, start_date, end_date, fields, count))
+    return get_mtss(security_list, start_date=start_date, end_date=end_date, fields=fields, count=count)
     
-
+@swap_wrapper
 def jq_get_fundamentals_continuously(query_object, end_date=None, count=1, panel=True):
     logger.info("HTTP GET: fundamentals_continuously, with end_date={}, count={}".format(end_date, count))
-    while True:
-        try:
-            return get_fundamentals_continuously(query_object, end_date=end_date, count=count, panel=panel)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_get_fundamentals_continuously failed, {}".format(e))
-                raise e
+    return get_fundamentals_continuously(query_object, end_date=end_date, count=count, panel=panel)
     
-
+@swap_wrapper
 def jq_get_all_securities(types=[], date=None):
     logger.info("HTTP GET: all_securities, with types={}, date={}".format(types, date))
-    while True:
-        try:
-            return get_all_securities(types=types, date=date)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_get_all_securities failed, {}".format(e))
-                raise e
+    return get_all_securities(types=types, date=date)
     
-
+@swap_wrapper
 def jq_get_trade_days(start_date=None, end_date=None, count=None):
     logger.info("HTTP GET: trade_days, with start_date={}, end_date={}, count={}".format(start_date, end_date, count))
-    while True:
-        try:
-            return get_trade_days(start_date=start_date, end_date=end_date, count=count)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_get_trade_days failed, {}".format(e))
-                raise e
+    return get_trade_days(start_date=start_date, end_date=end_date, count=count)
     
-
+@swap_wrapper
 def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low", "close"), include_now=False, end_dt=None,
              fq_ref_date=None, df=True):
-    logger.info("HTTP GET: bars, with unit={}, fields={}, include_now={}, end_dt={}, fq_ref_date={}".format(unit, fields, include_now, end_dt, fq_ref_date))
-    while True:
-        try:
-            return get_bars(security, count, unit=unit, fields=fields, include_now=include_now, 
-                            end_dt=end_dt, fq_ref_date=fq_ref_date, df=df)
-        except Exception as e:
-            if str(e)[:6] == "您当天的查询":
-                jq_swap_account()
-            else:
-                logger.exception("jq_get_bars failed, {}".format(e))
-                raise e
+    logger.info("HTTP GET: bars, with unit={}, fields={}, include_now={}, end_dt={}, \
+        fq_ref_date={}".format(unit, fields, include_now, end_dt, fq_ref_date))
+    return get_bars(security, count, unit=unit, fields=fields, include_now=include_now, 
+                    end_dt=end_dt, fq_ref_date=fq_ref_date, df=df)
     
