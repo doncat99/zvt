@@ -63,7 +63,8 @@ def jq_swap_account(error):
     password = 'jq_password{}'.format(jq_index)
 
     try:
-        logout()
+        if is_auth():
+            logout()
         logger.info("swap auth with {}:{}".format(zvt_env[account], zvt_env[password]))
         if auth(zvt_env[account], zvt_env[password]):
             logger.info("swap auth done")
