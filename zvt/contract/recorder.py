@@ -8,6 +8,7 @@ import pandas as pd
 from sqlalchemy.orm import Session
 import multiprocessing
 
+from zvt.domain import StockTradeDay
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_db_session, get_schema_columns
 from zvt.contract.api import get_entities, get_data
@@ -192,21 +193,27 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
     def evaluate_start_end_size_timestamps(self, entity, http_session):
         # not to list date yet
+        # print("step 1: entity.timestamp:{}".format(entity.timestamp))
         if entity.timestamp and (entity.timestamp >= now_pd_timestamp()):
             return entity.timestamp, None, 0, None
 
+        
         latest_saved_record = self.get_latest_saved_record(entity=entity)
+        # print("step 2: latest_saved_record:{}".format(latest_saved_record))
 
         if latest_saved_record:
             latest_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
         else:
             latest_timestamp = entity.timestamp
+        # print("step 3: latest_timestamp:{}".format(latest_timestamp))
 
         if not latest_timestamp:
             return self.start_timestamp, self.end_timestamp, self.default_size, None
 
+        # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
         if self.start_timestamp:
             latest_timestamp = max(latest_timestamp, self.start_timestamp)
+        # print("step 5: latest_timestamp:{}".format(latest_timestamp))
 
         size = self.default_size
         if self.end_timestamp:
@@ -357,8 +364,9 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    def update(self, entity_item, finished_items, http_session, pbar):
-        start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, http_session)
+    def update(self, entity_item, finished_items, trade_day, http_session, pbar):
+        self.logger.info("self:{}, entity_item:{}, default_size:{}".format(self, entity_item.id, self.default_size))
+        start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, http_session)
         size = int(size)
 
         if timestamps:
@@ -378,7 +386,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.process_index[2].acquire()
             pbar.update()
             self.process_index[2].release()
-            return
+            return False
 
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                     timestamps=timestamps, http_session=http_session)
@@ -407,7 +415,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                             self.process_index[2].acquire()
                             pbar.update()
                             self.process_index[2].release()
-                            return
+                            return True
 
                     domain_list.append(domain_item)
 
@@ -447,12 +455,16 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.process_index[2].acquire()
             pbar.update()
             self.process_index[2].release()
+        
+        return True
 
     def run(self):
         finished_items = []
         unfinished_items = self.entities
         raising_exception = None
         http_session = get_http_session()
+        trade_day = StockTradeDay.query_data(order=StockTradeDay.timestamp.desc(), return_type='domain')
+        trade_day = [day.timestamp for day in trade_day]
 
         while True:
             if len(multiprocessing.current_process()._identity) > 0:
@@ -465,12 +477,12 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 for entity_item in unfinished_items:
                     try:
                         now = time.time()
-                        self.update(entity_item, finished_items, http_session, pbar)
-                        if time.time() - now < self.sleeping_time:
+                        need_sleep = self.update(entity_item, finished_items, trade_day, http_session, pbar)
+                        if need_sleep and (time.time() - now < self.sleeping_time):
                             # sleep for a while to next entity
                             self.sleep()
                     except Exception as e:
-                        self.logger.info("error:{}".format(str(e)))
+                        self.logger.info("record error:{}".format(str(e)))
                         if not jq_swap_account(e):
                             self.logger.exception(
                                 "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
@@ -540,13 +552,15 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
             return records[0]
         return None
 
-    def evaluate_start_end_size_timestamps(self, entity, http_session):
+    def evaluate_start_end_size_timestamps(self, entity, trade_day, http_session):
         # not to list date yet
+        # print("step 1: entity.timestamp:{}".format(entity.timestamp))
         if entity.timestamp and (entity.timestamp >= now_pd_timestamp()):
             return entity.timestamp, None, 0, None
 
         # get latest record
         latest_saved_record = self.get_latest_saved_record(entity=entity)
+        # print("step 2: latest_saved_record:{}".format(latest_saved_record))
 
         if latest_saved_record:
             # the latest saved timestamp
@@ -554,12 +568,17 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         else:
             # the list date
             latest_saved_timestamp = entity.timestamp
+        # print("step 3: latest_saved_timestamp:{}".format(latest_saved_timestamp))
 
+        # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
+        
         if not latest_saved_timestamp:
             return None, None, self.default_size, None
-
+        
+        # self.logger.info("latest_saved_timestamp:{}, tradedays:{}".format(latest_saved_timestamp, trade_day[:2]))
         size = evaluate_size_from_timestamp(start_timestamp=latest_saved_timestamp, level=self.level,
-                                            one_day_trading_minutes=self.one_day_trading_minutes)
+                                            one_day_trading_minutes=self.one_day_trading_minutes,
+                                            trade_day=trade_day)
 
         return latest_saved_timestamp, None, size, None
 

@@ -40,6 +40,7 @@ def jq_auth():
         account = 'jq_username{}'.format(jq_index)
         password = 'jq_password{}'.format(jq_index)
         if not is_auth():    
+            logger.info("auth with {}:{}".format(zvt_env[account], zvt_env[password]))
             auth(zvt_env[account], zvt_env[password])
         else:
             logger.info("already auth, attempt with {}:{}".format(zvt_env[account], zvt_env[password]))
@@ -52,73 +53,73 @@ def jq_logout():
     pass
 
 def jq_swap_account(error):
-    if str(error)[:6] == "您当天的查询":
+    if not (str(error)[:6] == "您当天的查询" or str(error)[:4] == "帐号过期"):
         return False
 
-    global jq_index
-    
-    # lock.acquire()
-    jq_index = 1 if jq_index > 5 else jq_index + 1
-    account = 'jq_username{}'.format(jq_index)
-    password = 'jq_password{}'.format(jq_index)
+    logger.exception("auth failed, {}".format(error))
+    raise error
 
-    try:
-        if is_auth():
-            logout()
-        logger.info("swap auth with {}:{}".format(zvt_env[account], zvt_env[password]))
-        if auth(zvt_env[account], zvt_env[password]):
-            logger.info("swap auth done")
-    except Exception as e:
-        logger.exception("auth failed, {}".format(e))
-    
-    time.sleep(5)
-    # lock.release()
-    return True
+    # it is not allowed to swap account, thus the code below is no use anymore.
 
-def swap_wrapper(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        while True:
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                if not jq_swap_account(e):
-                    logger.exception("func.__name__ failed, {}".format(e))
-                    raise e
-    return wrapper 
+    # global jq_index
+    # jq_index = 1 if jq_index > 4 else jq_index + 1
+    # account = 'jq_username{}'.format(jq_index)
+    # password = 'jq_password{}'.format(jq_index) 
+    # try:
+    #     if is_auth():
+    #         logout()
+    #     logger.info("swap auth with {}:{}".format(zvt_env[account], zvt_env[password]))
+    #     if auth(zvt_env[account], zvt_env[password]):
+    #         logger.info("swap auth done")
+    # except Exception as e:
+    #     logger.exception("auth failed, {}".format(e))
+    # time.sleep(10)
+    # return True
 
-@swap_wrapper    
+# def swap_wrapper(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         while True:
+#             try:
+#                 return func(*args, **kwargs)
+#             except Exception as e:
+#                 if not jq_swap_account(e):
+#                     logger.exception("func.__name__ failed, {}".format(e))
+#                     raise e
+#     return wrapper 
+
+# @swap_wrapper    
 def jq_query(*args, **kwargs):
     logger.info("HTTP QUERY, with args={}, kwargs={}".format(args, kwargs))
     return query(*args, **kwargs)
 
-@swap_wrapper
+# @swap_wrapper
 def jq_get_fundamentals(query_object, date=None, statDate=None):
     logger.info("HTTP GET: fundamentals, with date={}, statDate={}".format(date, statDate))
     return get_fundamentals(query_object, date=date, statDate=statDate)
 
-@swap_wrapper
+# @swap_wrapper
 def jq_get_mtss(security_list, start_date=None, end_date=None, fields=None, count=None):
     logger.info("HTTP GET: mtss, with security_list={}, start_date={}, end_date={}, \
         fields={}, count={}".format(security_list, start_date, end_date, fields, count))
     return get_mtss(security_list, start_date=start_date, end_date=end_date, fields=fields, count=count)
     
-@swap_wrapper
+# @swap_wrapper
 def jq_get_fundamentals_continuously(query_object, end_date=None, count=1, panel=True):
     logger.info("HTTP GET: fundamentals_continuously, with end_date={}, count={}".format(end_date, count))
     return get_fundamentals_continuously(query_object, end_date=end_date, count=count, panel=panel)
     
-@swap_wrapper
+# @swap_wrapper
 def jq_get_all_securities(types=[], date=None):
     logger.info("HTTP GET: all_securities, with types={}, date={}".format(types, date))
     return get_all_securities(types=types, date=date)
     
-@swap_wrapper
+# @swap_wrapper
 def jq_get_trade_days(start_date=None, end_date=None, count=None):
     logger.info("HTTP GET: trade_days, with start_date={}, end_date={}, count={}".format(start_date, end_date, count))
     return get_trade_days(start_date=start_date, end_date=end_date, count=count)
     
-@swap_wrapper
+# @swap_wrapper
 def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low", "close"), include_now=False, end_dt=None,
              fq_ref_date=None, df=True):
     logger.info("HTTP GET: bars, with unit={}, fields={}, include_now={}, end_dt={}, \

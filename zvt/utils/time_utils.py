@@ -8,6 +8,7 @@ import tzlocal
 
 from zvt.contract import IntervalLevel
 
+
 CHINA_TZ = 'Asia/Shanghai'
 
 TIME_FORMAT_ISO8601 = "YYYY-MM-DDTHH:mm:ss.SSS"
@@ -50,7 +51,7 @@ def now_pd_timestamp() -> pd.Timestamp:
 def to_time_str(the_time, fmt=TIME_FORMAT_DAY):
     try:
         return arrow.get(to_pd_timestamp(the_time)).format(fmt)
-    except Exception as e:
+    except Exception as _:
         return the_time
 
 
@@ -97,10 +98,48 @@ def get_year_quarters(start, end=pd.Timestamp.now()):
 
 def date_and_time(the_date, the_time):
     time_str = '{}T{}:00.000'.format(to_time_str(the_date), the_time)
-
     return to_pd_timestamp(time_str)
 
 
+def convert_timedelta(duration):
+    days, seconds = duration.days, duration.seconds
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = (seconds % 60)
+    return days, hours, minutes, seconds
+
+
+def time_delta(enter, exit):
+    enter_delta = datetime.timedelta(hours=enter.hour, minutes=enter.minute, seconds=enter.second)
+    exit_delta = datetime.timedelta(hours=exit.hour, minutes=exit.minute, seconds=exit.second)
+    difference_delta = exit_delta - enter_delta
+    return convert_timedelta(difference_delta)
+
+
+def count_mins_from_day(the_time):
+    rest = datetime.time(hour=11, minute=30)
+    end = datetime.time(hour=15)
+
+    if the_time < rest:
+        _, _, minutes, _ = time_delta(the_time, rest)
+        return minutes + 120
+    else:
+        _, _, minutes, _ = time_delta(the_time, end)
+        return minutes
+
+
+def count_hours_from_day(the_time):
+    rest = datetime.time(hour=11, minute=30)
+    end = datetime.time(hour=15)
+
+    if the_time < rest:
+        _, hours, _, _ = time_delta(the_time, rest)
+        return hours + 2
+    else:
+        _, hours, _, _ = time_delta(the_time, end)
+        return hours
+
+        
 def next_timestamp(current_timestamp: pd.Timestamp, level: IntervalLevel) -> pd.Timestamp:
     current_timestamp = to_pd_timestamp(current_timestamp)
     return current_timestamp + pd.Timedelta(seconds=level.to_second())
@@ -109,7 +148,8 @@ def next_timestamp(current_timestamp: pd.Timestamp, level: IntervalLevel) -> pd.
 def evaluate_size_from_timestamp(start_timestamp,
                                  level: IntervalLevel,
                                  one_day_trading_minutes,
-                                 end_timestamp: pd.Timestamp = None):
+                                 end_timestamp: pd.Timestamp = None,
+                                 trade_day = None):
     """
     given from timestamp,level,one_day_trading_minutes,this func evaluate size of kdata to current.
     it maybe a little bigger than the real size for fetching all the kdata.
@@ -130,22 +170,117 @@ def evaluate_size_from_timestamp(start_timestamp,
 
     one_day_trading_seconds = one_day_trading_minutes * 60
 
-    if level == IntervalLevel.LEVEL_1DAY:
-        return time_delta.days + 1
+    if level == IntervalLevel.LEVEL_1MON:
+        if trade_day is not None:
+            try:
+                size = int(math.ceil(trade_day.index(start_timestamp) / 22))
+                size = 0 if size == 0 else size + 1
+                return size
+            except ValueError as _:
+                if start_timestamp < trade_day[-1]:
+                    return int(math.ceil(len(trade_day) / 22))
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days / 30))
 
     if level == IntervalLevel.LEVEL_1WEEK:
-        return int(math.ceil(time_delta.days / 7)) + 1
+        if trade_day is not None:
+            try:
+                size = int(math.ceil(trade_day.index(start_timestamp) / 5))
+                size = 0 if size == 0 else size + 1
+                return size
+            except ValueError as _:
+                if start_timestamp < trade_day[-1]:
+                    return int(math.ceil(len(trade_day) / 5))
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days / 7))
 
-    if level == IntervalLevel.LEVEL_1MON:
-        return int(math.ceil(time_delta.days / 30)) + 1
+    if level == IntervalLevel.LEVEL_1DAY:
+        if trade_day is not None:
+            try:
+                return trade_day.index(start_timestamp)
+            except ValueError as _:
+                if start_timestamp < trade_day[-1]:
+                    return len(trade_day)
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return time_delta.days
+
+    if level == IntervalLevel.LEVEL_1HOUR:
+        if trade_day is not None:
+            start_date = start_timestamp.replace(hour=0, minute=0, second=0)
+            try:
+                days = trade_day.index(start_date)
+                time = datetime.datetime.time(start_timestamp)
+                size = (days)*4 + int(math.ceil(count_hours_from_day(time)))
+                return size
+            except ValueError as _:
+                if start_date < trade_day[-1]:
+                    return len(trade_day)*4
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days * 4 * 2))
+
+    if level == IntervalLevel.LEVEL_30MIN:
+        if trade_day is not None:
+            start_date = start_timestamp.replace(hour=0, minute=0, second=0)
+            try:
+                days = trade_day.index(start_date)
+                time = datetime.datetime.time(start_timestamp)
+                size = (days)*4*2 + int(math.ceil(count_mins_from_day(time) / 5))
+                return size
+            except ValueError as _:
+                if start_date < trade_day[-1]:
+                    return len(trade_day)*4*2
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days * 4 * 2))
+
+    if level == IntervalLevel.LEVEL_15MIN:
+        if trade_day is not None:
+            start_date = start_timestamp.replace(hour=0, minute=0, second=0)
+            try:
+                days = trade_day.index(start_date)
+                time = datetime.datetime.time(start_timestamp)
+                size = (days)*4*4 + int(math.ceil(count_mins_from_day(time) / 5))
+                return size
+            except ValueError as _:
+                if start_date < trade_day[-1]:
+                    return len(trade_day)*4*4
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days * 4 * 4))
+
+    if level == IntervalLevel.LEVEL_5MIN:
+        if trade_day is not None:
+            start_date = start_timestamp.replace(hour=0, minute=0, second=0)
+            try:
+                days = trade_day.index(start_date)
+                time = datetime.datetime.time(start_timestamp)
+                size = (days)*4*12 + int(math.ceil(count_mins_from_day(time) / 5))
+                return size
+            except ValueError as _:
+                if start_date < trade_day[-1]:
+                    return len(trade_day)*4*12
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days * 4 * 12))
+
+    if level == IntervalLevel.LEVEL_1MIN:
+        if trade_day is not None:
+            start_date = start_timestamp.replace(hour=0, minute=0, second=0)
+            try:
+                days = trade_day.index(start_date)
+                time = datetime.datetime.time(start_timestamp)
+                size = (days)*4*60 + count_mins_from_day(time)
+                return size
+            except ValueError as _:
+                if start_date < trade_day[-1]:
+                    return len(trade_day)*4*60
+                # raise Exception("wrong start time:{}, error:{}".format(start_timestamp, e))
+        return int(math.ceil(time_delta.days * 4 * 60))
 
     if time_delta.days > 0:
         seconds = (time_delta.days + 1) * one_day_trading_seconds
-        return int(math.ceil(seconds / level.to_second())) + 1
+        return int(math.ceil(seconds / level.to_second()))
     else:
         seconds = time_delta.total_seconds()
-        return min(int(math.ceil(seconds / level.to_second())) + 1,
-                   one_day_trading_seconds / level.to_second() + 1)
+        return min(int(math.ceil(seconds / level.to_second())),
+                   one_day_trading_seconds / level.to_second())
 
 
 def is_finished_kdata_timestamp(timestamp, level: IntervalLevel):
