@@ -19,7 +19,7 @@ from zvt.domain import Stock, Etf, StockTradeDay, StockSummary, StockDetail, Fin
                        Stock1monKdata, Stock1monHfqKdata, Stock1monHfqKdata, Stock1monHfqKdata, \
                        Stock1mKdata, Stock1mHfqKdata, Stock1mHfqKdata, Stock5mKdata, Stock5mHfqKdata, \
                        Stock15mKdata, Stock15mHfqKdata, Stock30mKdata, Stock30mHfqKdata, \
-                       Stock4hKdata, Stock4hHfqKdata, Etf1dKdata
+                       Stock1hKdata, Stock1hHfqKdata, Etf1dKdata
 
 
 def get_cache():
@@ -243,14 +243,14 @@ class interface():
         Stock30mHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4[0], batch_size=arg4[1])
 
     @staticmethod
-    def get_stock_4h_k_data(arg1, arg2, arg3, arg4):
-        # 4小时线
-        Stock4hKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4[0], batch_size=arg4[1])
+    def get_stock_1h_k_data(arg1, arg2, arg3, arg4):
+        # 1小时线
+        Stock1hKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4[0], batch_size=arg4[1])
 
     @staticmethod
-    def get_stock_4h_hfq_k_data(arg1, arg2, arg3, arg4):
-        # 4小时线复权
-        Stock4hHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4[0], batch_size=arg4[1])
+    def get_stock_1h_hfq_k_data(arg1, arg2, arg3, arg4):
+        # 1小时线复权
+        Stock1hHfqKdata.record_data(provider='joinquant', process_index=(arg1, arg2, arg3, False), sleeping_time=arg4[0], batch_size=arg4[1])
 
     @staticmethod
     def get_etf_1d_k_data(arg1, arg2, arg3, arg4):
@@ -317,8 +317,8 @@ def fetch_data(lock):
         # [interface.get_stock_15m_hfq_k_data, "Stock 15 mins HFQ K-Data", 24],
         # [interface.get_stock_30m_k_data, "Stock 30 mins K-Data", 24], 
         # [interface.get_stock_30m_hfq_k_data, "Stock Daily 30 mins K-Data", 24],
-        # [interface.get_stock_4h_k_data, "Stock 4 hours K-Data", 24], 
-        # [interface.get_stock_4h_hfq_k_data, "Stock 4 hours HFQ K-Data", 24],
+        # [interface.get_stock_1h_k_data, "Stock 4 hours K-Data", 24], 
+        # [interface.get_stock_1h_hfq_k_data, "Stock 4 hours HFQ K-Data", 24],
         # [interface.get_etf_1d_k_data, "ETF Daily K-Data", 24],
     ]
 
