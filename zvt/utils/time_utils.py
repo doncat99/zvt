@@ -66,6 +66,8 @@ def next_date(the_time, days=1):
 def is_same_date(one, two):
     return to_pd_timestamp(one).date() == to_pd_timestamp(two).date()
 
+def date_delta(one, two):
+    return (to_pd_timestamp(one).date() - to_pd_timestamp(two).date()).days
 
 def is_same_time(one, two):
     return to_timestamp(one) == to_timestamp(two)
@@ -139,6 +141,12 @@ def count_hours_from_day(the_time):
         _, hours, _, _ = time_delta(the_time, end)
         return hours
 
+def count_mins_before_close_time(close_hour, close_minute):
+    now = pd.Timestamp.now()
+    close_time = datetime.time(hour=close_hour, minute=close_minute)
+    now_time = datetime.time(hour=now.hour, minute=now.minute, second=now.second)
+    _, hours, minutes, _ = time_delta(now_time, close_time)
+    return minutes + hours*60
         
 def next_timestamp(current_timestamp: pd.Timestamp, level: IntervalLevel) -> pd.Timestamp:
     current_timestamp = to_pd_timestamp(current_timestamp)

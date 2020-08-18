@@ -304,8 +304,8 @@ def fetch_data(lock):
         # [interface.get_etf_valuation_data, "ETF Valuation", 24],
         
         [interface.get_stock_1d_k_data, "Stock Daily K-Data", 24], 
-        # [interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data", 24],
-        # [interface.get_stock_1w_k_data, "Stock Weekly K-Data", 24],
+        [interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data", 24],
+        [interface.get_stock_1w_k_data, "Stock Weekly K-Data", 24],
         # [interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data", 24],
         # [interface.get_stock_1mon_k_data, "Stock Monthly K-Data", 24], 
         # [interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data", 24],
@@ -337,13 +337,12 @@ def fetch_data(lock):
     sleep = 1
     batch_size = 50
 
-    mp_tqdm(run, lock, shared=[sleep, batch_size], args=data_set, pc=3, reset=True)
+    mp_tqdm(run, lock, shared=[sleep, batch_size], args=data_set, pc=1, reset=True)
 
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
-
     fetch_data(l)
 
       

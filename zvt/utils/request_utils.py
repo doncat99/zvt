@@ -8,7 +8,7 @@ from functools import wraps
 
 from jqdatasdk import is_auth, auth, query, logout, \
                       get_fundamentals, get_mtss, get_fundamentals_continuously, \
-                      get_all_securities, get_trade_days, get_bars
+                      get_all_securities, get_trade_days, get_bars, get_query_count
                       
 from zvt import zvt_env
 
@@ -87,6 +87,11 @@ def jq_swap_account(error):
 #                     logger.exception("func.__name__ failed, {}".format(e))
 #                     raise e
 #     return wrapper 
+
+
+def jq_get_query_count():
+    count = get_query_count()
+    return count['spare']
 
 # @swap_wrapper    
 def jq_query(*args, **kwargs):

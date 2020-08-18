@@ -31,8 +31,8 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
                          (entity.end_date is None) or (entity.end_date > now_pd_timestamp())]
 
     # TODO:more general for the case using StockTradeDay
-    def evaluate_start_end_size_timestamps(self, entity, trade_day, http_session):
-        start, end, size, timestamps = super().evaluate_start_end_size_timestamps(entity, trade_day, http_session)
+    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+        start, end, size, timestamps = super().evaluate_start_end_size_timestamps(entity, trade_day, stock_detail, http_session)
         if start:
             # trade_day = StockTradeDay.query_data(limit=1, order=StockTradeDay.timestamp.desc(), return_type='domain')
             if trade_day:
