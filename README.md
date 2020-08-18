@@ -15,9 +15,10 @@ ZVT 源項目地址：https://github.com/zvtvz/zvt
 * 统一http访问入口，增加Session与请求重试逻辑（后续可通过RxPy实现响应式编程的异步模式）。
 * 增加多进程数据请求逻辑，允许数据并发请求，加快数据获取。
 * 增加数据爬取进度展示。
-* 增加joinquant账号切换功能。
-* log信息从控制台输出改为写文件记录。
-* 一些逻辑漏洞修复。
+* ~~增加joinquant账号切换功能~~ (被封号，代码保留但注释了，Todo：Mac地址替换和ip池)。
+* 增加log信息从控制台输出改为写文件记录。
+* 修正增量数据请求的计算逻辑（原作者的 evaluate_start_end_size_timestamps() 有较大逻辑漏洞，导致重复请求较多数据）。
+* 修正一些逻辑漏洞。
 
 为更好管控控制台信息输出，需要对jqdatasdk项目进行部分修改，详见：https://github.com/doncat99/jqdatasdk
 
