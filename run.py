@@ -334,7 +334,7 @@ def fetch_data(lock):
     print("parallel processing...")
     print("")
 
-    sleep = 1
+    sleep = 0
     batch_size = 50
 
     mp_tqdm(run, lock, shared=[sleep, batch_size], args=data_set, pc=1, reset=True)

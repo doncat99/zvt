@@ -369,7 +369,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         pass
 
     def update(self, entity_item, finished_items, trade_day, stock_detail, http_session, pbar):
-        start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, stock_detail, http_session)
+        start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, stock_detail, http_session)
         size = int(size)
 
         # no more to record
@@ -384,13 +384,17 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             return False
         else:
             if timestamps:
-                self.logger.info('entity_id:{}, result:{},{},{},{},{},{}-{}'.format(
-                    entity_item.id, size, jq_get_query_count(), trade_day[0], \
-                    start_timestamp, end_timestamp, timestamps[0], trade_day[-1]))
+                self.logger.info('{}, {}, {}, {}, {}, {}'.format(
+                    entity_item.id, size, jq_get_query_count(), 
+                    trade_day[0].strftime('%Y-%m-%d'),
+                    start_timestamp.strftime('%Y-%m-%d'),
+                    end_date.strftime('%Y-%m-%d')))
             else:
-                self.logger.info('entity_id:{}, result:{},{},{},{},{},{}'.format(
-                    entity_item.id, size, jq_get_query_count(), trade_day[0], \
-                    start_timestamp, end_timestamp, timestamps))
+                self.logger.info('{}, {}, {}, {}, {}, {}'.format(
+                    entity_item.id, size, jq_get_query_count(), 
+                    trade_day[0].strftime('%Y-%m-%d'),
+                    start_timestamp.strftime('%Y-%m-%d'),
+                    end_date.strftime('%Y-%m-%d')))
 
 
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
@@ -452,7 +456,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
 
             self.logger.info("finish recording {} for entity_id:{},latest_timestamp:{}".format(
-                self.data_schema, entity_item.id, start_timestamp))
+                self.data_schema.__class__, entity_item.id, start_timestamp))
             self.on_finish_entity(entity_item, http_session)
 
             finished_items.append(entity_item)
@@ -564,7 +568,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         # print("step 1: entity.timestamp:{}".format(entity.timestamp))
         now = now_pd_timestamp()
         if entity.timestamp and (entity.timestamp >= now):
-            return entity.timestamp, None, 0, None
+            return entity.timestamp, None, None, 0, None
 
         # get latest record
         latest_saved_record = self.get_latest_saved_record(entity=entity)
@@ -581,7 +585,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
         
         if not latest_saved_timestamp:
-            return None, None, self.default_size, None
+            return None, None, None, self.default_size, None
         
         # self.logger.info("latest_saved_timestamp:{}, tradedays:{}".format(latest_saved_timestamp, trade_day[:2]))
         trade_index = 0
@@ -594,18 +598,17 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
             end_date = stock_detail.loc[entity.id].at['end_date']
             days = date_delta(now, end_date)
             if days > 0:
-                days = date_delta(end_date, latest_saved_timestamp)
-                self.logger.info("entity:{}, size:{}, out of market at date:{}".format(entity.id, days, end_date))
-                return latest_saved_timestamp, None, days, None
+                trade_index = trade_day.index(end_date)
+                # self.logger.info("entity:{}, index:{}, out of market at date:{}, index_day:{}".format(entity.id, trade_index, end_date, trade_day[trade_index]))
         except Exception as e:
-            self.logger.info("stock detail error:{}".format(e))
+            self.logger.warning("stock detail error:{}".format(e))
 
-
-        size = evaluate_size_from_timestamp(start_timestamp=latest_saved_timestamp, level=self.level,
+        size = evaluate_size_from_timestamp(start_timestamp=latest_saved_timestamp, 
+                                            level=self.level,
                                             one_day_trading_minutes=self.one_day_trading_minutes,
                                             trade_day=trade_day[trade_index:])
 
-        return latest_saved_timestamp, None, size, None
+        return latest_saved_timestamp, None, trade_day[trade_index], size, None 
 
 
 class TimestampsDataRecorder(TimeSeriesDataRecorder):

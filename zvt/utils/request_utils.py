@@ -127,8 +127,7 @@ def jq_get_trade_days(start_date=None, end_date=None, count=None):
 # @swap_wrapper
 def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low", "close"), include_now=False, end_dt=None,
              fq_ref_date=None, df=True):
-    logger.info("HTTP GET: bars, with unit={}, fields={}, include_now={}, end_dt={}, \
-        fq_ref_date={}".format(unit, fields, include_now, end_dt, fq_ref_date))
+    logger.info("HTTP GET: bars, with unit={}, fq_ref_date={}".format(unit, fq_ref_date))
     return get_bars(security, count, unit=unit, fields=fields, include_now=include_now, 
                     end_dt=end_dt, fq_ref_date=fq_ref_date, df=df)
     
