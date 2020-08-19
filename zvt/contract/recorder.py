@@ -195,8 +195,9 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
         # not to list date yet
         # print("step 1: entity.timestamp:{}".format(entity.timestamp))
+        trade_index = 0
         if entity.timestamp and (entity.timestamp >= now_pd_timestamp()):
-            return entity.timestamp, None, 0, None
+            return entity.timestamp, None, trade_day[trade_index], 0, None
 
         
         latest_saved_record = self.get_latest_saved_record(entity=entity)
@@ -209,7 +210,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         # print("step 3: latest_timestamp:{}".format(latest_timestamp))
 
         if not latest_timestamp:
-            return self.start_timestamp, self.end_timestamp, self.default_size, None
+            return self.start_timestamp, self.end_timestamp, trade_day[trade_index], self.default_size, None
 
         # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
         if self.start_timestamp:
@@ -224,7 +225,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             now = now_pd_timestamp().replace(hour=0, minute=0, second=0)
             size = (now - latest_timestamp).days
 
-        return latest_timestamp, self.end_timestamp, size, None
+        return latest_timestamp, self.end_timestamp, trade_day[trade_index], size, None
 
     def get_data_map(self):
         """
@@ -456,7 +457,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
 
             self.logger.info("finish recording {} for entity_id:{},latest_timestamp:{}".format(
-                self.data_schema.__class__, entity_item.id, start_timestamp))
+                self.data_schema.__class__.__name__, entity_item.id, start_timestamp))
             self.on_finish_entity(entity_item, http_session)
 
             finished_items.append(entity_item)
@@ -567,8 +568,10 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         # not to list date yet
         # print("step 1: entity.timestamp:{}".format(entity.timestamp))
         now = now_pd_timestamp()
+        trade_index = 0
+
         if entity.timestamp and (entity.timestamp >= now):
-            return entity.timestamp, None, None, 0, None
+            return entity.timestamp, None, trade_day[trade_index], 0, None
 
         # get latest record
         latest_saved_record = self.get_latest_saved_record(entity=entity)
@@ -585,10 +588,10 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
         
         if not latest_saved_timestamp:
-            return None, None, None, self.default_size, None
+            return None, None, trade_day[trade_index], self.default_size, None
         
         # self.logger.info("latest_saved_timestamp:{}, tradedays:{}".format(latest_saved_timestamp, trade_day[:2]))
-        trade_index = 0
+        
         if trade_day is not None and len(trade_day) > 0:
             count_mins = count_mins_before_close_time(self.close_hour, self.close_minute)
             if count_mins > 0 and is_same_date(trade_day[0], now):
