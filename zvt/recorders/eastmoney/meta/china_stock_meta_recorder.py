@@ -40,9 +40,10 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                                          provider=self.provider)
 
     def run(self):
-        if len(multiprocessing.current_process()._identity) > 0:
+        process_identity = multiprocessing.current_process()._identity
+        if len(process_identity) > 0:
             #  The worker process tqdm bar shall start at Position 1
-            worker_id = (multiprocessing.current_process()._identity[0]-1)%self.process_index[0] + 1
+            worker_id = (process_identity[0]-1)%self.process_index[0] + 1
         else:
             worker_id = 0
         desc = "{:02d} : {}".format(worker_id, self.process_index[1])
@@ -94,7 +95,6 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 
                 self.session.commit()
                 self.logger.info('finish recording stock meta for:{}'.format(security_item.code))
-
 
                 self.process_index[2].acquire()
                 pbar.update()

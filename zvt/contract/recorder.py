@@ -476,15 +476,16 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         trade_day = StockTradeDay.query_data(order=StockTradeDay.timestamp.desc(), return_type='domain')
         trade_day = [day.timestamp for day in trade_day]
         stock_detail = StockDetail.query_data(columns=['entity_id', 'end_date'], index=['entity_id'], return_type='df')
-        # stock_detail.to_csv("aaa.csv")
 
+        process_identity = multiprocessing.current_process()._identity
+        if len(process_identity) > 0:
+            #  The worker process tqdm bar shall start at Position 1
+            worker_id = (process_identity[0]-1)%self.process_index[0] + 1
+        else:
+            worker_id = 0
+        desc = "{:02d}: {}".format(worker_id, self.process_index[1])
+        
         while True:
-            if len(multiprocessing.current_process()._identity) > 0:
-                #  The worker process tqdm bar shall start at Position 1
-                worker_id = (multiprocessing.current_process()._identity[0]-1)%self.process_index[0] + 1
-            else:
-                worker_id = 0
-            desc = "{:02d}: {}".format(worker_id, self.process_index[1])
             with tqdm(total=len(unfinished_items), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
                 for entity_item in unfinished_items:
                     try:
@@ -600,12 +601,20 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         try:
             end_date = stock_detail.loc[entity.id].at['end_date']
             days = date_delta(now, end_date)
-            if days > 0:
+        except Exception as e:
+            self.logger.warning("can't find stock in stock detail:{}".format(e))
+            days = -1
+
+        if days > 0:
+            try:
                 trade_index = trade_day.index(end_date)
                 # self.logger.info("entity:{}, index:{}, out of market at date:{}, index_day:{}".format(entity.id, trade_index, end_date, trade_day[trade_index]))
-        except Exception as e:
-            self.logger.warning("stock detail error:{}".format(e))
-
+            except Exception as _:
+                try:
+                    trade_index = trade_day.index[trade_day.index < end_date].index[0]
+                except Exception as e:
+                    self.logger.warning("can't find timestamp between trade_day:{}".format(e))
+                
         size = evaluate_size_from_timestamp(start_timestamp=latest_saved_timestamp, 
                                             level=self.level,
                                             one_day_trading_minutes=self.one_day_trading_minutes,
