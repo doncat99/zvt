@@ -3,11 +3,13 @@ import logging
 import time
 import uuid
 from typing import List
+import multiprocessing
 
 import pandas as pd
 from sqlalchemy.orm import Session
-import multiprocessing
+from tqdm import tqdm
 
+from zvt import zvt_env
 from zvt.domain import StockTradeDay, StockDetail
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_db_session, get_schema_columns
@@ -17,8 +19,6 @@ from zvt.utils.time_utils import to_pd_timestamp, TIME_FORMAT_DAY, to_time_str, 
                                  is_same_date, date_delta
 from zvt.utils.utils import fill_domain_from_dict
 from zvt.utils.request_utils import get_http_session, jq_swap_account, jq_get_query_count
-
-from tqdm import tqdm
 
 
 class Meta(type):
@@ -369,20 +369,23 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    def update(self, entity_item, finished_items, trade_day, stock_detail, http_session, pbar):
+    def update(self, entity_item, trade_day, stock_detail, http_session, pbar):
+        step1 = time.time()
+
         start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, stock_detail, http_session)
         size = int(size)
 
+        # self.logger.info("evaluate entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
+
         # no more to record
         if size == 0:
-            finished_items.append(entity_item)
-            # self.logger.info("finish recording {} for entity_id:{},latest_timestamp:{}".format(
-            #     self.data_schema, entity_item.id, start_timestamp))
+            self.logger.info("finish recording {} for entity_id: {},latest_timestamp: {}, time cost: {}".format(
+                self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
             self.on_finish_entity(entity_item, http_session)
             self.process_index[2].acquire()
             pbar.update()
             self.process_index[2].release()
-            return False
+            return True
         else:
             if timestamps:
                 self.logger.info('{}, {}, {}, {}, {}, {}'.format(
@@ -397,9 +400,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                     start_timestamp.strftime('%Y-%m-%d'),
                     end_date.strftime('%Y-%m-%d')))
 
-
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                     timestamps=timestamps, http_session=http_session)
+        
+        # self.logger.info("record entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
 
         all_duplicated = True
 
@@ -420,7 +424,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                             domain_item.id = "{}_{}".format(domain_item.id, uuid.uuid1())
                         # ignore
                         else:
-                            self.logger.info(f'ignore original duplicate item:{domain_item.id}')
+                            self.logger.info("ignore original duplicate item: {}, time cost: {}".format(domain_item.id, time.time()-step1))
 
                             self.process_index[2].acquire()
                             pbar.update()
@@ -446,32 +450,36 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 current_timestamp = pd.Timestamp.now()
                 if current_timestamp.hour >= self.close_hour:
                     if current_timestamp.minute - self.close_minute >= 5:
-                        self.logger.info('{} now is the close time:{}'.format(entity_item.id, current_timestamp))
-
+                        self.logger.info('{} now is the close time: {}'.format(entity_item.id, current_timestamp))
                         entity_finished = True
 
         # add finished entity to finished_items
         if entity_finished:
-            latest_saved_record = self.get_latest_saved_record(entity=entity_item)
-            if latest_saved_record:
-                start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
 
-            self.logger.info("finish recording {} for entity_id:{},latest_timestamp:{}".format(
-                self.data_schema.__class__.__name__, entity_item.id, start_timestamp))
             self.on_finish_entity(entity_item, http_session)
 
-            finished_items.append(entity_item)
+            if zvt_env['zvt_debug']:
+                latest_saved_record = self.get_latest_saved_record(entity=entity_item)
+                if latest_saved_record:
+                    start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
+                self.logger.info("finish recording {} for entity_id: {}, latest_timestamp: {}, time cost: {}".format(
+                    self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
+            else:
+                self.logger.info("finish recording {} for entity_id: {}, time cost: {}".format(
+                    self.data_schema.__name__, entity_item.id, time.time()-step1))
 
             self.process_index[2].acquire()
             pbar.update()
             self.process_index[2].release()
-        
-        return True
+            return True
+        else:
+            pass
+            self.logger.info("update recording {} for entity_id: {}, time cost: {}".format(
+                self.data_schema.__name__, entity_item.id, step1-time.time()))
+
+        return False
 
     def run(self):
-        finished_items = []
-        unfinished_items = self.entities
-        raising_exception = None
         http_session = get_http_session()
         trade_day = StockTradeDay.query_data(order=StockTradeDay.timestamp.desc(), return_type='domain')
         trade_day = [day.timestamp for day in trade_day]
@@ -485,13 +493,13 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             worker_id = 0
         desc = "{:02d}: {}".format(worker_id, self.process_index[1])
         
-        while True:
-            with tqdm(total=len(unfinished_items), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
-                for entity_item in unfinished_items:
+        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
+            for entity_item in self.entities:
+                while True:
                     try:
-                        now = time.time()
-                        need_sleep = self.update(entity_item, finished_items, trade_day, stock_detail, http_session, pbar)
-                        if need_sleep and (time.time() - now < self.sleeping_time):
+                        if self.update(entity_item, trade_day, stock_detail, http_session, pbar):
+                            break
+                        else:
                             # sleep for a while to next entity
                             self.sleep()
                     except Exception as e:
@@ -499,19 +507,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                         if not jq_swap_account(e):
                             self.logger.exception(
                                 "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
-                            raising_exception = e
-                            finished_items = unfinished_items
+                            raise e
                         break
 
-            unfinished_items = set(unfinished_items) - set(finished_items)
-
-            if len(unfinished_items) == 0:
-                break
-
         self.on_finish()
-
-        if raising_exception:
-            raise raising_exception
 
 
 class FixedCycleDataRecorder(TimeSeriesDataRecorder):
@@ -544,9 +543,12 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         self.one_day_trading_minutes = one_day_trading_minutes
 
     def get_latest_saved_record(self, entity):
+        # step = time.time()
         order = eval('self.data_schema.{}.desc()'.format(self.get_evaluated_time_field()))
+        # self.logger.info("get order: {}".format(time.time()-step))
 
         # 对于k线这种数据，最后一个记录有可能是没完成的，所以取两个，总是删掉最后一个数据，更新之
+        # self.logger.info("record info: {}, {}, {}".format(entity.id, order, self.level))
         records = get_data(entity_id=entity.id,
                            provider=self.provider,
                            data_schema=self.data_schema,
@@ -555,6 +557,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                            return_type='domain',
                            session=self.session,
                            level=self.level)
+        # self.logger.info("get record: {}".format(time.time()-step))
+
         if records:
             # delete unfinished kdata
             if len(records) == 2:
@@ -567,7 +571,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
 
     def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
         # not to list date yet
-        # print("step 1: entity.timestamp:{}".format(entity.timestamp))
+        # step1 = time.time()
         now = now_pd_timestamp()
         trade_index = 0
 
@@ -576,7 +580,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
 
         # get latest record
         latest_saved_record = self.get_latest_saved_record(entity=entity)
-        # print("step 2: latest_saved_record:{}".format(latest_saved_record))
+        # self.logger.info("step 1: get latest save record: {}".format(time.time()-step1))
 
         if latest_saved_record:
             # the latest saved timestamp
@@ -597,6 +601,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
             count_mins = count_mins_before_close_time(self.close_hour, self.close_minute)
             if count_mins > 0 and is_same_date(trade_day[0], now):
                 trade_index = 1
+        
+        # self.logger.info("step 2: get trade index: {}".format(time.time()-step1))
 
         try:
             end_date = stock_detail.loc[entity.id].at['end_date']
@@ -604,6 +610,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         except Exception as e:
             self.logger.warning("can't find stock in stock detail:{}".format(e))
             days = -1
+
+        # self.logger.info("step 3: get end date: {}".format(time.time()-step1))
 
         if days > 0:
             try:
@@ -619,6 +627,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                                             level=self.level,
                                             one_day_trading_minutes=self.one_day_trading_minutes,
                                             trade_day=trade_day[trade_index:])
+
+        # self.logger.info("step 4: evaluate: {}".format(time.time()-step1))
 
         return latest_saved_timestamp, None, trade_day[trade_index], size, None 
 

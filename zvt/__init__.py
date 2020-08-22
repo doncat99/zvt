@@ -62,6 +62,7 @@ def init_env(zvt_home: str) -> None:
 
     zvt_env['zvt_home'] = zvt_home
     zvt_env['data_path'] = data_path
+    zvt_env['zvt_debug'] = False
 
     # path for storing ui results
     zvt_env['ui_path'] = os.path.join(zvt_home, 'ui')

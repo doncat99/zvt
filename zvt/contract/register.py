@@ -96,18 +96,18 @@ def register_schema(providers: List[str],
         engine = get_db_engine(provider, db_name=db_name)
         inspector = Inspector.from_engine(engine)
 
-        # create index for 'timestamp','entity_id','code','report_period','updated_timestamp
+        # create index for 'id','timestamp','entity_id','code','report_period','updated_timestamp
         for table_name, table in iter(schema_base.metadata.tables.items()):
             index_column_names = [index['name'] for index in inspector.get_indexes(table_name)]
 
             logger.debug('engine:{},table:{},index:{}'.format(engine, table_name, index_column_names))
 
-            for col in ['timestamp', 'entity_id', 'code', 'report_period', 'created_timestamp', 'updated_timestamp']:
+            for col in ['id', 'timestamp', 'entity_id', 'code', 'report_period', 'created_timestamp', 'updated_timestamp']:
                 if col in table.c:
                     column = eval('table.c.{}'.format(col))
                     index_name = '{}_{}_index'.format(table_name, col)
                     if index_name not in index_column_names:
-                        index = sqlalchemy.schema.Index(index_name, column)
+                        index = sqlalchemy.schema.Index(index_name, column, unique=(col=='id'))
                         index.create(engine)
             for cols in [('timestamp', 'entity_id'), ('timestamp', 'code')]:
                 if (cols[0] in table.c) and (col[1] in table.c):
@@ -115,6 +115,5 @@ def register_schema(providers: List[str],
                     column1 = eval('table.c.{}'.format(col[1]))
                     index_name = '{}_{}_{}_index'.format(table_name, col[0], col[1])
                     if index_name not in index_column_names:
-                        index = sqlalchemy.schema.Index(index_name, column0,
-                                                        column1)
+                        index = sqlalchemy.schema.Index(index_name, column0, column1)
                         index.create(engine)

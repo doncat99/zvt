@@ -24,6 +24,13 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
         jq_auth()
 
     def record(self, entity, start, end, size, timestamps, http_session):
+        try:
+            trade_day = StockTradeDay.query_data(limit=1, order=StockTradeDay.timestamp.desc(), return_type='domain')
+            if len(trade_day) > 0:
+                start = trade_day[0]
+        except Exception as _:
+            pass
+
         df = pd.DataFrame()
         dates = jq_get_trade_days(start_date=start)
         self.logger.info(f'add dates:{dates}')
