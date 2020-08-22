@@ -301,7 +301,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                          entity_id=entity.id, filters=[self.data_schema.id == the_id], return_type='domain')
 
         if items and not self.force_update:
-            self.logger.info('ignore the data {}:{} saved before'.format(self.data_schema, the_id))
+            self.logger.info('ignore the data {}:{} saved before'.format(self.data_schema.__name__, the_id))
             return got_new_data, None
 
         if not items:
@@ -351,7 +351,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
             self.logger.info(
                 "persist {} for entity_id:{},time interval:[{},{}]".format(
-                    self.data_schema, entity.id, first_timestamp, last_timestamp))
+                    self.data_schema.__name__, entity.id, first_timestamp, last_timestamp))
 
             self.session.add_all(domain_list)
             self.session.commit()
@@ -372,6 +372,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def update(self, entity_item, trade_day, stock_detail, http_session, pbar):
         step1 = time.time()
 
+        # self.logger.info("who am i: {}".format(self))
         start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, stock_detail, http_session)
         size = int(size)
 
@@ -379,7 +380,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         # no more to record
         if size == 0:
-            self.logger.info("finish recording {} for entity_id: {},latest_timestamp: {}, time cost: {}".format(
+            self.logger.info("finish recording {} id: {},latest_timestamp: {}, time cost: {}".format(
                 self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
             self.on_finish_entity(entity_item, http_session)
             self.process_index[2].acquire()
@@ -462,10 +463,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 latest_saved_record = self.get_latest_saved_record(entity=entity_item)
                 if latest_saved_record:
                     start_timestamp = eval('latest_saved_record.{}'.format(self.get_evaluated_time_field()))
-                self.logger.info("finish recording {} for entity_id: {}, latest_timestamp: {}, time cost: {}".format(
+                self.logger.info("finish recording {} id: {}, latest_timestamp: {}, time cost: {}".format(
                     self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
             else:
-                self.logger.info("finish recording {} for entity_id: {}, time cost: {}".format(
+                self.logger.info("finish recording {} id: {}, time cost: {}".format(
                     self.data_schema.__name__, entity_item.id, time.time()-step1))
 
             self.process_index[2].acquire()
@@ -473,9 +474,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.process_index[2].release()
             return True
         else:
-            pass
-            self.logger.info("update recording {} for entity_id: {}, time cost: {}".format(
-                self.data_schema.__name__, entity_item.id, step1-time.time()))
+            self.logger.info("update recording {} id: {}, time cost: {}".format(
+                self.data_schema.__name__, entity_item.id, time.time()-step1))
 
         return False
 
@@ -660,6 +660,7 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
         raise NotImplementedError
 
     def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+        trade_index = 0
         timestamps = self.security_timestamps_map.get(entity.id)
         if not timestamps:
             timestamps = self.init_timestamps(entity, http_session)
@@ -672,7 +673,7 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
             self.security_timestamps_map[entity.id] = timestamps
 
         if not timestamps:
-            return None, None, 0, timestamps
+            return None, None, trade_day[trade_index], 0, timestamps
 
         timestamps.sort()
 
@@ -686,10 +687,10 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
             timestamps = [t for t in timestamps if t >= latest_record.timestamp]
 
             if timestamps:
-                return timestamps[0], timestamps[-1], len(timestamps), timestamps
-            return None, None, 0, None
+                return timestamps[0], timestamps[-1], trade_day[trade_index], len(timestamps), timestamps
+            return None, None, trade_day[trade_index], 0, None
 
-        return timestamps[0], timestamps[-1], len(timestamps), timestamps
+        return timestamps[0], timestamps[-1], trade_day[trade_index], len(timestamps), timestamps
 
 
 __all__ = ['Recorder', 'RecorderForEntities', 'FixedCycleDataRecorder', 'TimestampsDataRecorder',

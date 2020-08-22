@@ -94,7 +94,7 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 security_item.net_winning_rate = pct_to_float(resp_json['LotRateOn'])
                 
                 self.session.commit()
-                self.logger.info('finish recording stock meta for:{}'.format(security_item.code))
+                self.logger.info('finish recording stock meta for: {}'.format(security_item.code))
 
                 self.process_index[2].acquire()
                 pbar.update()
