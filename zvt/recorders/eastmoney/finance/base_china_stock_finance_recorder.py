@@ -95,7 +95,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
     def record(self, entity, start, end, size, timestamps, http_session):
         # different with the default timestamps handling
         param = self.generate_request_param(entity, start, end, size, timestamps, http_session)
-        self.logger.info('request param:{}'.format(param))
+        # self.logger.info('request param:{}'.format(param))
 
         return self.api_wrapper.request(http_session=http_session, url=self.url, param=param, method=self.request_method,
                                         path_fields=self.generate_path_fields(entity, http_session))

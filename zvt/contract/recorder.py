@@ -372,7 +372,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def update(self, entity_item, trade_day, stock_detail, http_session, pbar):
         step1 = time.time()
 
-        # self.logger.info("who am i: {}".format(self))
         start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, stock_detail, http_session)
         size = int(size)
 
@@ -677,13 +676,10 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
 
         timestamps.sort()
 
-        self.logger.info(
-            'entity_id:{},timestamps start:{},end:{}'.format(entity.id, timestamps[0], timestamps[-1]))
-
         latest_record = self.get_latest_saved_record(entity=entity)
 
         if latest_record:
-            self.logger.info('latest record timestamp:{}'.format(latest_record.timestamp))
+            # self.logger.info('latest record timestamp:{}'.format(latest_record.timestamp))
             timestamps = [t for t in timestamps if t >= latest_record.timestamp]
 
             if timestamps:
