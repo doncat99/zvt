@@ -387,18 +387,13 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.process_index[2].release()
             return True
         else:
-            if timestamps:
-                self.logger.info('{}, {}, {}, {}, {}, {}'.format(
-                    entity_item.id, size, jq_get_query_count(), 
-                    trade_day[0].strftime('%Y-%m-%d'),
-                    start_timestamp.strftime('%Y-%m-%d'),
-                    end_date.strftime('%Y-%m-%d')))
-            else:
-                self.logger.info('{}, {}, {}, {}, {}, {}'.format(
-                    entity_item.id, size, jq_get_query_count(), 
-                    trade_day[0].strftime('%Y-%m-%d'),
-                    start_timestamp.strftime('%Y-%m-%d'),
-                    end_date.strftime('%Y-%m-%d')))
+            start = start_timestamp.strftime('%Y-%m-%d') if start_timestamp else None
+            trade_day = trade_day[0].strftime('%Y-%m-%d') if trade_day else None
+            end = end_date.strftime('%Y-%m-%d') if end_date else None
+
+            self.logger.info('{}, {}, {}, {}, {}, {}'.format(
+                entity_item.id, size, jq_get_query_count(), 
+                trade_day, start, end))
 
         original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
                                     timestamps=timestamps, http_session=http_session)

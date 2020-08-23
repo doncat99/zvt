@@ -283,43 +283,45 @@ def run(args):
 
 def fetch_data(lock):
     data_set = [
-        [interface.get_stock_summary_data, "Stock Summary", 24],
-        [interface.get_stock_detail_data, "Stock Detail", 24], 
-        [interface.get_finance_data, "Finance Factor", 24],
-        [interface.get_balance_data, "Balance Sheet", 24*6],
-        [interface.get_income_data, "Income Statement", 24],
-        [interface.get_cashflow_data, "CashFlow Statement", 24],
+        [interface.get_top_ten_holder_data, "Top Ten Holder", 24*6],
+        # [interface.get_finance_data, "Finance Factor", 24*6],
+        # [interface.get_balance_data, "Balance Sheet", 24*6],
         [interface.get_moneyflow_data, "MoneyFlow Statement", 24],
-        [interface.get_dividend_financing_data, "Divdend Financing", 24],
-        [interface.get_dividend_detail_data, "Divdend Detail", 24],
-        [interface.get_spo_detail_data, "SPO Detail", 24],
-        [interface.get_rights_issue_detail_data, "Rights Issue Detail", 24],
-        [interface.get_margin_trading_summary_data, "Margin Trading Summary", 24],
-        [interface.get_cross_market_summary_data, "Cross Market Summary", 24],
-        [interface.get_holder_trading_data, "Holder Trading", 24],
-        [interface.get_top_ten_holder_data, "Top Ten Holder", 24],
+        # [interface.get_dividend_financing_data, "Divdend Financing", 24],
+        # [interface.get_dividend_detail_data, "Divdend Detail", 24],
+        # [interface.get_spo_detail_data, "SPO Detail", 24],
+        # [interface.get_rights_issue_detail_data, "Rights Issue Detail", 24],
+        # [interface.get_holder_trading_data, "Holder Trading", 24],
         [interface.get_top_ten_tradable_holder_data, "Top Ten Tradable Holder", 24],
-        [interface.get_stock_valuation_data, "Stock Valuation", 24],
-        [interface.get_etf_stock_data, "ETF Stock", 24],
-        [interface.get_etf_valuation_data, "ETF Valuation", 24],
+        # [interface.get_etf_valuation_data, "ETF Valuation", 24],
+
+        # [interface.get_stock_summary_data, "Stock Summary", 24],  
+        # [interface.get_stock_detail_data, "Stock Detail", 24], 
+        # [interface.get_income_data, "Income Statement", 24*6],
+        # [interface.get_cashflow_data, "CashFlow Statement", 24],
+        # [interface.get_stock_valuation_data, "Stock Valuation", 24],
+        # [interface.get_etf_stock_data, "ETF Stock", 24],
+        # [interface.get_margin_trading_summary_data, "Margin Trading Summary", 24],
+        # [interface.get_cross_market_summary_data, "Cross Market Summary", 24],
+        
         
         # [interface.get_stock_1d_k_data, "Stock Daily K-Data", 24], 
         # [interface.get_stock_1d_hfq_k_data, "Stock Daily HFQ K-Data", 24],
         # [interface.get_stock_1w_k_data, "Stock Weekly K-Data", 24],
-        # [interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data", 24],
-        # [interface.get_stock_1mon_k_data, "Stock Monthly K-Data", 24], 
-        # [interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data", 24],
-        # [interface.get_stock_1m_k_data, "Stock 1 mins K-Data", 24], 
-        # [interface.get_stock_1m_hfq_k_data, "Stock 1 mins HFQ K-Data", 24],
-        # [interface.get_stock_5m_k_data, "Stock 5 mins K-Data", 24], 
-        # [interface.get_stock_5m_hfq_k_data, "Stock 5 mins HFQ K-Data", 24],
-        # [interface.get_stock_15m_k_data, "Stock 15 mins K-Data", 24], 
-        # [interface.get_stock_15m_hfq_k_data, "Stock 15 mins HFQ K-Data", 24],
-        # [interface.get_stock_30m_k_data, "Stock 30 mins K-Data", 24], 
-        # [interface.get_stock_30m_hfq_k_data, "Stock Daily 30 mins K-Data", 24],
-        # [interface.get_stock_1h_k_data, "Stock 4 hours K-Data", 24], 
-        # [interface.get_stock_1h_hfq_k_data, "Stock 4 hours HFQ K-Data", 24],
-        # [interface.get_etf_1d_k_data, "ETF Daily K-Data", 24],
+        [interface.get_stock_1w_hfq_k_data, "Stock Weekly HFQ K-Data", 24],
+        [interface.get_stock_1mon_k_data, "Stock Monthly K-Data", 24], 
+        [interface.get_stock_1mon_hfq_k_data, "Stock Monthly HFQ K-Data", 24],
+        [interface.get_stock_1m_k_data, "Stock 1 mins K-Data", 24], 
+        [interface.get_stock_1m_hfq_k_data, "Stock 1 mins HFQ K-Data", 24],
+        [interface.get_stock_5m_k_data, "Stock 5 mins K-Data", 24], 
+        [interface.get_stock_5m_hfq_k_data, "Stock 5 mins HFQ K-Data", 24],
+        [interface.get_stock_15m_k_data, "Stock 15 mins K-Data", 24], 
+        [interface.get_stock_15m_hfq_k_data, "Stock 15 mins HFQ K-Data", 24],
+        [interface.get_stock_30m_k_data, "Stock 30 mins K-Data", 24], 
+        [interface.get_stock_30m_hfq_k_data, "Stock Daily 30 mins K-Data", 24],
+        [interface.get_stock_1h_k_data, "Stock 4 hours K-Data", 24], 
+        [interface.get_stock_1h_hfq_k_data, "Stock 4 hours HFQ K-Data", 24],
+        [interface.get_etf_1d_k_data, "ETF Daily K-Data", 24],
     ]
 
     print("*"*60)
@@ -337,7 +339,7 @@ def fetch_data(lock):
     sleep = 0
     batch_size = 50
 
-    mp_tqdm(run, lock, shared=[sleep, batch_size], args=data_set, pc=1, reset=True)
+    mp_tqdm(run, lock, shared=[sleep, batch_size], args=data_set, pc=3, reset=True)
 
 
 if __name__ == '__main__':

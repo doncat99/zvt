@@ -90,8 +90,10 @@ def jq_swap_account(error):
 
 
 def jq_get_query_count():
-    count = get_query_count()
-    return count['spare']
+    if is_auth():
+        count = get_query_count()
+        return count['spare']
+    return 0
 
 # @swap_wrapper    
 def jq_query(*args, **kwargs):

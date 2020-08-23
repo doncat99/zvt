@@ -79,12 +79,12 @@ def call_eastmoney_api(http_session, url=None, method='post', param=None, path_f
 
     try:
         origin_result = resp.json().get('Result')
-        # if origin_result is None:
-        #     origin_result = {}
+        if origin_result is None:
+            origin_result = {}
     except Exception as e:
         logger.exception('code:{},content:{}'.format(resp.status_code, resp.text))
         raise e
-        # origin_result = {}
+        origin_result = {}
 
     if path_fields:
         the_data = get_from_path_fields(origin_result, path_fields)
@@ -128,7 +128,7 @@ class BaseEastmoneyRecorder(TimestampsDataRecorder):
                 param = self.generate_request_param(entity_item, start, end, size, the_timestamp)
                 tmp_list = self.api_wrapper.request(http_session, url=self.url, param=param, method=self.request_method,
                                                     path_fields=self.path_fields)
-                self.logger.info("record {} for entity_id:{},timestamp:{}".format(
+                self.logger.info("record {} for id: {}, timestamp: {}".format(
                     self.data_schema, entity_item.id, the_timestamp))
                 # fill timestamp field
                 for tmp in tmp_list:
@@ -188,20 +188,20 @@ class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder):
         }
         return call_eastmoney_api(http_session, self.page_url, param=param, path_fields=['TotalCount'])
 
-    def evaluate_start_end_size_timestamps(self, entity, http_session):
+    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
         remote_count = self.get_remote_count(entity, http_session)
 
         if remote_count == 0:
-            return None, None, 0, None
+            return None, None, None, 0, None
 
         # get local count
         local_count = get_data_count(data_schema=self.data_schema, session=self.session,
                                      filters=[self.data_schema.entity_id == entity.id])
         # FIXME:the > case
         if local_count >= remote_count:
-            return None, None, 0, None
+            return None, None, None, 0, None
 
-        return None, None, remote_count - local_count, None
+        return None, None, None, remote_count - local_count, None
 
     def generate_request_param(self, security_item, start, end, size, timestamp):
         return {
@@ -230,7 +230,7 @@ class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder):
         _, result = self.generate_domain(security_item, results[0])
         return result
 
-    def evaluate_start_end_size_timestamps(self, entity, http_session):
+    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
         # get latest record
         latest_record = get_data(entity_id=entity.id,
                                  provider=self.provider,
@@ -242,11 +242,11 @@ class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder):
             remote_record = self.get_remote_latest_record(entity, http_session)
             if not remote_record or (
                     latest_record[0].id == remote_record.id):
-                return None, None, 0, None
+                return None, None, None, 0, None
             else:
-                return None, None, 10, None
+                return None, None, None, 10, None
 
-        return None, None, 1000, None
+        return None, None, None, 1000, None
 
     def generate_request_param(self, security_item, start, end, size, timestamp):
         return {
