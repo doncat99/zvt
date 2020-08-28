@@ -43,8 +43,7 @@ class MarginTradingRecorder(TimeSeriesDataRecorder):
             df['id'] = df[['entity_id', 'timestamp']].apply(
                 lambda se: "{}_{}".format(se['entity_id'], to_time_str(se['timestamp'], fmt=TIME_FORMAT_DAY)), axis=1)
 
-            print(df)
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
         return None
 

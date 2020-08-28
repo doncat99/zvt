@@ -78,6 +78,6 @@ class StockMoneyFlow(MoneyFlowBase, Mixin):
     net_small_inflow_rate = Column(Float)
 
 
-register_schema(providers=['sina'], db_name='money_flow', schema_base=MoneyFlowBase)
+register_schema(regions=['chn', 'us'], providers=['sina'], db_name='money_flow', schema_base=MoneyFlowBase)
 
 __all__ = ['BlockMoneyFlow', 'StockMoneyFlow']

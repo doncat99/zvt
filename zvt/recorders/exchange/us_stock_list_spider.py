@@ -46,10 +46,10 @@ class ExchangeUsStockListRecorder(Recorder):
             df = df.drop_duplicates(subset=('id'), keep='last')
 
             # persist StockDetail
-            df_to_db(df=df, data_schema=StockDetail, provider=self.provider, force_update=False)
+            df_to_db(df=df, region='us', data_schema=StockDetail, provider=self.provider, force_update=False)
 
             df.drop(['industry','sector'], axis=1, inplace=True)
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=False)
+            df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=False)
 
             self.logger.info("persist stock list successs")
 

@@ -12,6 +12,6 @@ class Index1dKdata(KdataBase, IndexKdataCommon):
     __tablename__ = 'index_1d_kdata'
 
 
-register_schema(providers=['sina'], db_name='index_1d_kdata', schema_base=KdataBase)
+register_schema(regions=['chn', 'us'], providers=['sina'], db_name='index_1d_kdata', schema_base=KdataBase)
 
 __all__ = ['Index1dKdata']

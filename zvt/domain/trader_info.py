@@ -98,6 +98,6 @@ class Order(TraderBase, Mixin):
     level = Column(String(length=32))
 
 
-register_schema(providers=['zvt'], db_name='trader_info', schema_base=TraderBase)
+register_schema(regions=['chn', 'us'], providers=['zvt'], db_name='trader_info', schema_base=TraderBase)
 
 __all__ = ['TraderInfo', 'AccountStats', 'Position', 'Order']

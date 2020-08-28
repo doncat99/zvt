@@ -32,4 +32,4 @@ class Stock1dMaFactor(Stock1dMaFactorBase, Mixin):
     ma250 = Column(Float)
 
 
-register_schema(providers=['zvt'], db_name='stock_1d_ma_factor', schema_base=Stock1dMaFactorBase)
+register_schema(regions=['chn', 'us'], providers=['zvt'], db_name='stock_1d_ma_factor', schema_base=Stock1dMaFactorBase)

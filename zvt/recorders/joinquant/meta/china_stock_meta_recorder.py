@@ -46,9 +46,9 @@ class JqChinaStockRecorder(BaseJqChinaMetaRecorder):
     def run(self):
         # 抓取股票列表
         df_stock = self.to_zvt_entity(jq_get_all_securities(['stock']), entity_type='stock')
-        df_to_db(df_stock, data_schema=Stock, provider=self.provider, force_update=self.force_update)
+        df_to_db(df_stock, region='chn', data_schema=Stock, provider=self.provider, force_update=self.force_update)
         # persist StockDetail too
-        df_to_db(df=df_stock, data_schema=StockDetail, provider=self.provider, force_update=self.force_update)
+        df_to_db(df=df_stock, region='chn', data_schema=StockDetail, provider=self.provider, force_update=self.force_update)
 
         # self.logger.info(df_stock)
         self.logger.info("persist stock list success")
@@ -62,7 +62,7 @@ class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
     def run(self):
         # 抓取etf列表
         df_index = self.to_zvt_entity(jq_get_all_securities(['etf']), entity_type='etf', category='etf')
-        df_to_db(df_index, data_schema=Etf, provider=self.provider, force_update=self.force_update)
+        df_to_db(df_index, region='chn', data_schema=Etf, provider=self.provider, force_update=self.force_update)
 
         # self.logger.info(df_index)
         self.logger.info("persist etf list success")
@@ -112,7 +112,7 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
             df['report_date'] = pd.to_datetime(df['period_end'])
             df['report_period'] = df['report_type'].apply(lambda x: jq_to_report_period(x))
 
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
             # self.logger.info(df.tail())
             self.logger.info(f"persist etf {entity.code} portfolio success")

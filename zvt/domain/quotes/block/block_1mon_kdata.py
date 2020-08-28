@@ -12,6 +12,6 @@ class Block1monKdata(KdataBase, BlockKdataCommon):
     __tablename__ = 'block_1mon_kdata'
 
 
-register_schema(providers=['eastmoney'], db_name='block_1mon_kdata', schema_base=KdataBase)
+register_schema(regions=['chn', 'us'], providers=['eastmoney'], db_name='block_1mon_kdata', schema_base=KdataBase)
 
 __all__ = ['Block1monKdata']

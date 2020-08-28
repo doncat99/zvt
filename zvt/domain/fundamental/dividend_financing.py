@@ -69,6 +69,6 @@ class RightsIssueDetail(DividendFinancingBase, Mixin):
     rights_raising_fund = Column(Float)
 
 
-register_schema(providers=['eastmoney'], db_name='dividend_financing', schema_base=DividendFinancingBase)
+register_schema(regions=['chn', 'us'], providers=['eastmoney'], db_name='dividend_financing', schema_base=DividendFinancingBase)
 
 __all__ = ['DividendFinancing', 'DividendDetail', 'SpoDetail', 'RightsIssueDetail']

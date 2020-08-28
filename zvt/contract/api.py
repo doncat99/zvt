@@ -18,6 +18,16 @@ from zvt.utils.pd_utils import pd_is_not_null, index_df
 from zvt.utils.time_utils import to_pd_timestamp
 
 
+def build_engine(region, data_path, provider, db_name):
+    if "db_engine" in zvt_env and zvt_env['db_engine'] == "postgresql":
+        print("engine added require:{}_{}_{}".format(region, provider, db_name))
+        db_engine = None
+    else:
+        db_path = os.path.join(data_path, '{}_{}_{}.db?check_same_thread=False'.format(region, provider, db_name))
+        db_engine = create_engine('sqlite:///' + db_path, echo=False)
+
+    return db_engine
+
 def get_db_name(data_schema: DeclarativeMeta) -> str:
     """
     get db name of the domain schema
@@ -32,7 +42,8 @@ def get_db_name(data_schema: DeclarativeMeta) -> str:
             return db_name
 
 
-def get_db_engine(provider: str,
+def get_db_engine(region: str,
+                  provider: str,
                   db_name: str = None,
                   data_schema: object = None,
                   data_path: str = zvt_env['data_path']) -> Engine:
@@ -53,13 +64,11 @@ def get_db_engine(provider: str,
     if data_schema:
         db_name = get_db_name(data_schema=data_schema)
 
-    db_path = os.path.join(data_path, '{}_{}.db?check_same_thread=False'.format(provider, db_name))
-
-    engine_key = '{}_{}'.format(provider, db_name)
+    engine_key = '{}_{}_{}'.format(region, provider, db_name)
     db_engine = zvt_context.db_engine_map.get(engine_key)
     if not db_engine:
-        db_engine = create_engine('sqlite:///' + db_path, echo=False)
-        zvt_context.db_engine_map[engine_key] = db_engine
+        db_engine = build_engine(region, data_path, provider, db_name)
+        if db_engine: zvt_context.db_engine_map[engine_key] = db_engine
     return db_engine
 
 
@@ -386,6 +395,7 @@ def get_entity_code(entity_id: str):
 
 
 def df_to_db(df: pd.DataFrame,
+             region: str,
              data_schema: DeclarativeMeta,
              provider: str,
              force_update: bool = False,
@@ -409,7 +419,7 @@ def df_to_db(df: pd.DataFrame,
     if not pd_is_not_null(df):
         return
 
-    db_engine = get_db_engine(provider, data_schema=data_schema)
+    db_engine = get_db_engine(region, provider, data_schema=data_schema)
 
     schema_cols = get_schema_columns(data_schema)
     cols = set(df.columns.tolist()) & set(schema_cols)

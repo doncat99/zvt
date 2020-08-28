@@ -70,7 +70,7 @@ class ChinaETFListSpider(Recorder):
         df = df.dropna(axis=0, how='any')
         df = df.drop_duplicates(subset='id', keep='last')
 
-        df_to_db(df=df, data_schema=Etf, provider=self.provider, force_update=False)
+        df_to_db(df=df, region='chn', data_schema=Etf, provider=self.provider, force_update=False)
 
     def download_sh_etf_component(self, df: pd.DataFrame, http_session):
         """
@@ -107,7 +107,7 @@ class ChinaETFListSpider(Recorder):
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{etf_id}_{x}')
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
+            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider)
             self.logger.info(f'{etf["FUND_NAME"]} - {etf_code} 成分股抓取完成...')
 
             self.sleep()
@@ -156,7 +156,7 @@ class ChinaETFListSpider(Recorder):
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{etf_id}_{x}')
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
+            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider)
             self.logger.info(f'{etf["证券简称"]} - {etf_code} 成分股抓取完成...')
 
             self.sleep()

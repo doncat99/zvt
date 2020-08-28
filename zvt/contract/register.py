@@ -40,7 +40,8 @@ def register_entity(entity_type: str = None):
     return register
 
 
-def register_schema(providers: List[str],
+def register_schema(regions: List[str],
+                    providers: List[str],
                     db_name: str,
                     schema_base: DeclarativeMeta,
                     entity_type: str = 'stock'):
@@ -75,48 +76,51 @@ def register_schema(providers: List[str],
 
     zvt_context.dbname_map_schemas[db_name] = schemas
 
-    for provider in providers:
-        # track in in  _providers
-        if provider not in zvt_context.providers:
-            zvt_context.providers.append(provider)
+    for region in regions:
+        for provider in providers:
+            # track in in  _providers
+            if provider not in zvt_context.providers:
+                zvt_context.providers.append(provider)
 
-        if not zvt_context.provider_map_dbnames.get(provider):
-            zvt_context.provider_map_dbnames[provider] = []
-        zvt_context.provider_map_dbnames[provider].append(db_name)
-        zvt_context.dbname_map_base[db_name] = schema_base
+            if not zvt_context.provider_map_dbnames.get(provider):
+                zvt_context.provider_map_dbnames[provider] = []
+            zvt_context.provider_map_dbnames[provider].append(db_name)
+            zvt_context.dbname_map_base[db_name] = schema_base
 
-        # create the db & table
-        engine = get_db_engine(provider, db_name=db_name)
-        schema_base.metadata.create_all(engine)
+            # create the db & table
+            engine = get_db_engine(region, provider, db_name=db_name)
+            if engine is None: continue
+            schema_base.metadata.create_all(engine)
 
-        session_fac = get_db_session_factory(provider, db_name=db_name)
-        session_fac.configure(bind=engine)
+            session_fac = get_db_session_factory(provider, db_name=db_name)
+            session_fac.configure(bind=engine)
 
-    for provider in providers:
-        engine = get_db_engine(provider, db_name=db_name)
-        inspector = Inspector.from_engine(engine)
+        for provider in providers:
+            engine = get_db_engine(region, provider, db_name=db_name)
+            if engine is None: continue
+            inspector = Inspector.from_engine(engine)
 
-        # create index for 'id','timestamp','entity_id','code','report_period','updated_timestamp
-        for table_name, table in iter(schema_base.metadata.tables.items()):
-            index_column_names = [index['name'] for index in inspector.get_indexes(table_name)]
-            
+            # create index for 'id','timestamp','entity_id','code','report_period','updated_timestamp
+            for table_name, table in iter(schema_base.metadata.tables.items()):
+                index_column_names = [index['name'] for index in inspector.get_indexes(table_name)]
+                
 
-            logger.debug('engine:{},table:{},index:{}'.format(engine, table_name, index_column_names))
+                logger.debug('engine:{},table:{},index:{}'.format(engine, table_name, index_column_names))
 
-            for col in ['id', 'timestamp', 'entity_id', 'code', 'report_period', 'created_timestamp', 'updated_timestamp']:
-                if col in table.c:
-                    index_name = '{}_{}_index'.format(table_name, col)
-                    if index_name not in index_column_names:
-                        column = eval('table.c.{}'.format(col))
-                        # if col == 'timestamp': column = '-' + column
-                        # index = sqlalchemy.schema.Index(index_name, column, unique=(col=='id'))
-                        index = sqlalchemy.schema.Index(index_name, column)
-                        index.create(engine)
-            for cols in [('timestamp', 'entity_id'), ('timestamp', 'code')]:
-                if (cols[0] in table.c) and (col[1] in table.c):
-                    index_name = '{}_{}_{}_index'.format(table_name, col[0], col[1])
-                    if index_name not in index_column_names:
-                        column0 = eval('table.c.{}'.format(col[0]))
-                        column1 = eval('table.c.{}'.format(col[1]))
-                        index = sqlalchemy.schema.Index(index_name, column0, column1)
-                        index.create(engine)
+                for col in ['id', 'timestamp', 'entity_id', 'code', 'report_period', 'created_timestamp', 'updated_timestamp']:
+                    if col in table.c:
+                        index_name = '{}_{}_index'.format(table_name, col)
+                        if index_name not in index_column_names:
+                            column = eval('table.c.{}'.format(col))
+                            # if col == 'timestamp': column = '-' + column
+                            # index = sqlalchemy.schema.Index(index_name, column, unique=(col=='id'))
+                            index = sqlalchemy.schema.Index(index_name, column)
+                            index.create(engine)
+                for cols in [('timestamp', 'entity_id'), ('timestamp', 'code')]:
+                    if (cols[0] in table.c) and (col[1] in table.c):
+                        index_name = '{}_{}_{}_index'.format(table_name, col[0], col[1])
+                        if index_name not in index_column_names:
+                            column0 = eval('table.c.{}'.format(col[0]))
+                            column1 = eval('table.c.{}'.format(col[1]))
+                            index = sqlalchemy.schema.Index(index_name, column0, column1)
+                            index.create(engine)

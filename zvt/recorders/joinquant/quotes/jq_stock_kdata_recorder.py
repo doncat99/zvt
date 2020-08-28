@@ -137,7 +137,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
 
             df['id'] = df[['entity_id', 'timestamp']].apply(generate_kdata_id, axis=1)
 
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
         return None
 

@@ -61,4 +61,4 @@ class Stock1dZenFactor(Stock1dZenFactorBase, Mixin):
     zen_state = Column(String(length=32))
 
 
-register_schema(providers=['zvt'], db_name='stock_1d_zen_factor', schema_base=Stock1dZenFactorBase)
+register_schema(regions=['chn', 'us'], providers=['zvt'], db_name='stock_1d_zen_factor', schema_base=Stock1dZenFactorBase)

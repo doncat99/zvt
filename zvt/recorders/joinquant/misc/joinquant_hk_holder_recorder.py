@@ -88,7 +88,7 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
                                                  to_time_str(se['timestamp'], fmt=TIME_FORMAT_DAY)),
                     axis=1)
 
-                df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+                df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
 
 __all__ = ['JoinquantHkHolderRecorder']

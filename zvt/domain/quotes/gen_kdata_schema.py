@@ -10,7 +10,7 @@ from zvt.contract import IntervalLevel
 # 1)name:{entity_type}{level}Kdata
 # 2)one db file for one schema
 
-def gen_kdata_schema(pkg: str, providers: List[str], entity_type: str, levels: List[IntervalLevel],
+def gen_kdata_schema(pkg: str, regions: List[str], providers: List[str], entity_type: str, levels: List[IntervalLevel],
                      adjust_types: List[AdjustType] = [None]):
     tables = []
     for level in levels:
@@ -49,7 +49,7 @@ class {class_name}(KdataBase, {kdata_common}):
     __tablename__ = '{table_name}'
 
 
-register_schema(providers={providers}, db_name='{table_name}', schema_base=KdataBase)
+register_schema(regions={regions}, providers={providers}, db_name='{table_name}', schema_base=KdataBase)
 
 __all__ = ['{class_name}']
 '''
@@ -71,17 +71,17 @@ __all__ = ['{class_name}']
 
 if __name__ == '__main__':
     # 股票行情
-    gen_kdata_schema(pkg='zvt', providers=['joinquant'], entity_type='stock',
+    gen_kdata_schema(pkg='zvt', regions=['chn', 'us'], providers=['joinquant'], entity_type='stock',
                      levels=[level for level in IntervalLevel if level != IntervalLevel.LEVEL_TICK],
                      adjust_types=[None, AdjustType.hfq])
 
     # 板块行情
-    gen_kdata_schema(pkg='zvt', providers=['eastmoney'], entity_type='block',
+    gen_kdata_schema(pkg='zvt', regions=['chn', 'us'], providers=['eastmoney'], entity_type='block',
                      levels=[IntervalLevel.LEVEL_1DAY, IntervalLevel.LEVEL_1WEEK, IntervalLevel.LEVEL_1MON])
 
     # etf行情
-    gen_kdata_schema(pkg='zvt', providers=['sina'], entity_type='etf',
+    gen_kdata_schema(pkg='zvt', regions=['chn', 'us'], providers=['sina'], entity_type='etf',
                      levels=[IntervalLevel.LEVEL_1DAY])
     # 指数行情
-    gen_kdata_schema(pkg='zvt', providers=['sina'], entity_type='index',
+    gen_kdata_schema(pkg='zvt', regions=['chn', 'us'], providers=['sina'], entity_type='index',
                      levels=[IntervalLevel.LEVEL_1DAY])

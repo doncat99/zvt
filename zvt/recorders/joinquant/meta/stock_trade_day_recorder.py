@@ -38,7 +38,7 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
         df['id'] = [to_time_str(date) for date in dates]
         df['entity_id'] = 'stock_sz_000001'
 
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
 
 __all__ = ['StockTradeDayRecorder']

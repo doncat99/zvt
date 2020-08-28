@@ -110,18 +110,27 @@ CHINA_STOCK_MAIN_INDEX = [{'id': 'index_cn_000001',
                           ]
 
 
-def init_main_index(provider='exchange'):
+def init_main_index(region, provider='exchange'):
     from zvt.utils.time_utils import to_pd_timestamp
     import pandas as pd
     from zvt.contract.api import df_to_db
     from zvt.domain import Index
 
-    for item in CHINA_STOCK_MAIN_INDEX:
-        item['timestamp'] = to_pd_timestamp(item['timestamp'])
-    df = pd.DataFrame(CHINA_STOCK_MAIN_INDEX)
-    # print(df)
-    df_to_db(df=df, data_schema=Index, provider=provider, force_update=False)
+    if region == 'chn':
+        for item in CHINA_STOCK_MAIN_INDEX:
+            item['timestamp'] = to_pd_timestamp(item['timestamp'])
+        df = pd.DataFrame(CHINA_STOCK_MAIN_INDEX)
+    elif region == 'us':
+        df = pd.DataFrame()
+        print("US region index not initialized, in file: init_main_index")
+    else:
+        print("index not initialized, in file: init_main_index")
+        df = pd.DataFrame()
+
+    df_to_db(df=df, region=region, data_schema=Index, provider=provider, force_update=False)
 
 
-init_main_index(provider='joinquant')
-init_main_index(provider='exchange')
+
+
+
+

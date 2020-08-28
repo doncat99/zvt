@@ -110,7 +110,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{index_id}_{x}')
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider, force_update=True)
+            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=True)
             self.logger.info(f'{index["name"]} - {index_code} 成分股抓取完成...')
 
             self.sleep()
@@ -161,7 +161,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{index_id}_{x}')
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
+            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider)
             self.logger.info(f'{index["name"]} - {index_code} 成分股抓取完成...')
 
             self.sleep()
@@ -241,7 +241,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{index_id}_{x}')
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
+            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider)
             self.logger.info(f'{index["name"]} - {index_code} 成分股抓取完成...')
 
             self.sleep()
@@ -257,7 +257,7 @@ class ChinaIndexListSpider(Recorder):
         df = df.dropna(axis=0, how='any')
         df = df.drop_duplicates(subset='id', keep='last')
 
-        df_to_db(df=df, data_schema=Index, provider=self.provider, force_update=False)
+        df_to_db(df=df, region='chn', data_schema=Index, provider=self.provider, force_update=False)
 
 
 __all__ = ['ChinaIndexListSpider']

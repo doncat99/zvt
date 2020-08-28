@@ -93,6 +93,6 @@ class InstitutionalInvestorHolder(HolderBase, Mixin):
     shareholding_ratio = Column(Float)
 
 
-register_schema(providers=['eastmoney', 'joinquant'], db_name='holder', schema_base=HolderBase)
+register_schema(regions=['chn', 'us'], providers=['eastmoney', 'joinquant'], db_name='holder', schema_base=HolderBase)
 
 __all__ = ['TopTenTradableHolder', 'TopTenHolder', 'InstitutionalInvestorHolder', 'HkHolder']

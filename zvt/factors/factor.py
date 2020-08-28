@@ -270,8 +270,8 @@ class Factor(DataReader, DataListener):
         """
         pass
 
-    def persist_factor(self):
-        df_to_db(df=self.factor_df, data_schema=self.factor_schema, provider='zvt', force_update=False)
+    def persist_factor(self, region):
+        df_to_db(df=self.factor_df, region=region, data_schema=self.factor_schema, provider='zvt', force_update=False)
 
 
 class FilterFactor(Factor):
