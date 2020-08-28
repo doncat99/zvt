@@ -3,6 +3,7 @@ from zvt.recorders.eastmoney import *
 from zvt.recorders.exchange import *
 from zvt.recorders.joinquant import *
 from zvt.recorders.sina import *
+from zvt.recorders.yahoo import *
 
 CHINA_STOCK_MAIN_INDEX = [{'id': 'index_cn_000001',
                            'entity_id': 'index_cn_000001',
