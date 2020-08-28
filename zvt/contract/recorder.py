@@ -197,7 +197,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         # print("step 1: entity.timestamp:{}".format(entity.timestamp))
         trade_index = 0
         if entity.timestamp and (entity.timestamp >= now_pd_timestamp()):
-            return entity.timestamp, None, trade_day[trade_index], 0, None
+            trade = trade_day[trade_index] if len(trade_day) > 0 else None
+            return entity.timestamp, None, trade, 0, None
 
         
         latest_saved_record = self.get_latest_saved_record(entity=entity)
@@ -210,7 +211,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         # print("step 3: latest_timestamp:{}".format(latest_timestamp))
 
         if not latest_timestamp:
-            return self.start_timestamp, self.end_timestamp, trade_day[trade_index], self.default_size, None
+            trade = trade_day[trade_index] if len(trade_day) > 0 else None
+            return self.start_timestamp, self.end_timestamp, trade, self.default_size, None
 
         # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
         if self.start_timestamp:
@@ -225,7 +227,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             now = now_pd_timestamp().replace(hour=0, minute=0, second=0)
             size = (now - latest_timestamp).days
 
-        return latest_timestamp, self.end_timestamp, trade_day[trade_index], size, None
+        trade = trade_day[trade_index] if len(trade_day) > 0 else None
+        return latest_timestamp, self.end_timestamp, trade, size, None
 
     def get_data_map(self):
         """
@@ -570,7 +573,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         trade_index = 0
 
         if entity.timestamp and (entity.timestamp >= now):
-            return entity.timestamp, None, trade_day[trade_index], 0, None
+            trade = trade_day[trade_index] if len(trade_day) > 0 else None
+            return entity.timestamp, None, trade, 0, None
 
         # get latest record
         latest_saved_record = self.get_latest_saved_record(entity=entity)
@@ -587,7 +591,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         # print("step 4: start_timestamp:{}, end_timestamp:{}".format(self.start_timestamp, self.end_timestamp))
         
         if not latest_saved_timestamp:
-            return None, None, trade_day[trade_index], self.default_size, None
+            trade = trade_day[trade_index] if len(trade_day) > 0 else None
+            return None, None, trade, self.default_size, None
         
         # self.logger.info("latest_saved_timestamp:{}, tradedays:{}".format(latest_saved_timestamp, trade_day[:2]))
         
@@ -623,8 +628,8 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                                             trade_day=trade_day[trade_index:])
 
         # self.logger.info("step 4: evaluate: {}".format(time.time()-step1))
-
-        return latest_saved_timestamp, None, trade_day[trade_index], size, None 
+        trade = trade_day[trade_index] if len(trade_day) > 0 else None
+        return latest_saved_timestamp, None, trade, size, None 
 
 
 class TimestampsDataRecorder(TimeSeriesDataRecorder):
@@ -667,21 +672,23 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
             self.security_timestamps_map[entity.id] = timestamps
 
         if not timestamps:
-            return None, None, trade_day[trade_index], 0, timestamps
+            trade = trade_day[trade_index] if len(trade_day) > 0 else None
+            return None, None, trade, 0, timestamps
 
         timestamps.sort()
 
         latest_record = self.get_latest_saved_record(entity=entity)
+        trade = trade_day[trade_index] if len(trade_day) > 0 else None
 
         if latest_record:
             # self.logger.info('latest record timestamp:{}'.format(latest_record.timestamp))
             timestamps = [t for t in timestamps if t >= latest_record.timestamp]
 
             if timestamps:
-                return timestamps[0], timestamps[-1], trade_day[trade_index], len(timestamps), timestamps
-            return None, None, trade_day[trade_index], 0, None
+                return timestamps[0], timestamps[-1], trade, len(timestamps), timestamps
+            return None, None, trade, 0, None
 
-        return timestamps[0], timestamps[-1], trade_day[trade_index], len(timestamps), timestamps
+        return timestamps[0], timestamps[-1], trade, len(timestamps), timestamps
 
 
 __all__ = ['Recorder', 'RecorderForEntities', 'FixedCycleDataRecorder', 'TimestampsDataRecorder',

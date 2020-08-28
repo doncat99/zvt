@@ -20,7 +20,7 @@ from zvt.utils.time_utils import to_pd_timestamp
 
 def build_engine(region, data_path, provider, db_name):
     if "db_engine" in zvt_env and zvt_env['db_engine'] == "postgresql":
-        print("engine added require:{}_{}_{}".format(region, provider, db_name))
+        # print("engine added require:{}_{}_{}".format(region, provider, db_name))
         db_engine = None
     else:
         db_path = os.path.join(data_path, '{}_{}_{}.db?check_same_thread=False'.format(region, provider, db_name))

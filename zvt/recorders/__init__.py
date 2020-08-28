@@ -127,10 +127,13 @@ def init_main_index(region, provider='exchange'):
         print("index not initialized, in file: init_main_index")
         df = pd.DataFrame()
 
-    df_to_db(df=df, region=region, data_schema=Index, provider=provider, force_update=False)
+    try:
+        df_to_db(df=df, region=region, data_schema=Index, provider=provider, force_update=False)
+    except Exception as _:
+        pass
 
-
-
-
+regions = ['chn']
+for region in regions:
+    init_main_index(region)
 
 
