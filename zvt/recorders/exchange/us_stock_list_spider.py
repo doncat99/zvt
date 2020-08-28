@@ -9,7 +9,7 @@ from zvt.contract.recorder import Recorder
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
 from zvt.domain import Stock, StockDetail
-from zvt.recorders.consts import DEFAULT_SH_HEADER, DEFAULT_SZ_HEADER
+from zvt.recorders.consts import YAHOO_STOCK_LIST_HEADER
 
 
 class ExchangeUsStockListRecorder(Recorder):
@@ -23,7 +23,7 @@ class ExchangeUsStockListRecorder(Recorder):
 
         for exchange in exchanges:
             url = 'https://old.nasdaq.com/screening/companies-by-name.aspx?letter=0&render=download&exchange={}'.format(exchange)
-            resp = request_get(http_session, url)
+            resp = request_get(http_session, url, headers=YAHOO_STOCK_LIST_HEADER)
             self.download_stock_list(response=resp, exchange=exchange)
 
 
