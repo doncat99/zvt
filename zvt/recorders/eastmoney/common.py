@@ -25,14 +25,14 @@ def get_fc(security_item):
 
 
 def get_company_type(stock_domain: StockDetail):
-    if stock_domain.industries is None:
+    if stock_domain.industry is None:
         return CompanyType.qiye
-    industries = stock_domain.industries.split(',')
-    if ('银行' in industries) or ('信托' in industries):
+    industry = stock_domain.industry.split(',')
+    if ('银行' in industry) or ('信托' in industry):
         return CompanyType.yinhang
-    if '保险' in industries:
+    if '保险' in industry:
         return CompanyType.baoxian
-    if '证券' in industries:
+    if '证券' in industry:
         return CompanyType.quanshang
     return CompanyType.qiye
 

@@ -114,7 +114,8 @@ class EtfStock(StockMetaBase, BasePortfolioStockHistory):
 class StockDetail(StockMetaBase, BaseSecurity):
     __tablename__ = 'stock_detail'
 
-    industries = Column(String(length=64))
+    industry = Column(String(length=64))
+    sector = Column(String(length=64))
     industry_indices = Column(String(length=64))
     concept_indices = Column(String(length=256))
     area_indices = Column(String(length=64))

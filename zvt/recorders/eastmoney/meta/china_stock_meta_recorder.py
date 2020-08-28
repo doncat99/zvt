@@ -74,8 +74,8 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                 security_item.date_of_establishment = to_pd_timestamp(resp_json['FoundDate'])
 
                 # 关联行业
-                industries = ','.join(resp_json['Industry'].split('-'))
-                security_item.industries = industries
+                industry = ','.join(resp_json['Industry'].split('-'))
+                security_item.industry = industry
 
                 # 关联概念
                 security_item.concept_indices = resp_json['Block']

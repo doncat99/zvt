@@ -30,27 +30,28 @@ class ExchangeUsStockListRecorder(Recorder):
     def download_stock_list(self, response, exchange):
         df = pd.read_csv(io.BytesIO(response.content), encoding='UTF8', dtype=str)
 
-        print("exchange:", exchange)
-        print(df)
+        if df is not None:
+            df.rename(columns = {'Symbol':'code', 'Name':'name', 'IPOyear':'list_date', 'industry':'industries', 'Sector':'sector'}, inplace = True) 
+            df = df[['code', 'name', 'list_date', 'industries', 'sector']]
 
-        # if df is not None:
-        #     df.columns = ['code', 'name', 'list_date']
+            df.fillna({'list_date':'1980'}, inplace=True)
 
-        #     df = df.dropna(subset=['code'])
+            df['list_date'] = df['list_date'].apply(lambda x: to_pd_timestamp(x))
+            df['exchange'] = exchange
+            df['entity_type'] = 'stock'
+            df['id'] = df[['entity_type', 'exchange', 'code']].apply(lambda x: '_'.join(x.astype(str)), axis=1)
+            df['entity_id'] = df['id']
+            df['timestamp'] = df['list_date']
+            df = df.dropna(axis=0, how='any')
+            df = df.drop_duplicates(subset=('id'), keep='last')
 
-        #     df['list_date'] = df['list_date'].apply(lambda x: to_pd_timestamp(x))
-        #     df['exchange'] = exchange
-        #     df['entity_type'] = 'stock'
-        #     df['id'] = df[['entity_type', 'exchange', 'code']].apply(lambda x: '_'.join(x.astype(str)), axis=1)
-        #     df['entity_id'] = df['id']
-        #     df['timestamp'] = df['list_date']
-        #     df = df.dropna(axis=0, how='any')
-        #     df = df.drop_duplicates(subset=('id'), keep='last')
-        #     df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=False)
-        #     # persist StockDetail too
-        #     df_to_db(df=df, data_schema=StockDetail, provider=self.provider, force_update=False)
-        #     # self.logger.info(df.tail())
-        #     self.logger.info("persist stock list successs")
+            # persist StockDetail
+            df_to_db(df=df, data_schema=StockDetail, provider=self.provider, force_update=False)
+
+            df.drop(['industry','sector'], axis=1, inplace=True)
+            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=False)
+
+            self.logger.info("persist stock list successs")
 
 
 __all__ = ['ExchangeUsStockListRecorder']
