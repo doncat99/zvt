@@ -77,12 +77,15 @@ chn_map_key = [
     "joinquant_stock_1m_kdata",
     "zvt_stock_1wk_ma_stats",
     "joinquant_stock_1mon_hfq_kdata",
-    "zvt_trader_info"]
+    "zvt_trader_info",
+    "eastmoney_stock_detail",
+]
 
 us_map_key = [
     "exchange_stock_meta",
+    "yahoo_stock_meta",
     "zvt_trader_info",
-    
+    "yahoo_stock_detail",
 ]
 
 def build_map(region, map_key):

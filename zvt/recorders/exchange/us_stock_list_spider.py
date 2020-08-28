@@ -31,8 +31,8 @@ class ExchangeUsStockListRecorder(Recorder):
         df = pd.read_csv(io.BytesIO(response.content), encoding='UTF8', dtype=str)
 
         if df is not None:
-            df.rename(columns = {'Symbol':'code', 'Name':'name', 'IPOyear':'list_date', 'industry':'industries', 'Sector':'sector'}, inplace = True) 
-            df = df[['code', 'name', 'list_date', 'industries', 'sector']]
+            df.rename(columns = {'Symbol':'code', 'Name':'name', 'IPOyear':'list_date', 'industry':'industry', 'Sector':'sector'}, inplace = True) 
+            df = df[['code', 'name', 'list_date', 'industry', 'sector']]
 
             df.fillna({'list_date':'1980'}, inplace=True)
 
@@ -46,10 +46,10 @@ class ExchangeUsStockListRecorder(Recorder):
             df = df.drop_duplicates(subset=('id'), keep='last')
 
             # persist StockDetail
-            df_to_db(df=df, region='us', data_schema=StockDetail, provider=self.provider, force_update=False)
+            df_to_db(df=df, region='us', data_schema=StockDetail, provider=self.provider, force_update=True)
 
             df.drop(['industry','sector'], axis=1, inplace=True)
-            df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=False)
+            df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=True)
 
             self.logger.info("persist stock list successs")
 
