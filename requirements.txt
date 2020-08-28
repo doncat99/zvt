@@ -19,5 +19,4 @@ pluggy==0.13.1
 dash==1.14.0
 dash_core_components==1.10.2
 dash_html_components==1.0.3
-tushare >= 1.2.59
 
