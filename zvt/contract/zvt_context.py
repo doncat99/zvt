@@ -83,6 +83,7 @@ us_map_key = [
     "exchange_stock_meta",
     "yahoo_stock_meta",
     "yahoo_stock_detail",
+    "yahoo_trade_day",
     "yahoo_stock_1mon_kdata",
     "yahoo_stock_1mon_hfq_kdata",
     "yahoo_stock_1wk_kdata",

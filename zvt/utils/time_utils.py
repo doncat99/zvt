@@ -24,6 +24,9 @@ TIME_FORMAT_MINUTE1 = 'HH:mm'
 TIME_FORMAT_MINUTE2 = "YYYY-MM-DD HH:mm:ss"
 
 
+def is_datetime(the_time):
+    return isinstance(the_time, datetime.datetime)
+
 # ms(int) or second(float) or str
 def to_pd_timestamp(the_time):
     if the_time is None:
