@@ -46,7 +46,7 @@ class Stock1dZenFactor(Stock1dZenFactorBase, Mixin):
 
     level = Column(String(length=32))
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     open = Column(Float)
     close = Column(Float)

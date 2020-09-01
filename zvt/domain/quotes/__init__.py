@@ -7,7 +7,7 @@ from zvt.contract import Mixin
 class KdataCommon(Mixin):
     provider = Column(String(length=32))
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
     # Enum constraint is not extendable
     # level = Column(Enum(IntervalLevel, values_callable=enum_value))
     level = Column(String(length=32))
@@ -32,7 +32,7 @@ class KdataCommon(Mixin):
 class TickCommon(Mixin):
     provider = Column(String(length=32))
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
     level = Column(String(length=32))
 
     order = Column(String(length=32))

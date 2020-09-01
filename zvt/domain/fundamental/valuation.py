@@ -12,7 +12,7 @@ class StockValuation(ValuationBase, Mixin):
     __tablename__ = 'stock_valuation'
 
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
     # 总股本(股)
     capitalization = Column(Float)
     # 公司已发行的普通股股份总数(包含A股，B股和H股的总股本)
@@ -39,7 +39,7 @@ class EtfValuation(ValuationBase, Mixin):
     __tablename__ = 'etf_valuation'
 
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
     # 静态pe
     pe = Column(Float)
     # 加权

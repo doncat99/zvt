@@ -15,7 +15,7 @@ class StockSummary(OverallBase, Mixin):
 
     provider = Column(String(length=32))
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     total_value = Column(Float)
     total_tradable_vaule = Column(Float)
@@ -32,7 +32,7 @@ class MarginTradingSummary(OverallBase, Mixin):
     __tablename__ = 'margin_trading_summary'
     provider = Column(String(length=32))
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     # 融资余额
     margin_value = Column(Float)
@@ -54,7 +54,7 @@ class CrossMarketSummary(OverallBase, Mixin):
     __tablename__ = 'cross_market_summary'
     provider = Column(String(length=32))
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     buy_amount = Column(Float)
     buy_volume = Column(Float)

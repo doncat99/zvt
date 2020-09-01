@@ -14,7 +14,7 @@ class BlockMoneyFlow(MoneyFlowBase, Mixin):
     __tablename__ = 'block_money_flow'
 
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     # 收盘价
     close = Column(Float)
@@ -48,7 +48,7 @@ class StockMoneyFlow(MoneyFlowBase, Mixin):
     __tablename__ = 'stock_money_flow'
 
     code = Column(String(length=32))
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     # 收盘价
     close = Column(Float)

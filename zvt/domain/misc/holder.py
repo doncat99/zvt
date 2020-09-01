@@ -13,7 +13,7 @@ class HkHolder(HolderBase, Mixin):
     # 股票代码
     code = Column(String(length=32))
     # 股票名称
-    name = Column(String(length=32))
+    name = Column(String(length=128))
 
     # 市场通编码	三种类型：310001-沪股通，310002-深股通，310005-港股通
     holder_code = Column(String(length=32))

@@ -206,7 +206,7 @@ def evaluate_size_from_timestamp(start_timestamp,
         return int(math.ceil(time_delta.days / 7))
 
     if level == IntervalLevel.LEVEL_1DAY:
-        if trade_day is not None:
+        if trade_day is not None and len(trade_day) > 0:
             try:
                 return trade_day.index(start_timestamp)
             except ValueError as _:
