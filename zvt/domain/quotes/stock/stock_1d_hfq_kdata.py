@@ -12,6 +12,6 @@ class Stock1dHfqKdata(KdataBase, StockKdataCommon):
     __tablename__ = 'stock_1d_hfq_kdata'
 
 
-register_schema(regions=['chn', 'us'], providers=['joinquant'], db_name='stock_1d_hfq_kdata', schema_base=KdataBase)
+register_schema(regions=['chn', 'us'], providers=['joinquant', 'yahoo'], db_name='stock_1d_hfq_kdata', schema_base=KdataBase)
 
 __all__ = ['Stock1dHfqKdata']

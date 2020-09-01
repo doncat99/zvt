@@ -17,6 +17,8 @@ class KdataCommon(Mixin):
     open = Column(Float)
     # 收盘价
     close = Column(Float)
+    # 调整收盘价
+    adj_close = Column(Float)
     # 最高价
     high = Column(Float)
     # 最低价

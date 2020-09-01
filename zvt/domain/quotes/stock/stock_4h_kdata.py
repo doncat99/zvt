@@ -12,6 +12,6 @@ class Stock4hKdata(KdataBase, StockKdataCommon):
     __tablename__ = 'stock_4h_kdata'
 
 
-register_schema(regions=['chn', 'us'], providers=['joinquant'], db_name='stock_4h_kdata', schema_base=KdataBase)
+register_schema(regions=['chn', 'us'], providers=['joinquant', 'yahoo'], db_name='stock_4h_kdata', schema_base=KdataBase)
 
 __all__ = ['Stock4hKdata']
