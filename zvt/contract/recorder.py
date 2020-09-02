@@ -91,7 +91,7 @@ class RecorderForEntities(Recorder):
                  batch_size=10,
                  force_update=False,
                  sleeping_time=10,
-                 process_index=None) -> None:
+                 share_para=None) -> None:
         """
 
         :param entity_type:
@@ -118,7 +118,7 @@ class RecorderForEntities(Recorder):
         self.entity_type = entity_type
         self.exchanges = exchanges
         self.codes = codes
-        self.process_index = process_index
+        self.share_para = share_para
 
         # set entity_ids or (entity_type,exchanges,codes)
         self.entity_ids = entity_ids
@@ -164,7 +164,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                  end_timestamp=None,
                  close_hour=0,
                  close_minute=0,
-                 process_index=None) -> None:
+                 share_para=None) -> None:
 
         self.default_size = default_size
         self.real_time = real_time
@@ -176,7 +176,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         self.start_timestamp = to_pd_timestamp(start_timestamp)
         self.end_timestamp = to_pd_timestamp(end_timestamp)
 
-        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time, process_index=process_index)
+        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time, share_para=share_para)
 
     def get_latest_saved_record(self, entity):
         order = eval('self.data_schema.{}.desc()'.format(self.get_evaluated_time_field()))
@@ -385,9 +385,9 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.logger.info("finish recording {} id: {},latest_timestamp: {}, time cost: {}".format(
                 self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
             self.on_finish_entity(entity_item, http_session)
-            self.process_index[2].acquire()
+            self.share_para[2].acquire()
             pbar.update()
-            self.process_index[2].release()
+            self.share_para[2].release()
             return True
         else:
             start = start_timestamp.strftime('%Y-%m-%d') if start_timestamp else None
@@ -424,9 +424,9 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                         else:
                             self.logger.info("ignore original duplicate item: {}, time cost: {}".format(domain_item.id, time.time()-step1))
 
-                            self.process_index[2].acquire()
+                            self.share_para[2].acquire()
                             pbar.update()
-                            self.process_index[2].release()
+                            self.share_para[2].release()
                             return True
 
                     domain_list.append(domain_item)
@@ -466,9 +466,9 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 self.logger.info("finish recording {} id: {}, time cost: {}".format(
                     self.data_schema.__name__, entity_item.id, time.time()-step1))
 
-            self.process_index[2].acquire()
+            self.share_para[2].acquire()
             pbar.update()
-            self.process_index[2].release()
+            self.share_para[2].release()
             return True
         else:
             self.logger.info("update recording {} id: {}, time cost: {}".format(
@@ -485,12 +485,12 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         process_identity = multiprocessing.current_process()._identity
         if len(process_identity) > 0:
             #  The worker process tqdm bar shall start at Position 1
-            worker_id = (process_identity[0]-1)%self.process_index[0] + 1
+            worker_id = (process_identity[0]-1)%self.share_para[0] + 1
         else:
             worker_id = 0
-        desc = "{:02d}: {}".format(worker_id, self.process_index[1])
+        desc = "{:02d}: {}".format(worker_id, self.share_para[1])
         
-        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
+        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3]) as pbar:
             for entity_item in self.entities:
                 while True:
                     try:
@@ -530,10 +530,10 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                  level=IntervalLevel.LEVEL_1DAY,
                  kdata_use_begin_time=False,
                  one_day_trading_minutes=24 * 60,
-                 process_index=None) -> None:
+                 share_para=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, process_index=process_index)
+                         close_minute, share_para=share_para)
 
         self.level = IntervalLevel(level)
         self.kdata_use_begin_time = kdata_use_begin_time
@@ -649,10 +649,10 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
                  end_timestamp=None,
                  close_hour=0,
                  close_minute=0,
-                 process_index=None) -> None:
+                 share_para=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp,
-                         close_hour=close_hour, close_minute=close_minute, process_index=process_index)
+                         close_hour=close_hour, close_minute=close_minute, share_para=share_para)
         self.security_timestamps_map = {}
 
     def init_timestamps(self, entity_item, http_session) -> List[pd.Timestamp]:

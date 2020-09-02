@@ -28,10 +28,10 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
                  force_update=False, sleeping_time=10, default_size=2000, real_time=True, fix_duplicate_way='add',
                  start_timestamp=None, end_timestamp=None,
                  level=IntervalLevel.LEVEL_1DAY, kdata_use_begin_time=False, close_hour=0, close_minute=0,
-                 one_day_trading_minutes=24 * 60, process_index=None) -> None:
+                 one_day_trading_minutes=24 * 60, share_para=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, level, kdata_use_begin_time, one_day_trading_minutes, process_index=process_index)
+                         close_minute, level, kdata_use_begin_time, one_day_trading_minutes, share_para=share_para)
 
     def get_data_map(self):
         return {}

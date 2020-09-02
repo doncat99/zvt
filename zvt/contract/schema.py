@@ -102,7 +102,7 @@ class Mixin(object):
                     close_hour=None,
                     close_minute=None,
                     one_day_trading_minutes=None,
-                    process_index=None):
+                    share_para=None):
         if cls.provider_map_recorder:
             # print(f'{cls.__name__} registered recorders:{cls.provider_map_recorder}')
 
@@ -145,7 +145,7 @@ class Mixin(object):
 
                 kw['level'] = level
 
-            kw['process_index'] = process_index
+            kw['share_para'] = share_para
             # print(recorder_class)
             # print(*kw)  
             r = recorder_class(**kw)

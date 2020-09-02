@@ -16,7 +16,7 @@ class YahooUsStockListRecorder(ExchangeUsStockListRecorder):
     data_schema = Stock
     provider = 'yahoo'
 
-    def __init__(self, batch_size=10, force_update=False, sleeping_time=5, process_index=None) -> None:
+    def __init__(self, batch_size=10, force_update=False, sleeping_time=5, share_para=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
 
 
@@ -24,14 +24,14 @@ class YahooUsStockDetailRecorder(Recorder):
     provider = 'yahoo'
     data_schema = StockDetail
 
-    def __init__(self, batch_size=10, force_update=False, sleeping_time=5, codes=None, process_index=None) -> None:
+    def __init__(self, batch_size=10, force_update=False, sleeping_time=5, codes=None, share_para=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
 
         # get list at first
         # EastmoneyChinaStockListRecorder().run()
 
         self.codes = codes
-        self.process_index = process_index
+        self.share_para = share_para
         
         if not self.force_update:
             self.entities = get_entities(session=self.session,
@@ -46,12 +46,12 @@ class YahooUsStockDetailRecorder(Recorder):
         process_identity = multiprocessing.current_process()._identity
         if len(process_identity) > 0:
             #  The worker process tqdm bar shall start at Position 1
-            worker_id = (process_identity[0]-1)%self.process_index[0] + 1
+            worker_id = (process_identity[0]-1)%self.share_para[0] + 1
         else:
             worker_id = 0
-        desc = "{:02d} : {}".format(worker_id, self.process_index[1])
+        desc = "{:02d} : {}".format(worker_id, self.share_para[1])
 
-        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.process_index[3]) as pbar:
+        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3]) as pbar:
             http_session = get_http_session()
             
             for security_item in self.entities:
@@ -99,9 +99,9 @@ class YahooUsStockDetailRecorder(Recorder):
                 # self.session.commit()
                 # self.logger.info('finish recording stock meta for: {}'.format(security_item.code))
 
-                self.process_index[2].acquire()
+                self.share_para[2].acquire()
                 pbar.update()
-                self.process_index[2].release()
+                self.share_para[2].release()
                 
                 self.sleep()
 

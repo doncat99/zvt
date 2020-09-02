@@ -46,7 +46,7 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
                  close_minute=0,
                  one_day_trading_minutes=4 * 60,
                  adjust_type=AdjustType.qfq,
-                 process_index=None) -> None:
+                 share_para=None) -> None:
         level = IntervalLevel(level)
         adjust_type = AdjustType(adjust_type)
         self.data_schema = get_kdata_schema(entity_type='stock', level=level, adjust_type=adjust_type)
@@ -54,7 +54,7 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
 
         super().__init__('stock', exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, level, kdata_use_begin_time, one_day_trading_minutes, process_index=process_index)
+                         close_minute, level, kdata_use_begin_time, one_day_trading_minutes, share_para=share_para)
         self.adjust_type = adjust_type
 
     def generate_domain_id(self, entity, original_data):
