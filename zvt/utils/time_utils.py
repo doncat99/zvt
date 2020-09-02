@@ -85,7 +85,7 @@ def day_offset_today(offset=0):
     return now_pd_timestamp() + datetime.timedelta(days=offset)
 
 
-def get_year_quarters(start, end=pd.Timestamp.now()):
+def get_year_quarters(start, end=now_pd_timestamp()):
     start_year_quarter = get_year_quarter(start)
     current_year_quarter = get_year_quarter(end)
     if current_year_quarter[0] == start_year_quarter[0]:
@@ -145,7 +145,7 @@ def count_hours_from_day(the_time):
         return hours
 
 def count_mins_before_close_time(close_hour, close_minute):
-    now = pd.Timestamp.now()
+    now = now_pd_timestamp()
     close_time = datetime.time(hour=close_hour, minute=close_minute)
     now_time = datetime.time(hour=now.hour, minute=now.minute, second=now.second)
     _, hours, minutes, _ = time_delta(now_time, close_time)
@@ -173,7 +173,7 @@ def evaluate_size_from_timestamp(start_timestamp,
     :type one_day_trading_minutes: int
     """
     if not end_timestamp:
-        end_timestamp = pd.Timestamp.now()
+        end_timestamp = now_pd_timestamp()
     else:
         end_timestamp = to_pd_timestamp(end_timestamp)
 

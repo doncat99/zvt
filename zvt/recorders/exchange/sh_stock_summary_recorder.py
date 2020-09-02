@@ -2,7 +2,7 @@ import demjson
 import pandas as pd
 
 from zvt.contract.recorder import TimestampsDataRecorder
-from zvt.utils.time_utils import to_time_str
+from zvt.utils.time_utils import to_time_str, now_pd_timestamp
 from zvt.utils.utils import to_float
 from zvt.utils.request_utils import request_get
 from zvt.domain import Index
@@ -27,7 +27,7 @@ class StockSummaryRecorder(TimestampsDataRecorder):
 
     def init_timestamps(self, entity, http_session):
         return pd.date_range(start=entity.timestamp,
-                             end=pd.Timestamp.now(),
+                             end=now_pd_timestamp(),
                              freq='B').tolist()
 
     def record(self, entity, start, end, size, timestamps, http_session):

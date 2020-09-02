@@ -445,7 +445,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
             # realtime and to the close time
             if self.real_time and (self.close_hour is not None) and (self.close_minute is not None):
-                current_timestamp = pd.Timestamp.now()
+                current_timestamp = now_pd_timestamp()
                 if current_timestamp.hour >= self.close_hour:
                     if current_timestamp.minute - self.close_minute >= 5:
                         self.logger.info('{} now is the close time: {}'.format(entity_item.id, current_timestamp))
