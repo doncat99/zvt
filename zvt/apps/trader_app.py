@@ -96,7 +96,7 @@ def serve_layout():
                                             dcc.DatePickerRange(
                                                 id='date-picker-range',
                                                 start_date='2009-01-01',
-                                                end_date=now_pd_timestamp(),
+                                                end_date=now_pd_timestamp('chn'),
                                                 display_format=TIME_FORMAT_DAY
                                             )
                                         ],

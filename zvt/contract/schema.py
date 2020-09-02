@@ -158,7 +158,7 @@ class Mixin(object):
 
 class NormalMixin(Mixin):
     # the record created time in db
-    created_timestamp = Column(DateTime, default=now_pd_timestamp())
+    created_timestamp = Column(DateTime, default=now_pd_timestamp('chn'))
     # the record updated time in db, some recorder would check it for whether need to refresh
     updated_timestamp = Column(DateTime)
 
@@ -268,6 +268,6 @@ class EntityMixin(Mixin):
 
 class NormalEntityMixin(EntityMixin):
     # the record created time in db
-    created_timestamp = Column(DateTime, default=now_pd_timestamp())
+    created_timestamp = Column(DateTime, default=now_pd_timestamp('chn'))
     # the record updated time in db, some recorder would check it for whether need to refresh
     updated_timestamp = Column(DateTime)

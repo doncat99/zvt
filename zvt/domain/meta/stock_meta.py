@@ -5,7 +5,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import EntityMixin
 from zvt.contract.register import register_schema, register_entity
-from zvt.utils.time_utils import now_pd_timestamp
 
 StockMetaBase = declarative_base()
 
@@ -19,8 +18,7 @@ class BaseSecurity(EntityMixin):
 
 class BasePortfolio(BaseSecurity):
     @classmethod
-    def get_stocks(cls,
-                   code=None, codes=None, ids=None, timestamp=now_pd_timestamp(), provider=None):
+    def get_stocks(cls, timestamp, code=None, codes=None, ids=None, provider=None):
         """
 
         :param code: portfolio(etf/block/index...) code
@@ -68,7 +66,7 @@ class Etf(StockMetaBase, BasePortfolio):
     category = Column(String(length=64))
 
     @classmethod
-    def get_stocks(cls, code=None, codes=None, ids=None, timestamp=now_pd_timestamp(), provider=None):
+    def get_stocks(cls, timestamp, code=None, codes=None, ids=None, provider=None):
         from zvt.api.quote import get_etf_stocks
         return get_etf_stocks(code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider)
 

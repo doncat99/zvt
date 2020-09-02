@@ -28,17 +28,7 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
         super().init_entities()
         # 过滤掉退市的
         self.entities = [entity for entity in self.entities if
-                         (entity.end_date is None) or (entity.end_date > now_pd_timestamp())]
-
-    # TODO:more general for the case using StockTradeDay
-    # def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
-    #     start, end, end_date, size, timestamps = super().evaluate_start_end_size_timestamps(entity, trade_day, stock_detail, http_session)
-    #     # if start:
-    #     #     # trade_day = StockTradeDay.query_data(limit=1, order=StockTradeDay.timestamp.desc(), return_type='domain')
-    #     #     if trade_day:
-    #     #         if is_same_date(trade_day[0].timestamp, start):
-    #     #             size = 0
-    #     return start, end, end_date, size, timestamps
+                         (entity.end_date is None) or (entity.end_date > now_pd_timestamp('chn'))]
 
     def generate_url(self, code, number):
         return self.url.format(number, code)

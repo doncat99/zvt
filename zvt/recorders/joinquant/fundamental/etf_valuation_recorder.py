@@ -27,7 +27,7 @@ class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):
 
     def record(self, entity, start, end, size, timestamps, http_session):
         if not end:
-            end = now_pd_timestamp()
+            end = now_pd_timestamp('chn')
 
         date_range = pd.date_range(start=start, end=end, freq='1D').tolist()
         for date in date_range:

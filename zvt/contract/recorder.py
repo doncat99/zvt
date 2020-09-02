@@ -192,11 +192,11 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             return records[0]
         return None
 
-    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+    def evaluate_start_end_size_timestamps(self, now, entity, trade_day, stock_detail, http_session):
         # not to list date yet
         # print("step 1: entity.timestamp:{}".format(entity.timestamp))
         trade_index = 0
-        if entity.timestamp and (entity.timestamp >= now_pd_timestamp()):
+        if entity.timestamp and (entity.timestamp >= now):
             trade = trade_day[trade_index] if len(trade_day) > 0 else None
             return entity.timestamp, None, trade, 0, None
 
@@ -224,8 +224,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             if latest_timestamp >= self.end_timestamp:
                 size = 0
         else:
-            now = now_pd_timestamp().replace(hour=0, minute=0, second=0)
-            size = (now - latest_timestamp).days
+            size = (now.replace(hour=0, minute=0, second=0) - latest_timestamp).days
 
         trade = trade_day[trade_index] if len(trade_day) > 0 else None
         return latest_timestamp, self.end_timestamp, trade, size, None
@@ -372,10 +371,11 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    def update(self, entity_item, trade_day, stock_detail, http_session, pbar):
+    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
         step1 = time.time()
 
-        start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(entity_item, trade_day, stock_detail, http_session)
+        now = now_pd_timestamp(region)
+        start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(now, entity_item, trade_day, stock_detail, http_session)
         size = int(size)
 
         # self.logger.info("evaluate entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
@@ -445,9 +445,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
             # realtime and to the close time
             if self.real_time and (self.close_hour is not None) and (self.close_minute is not None):
-                current_timestamp = now_pd_timestamp()
-                if current_timestamp.hour >= self.close_hour:
-                    if current_timestamp.minute - self.close_minute >= 5:
+                if now.hour >= self.close_hour:
+                    if now.minute - self.close_minute >= 5:
                         self.logger.info('{} now is the close time: {}'.format(entity_item.id, current_timestamp))
                         entity_finished = True
 
@@ -494,7 +493,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             for entity_item in self.entities:
                 while True:
                     try:
-                        if self.update(entity_item, trade_day, stock_detail, http_session, pbar):
+                        if self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar):
                             break
                         else:
                             # sleep for a while to next entity
@@ -566,10 +565,9 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
             return records[0]
         return None
 
-    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+    def evaluate_start_end_size_timestamps(self, now, entity, trade_day, stock_detail, http_session):
         # not to list date yet
         # step1 = time.time()
-        now = now_pd_timestamp()
         trade_index = 0
 
         if entity.timestamp and (entity.timestamp >= now):
@@ -597,7 +595,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         # self.logger.info("latest_saved_timestamp:{}, tradedays:{}".format(latest_saved_timestamp, trade_day[:2]))
         
         if trade_day is not None and len(trade_day) > 0:
-            count_mins = count_mins_before_close_time(self.close_hour, self.close_minute)
+            count_mins = count_mins_before_close_time(now, self.close_hour, self.close_minute)
             if count_mins > 0 and is_same_date(trade_day[0], now):
                 trade_index = 1
         
@@ -623,6 +621,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                     self.logger.warning("can't find timestamp between trade_day:{}".format(e))
                 
         size = evaluate_size_from_timestamp(start_timestamp=latest_saved_timestamp, 
+                                            end_timestamp=now,
                                             level=self.level,
                                             one_day_trading_minutes=self.one_day_trading_minutes,
                                             trade_day=trade_day[trade_index:])
@@ -658,7 +657,7 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
     def init_timestamps(self, entity_item, http_session) -> List[pd.Timestamp]:
         raise NotImplementedError
 
-    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+    def evaluate_start_end_size_timestamps(self, now, entity, trade_day, stock_detail, http_session):
         trade_index = 0
         timestamps = self.security_timestamps_map.get(entity.id)
         if not timestamps:

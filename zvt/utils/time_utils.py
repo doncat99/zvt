@@ -5,11 +5,13 @@ import math
 import arrow
 import pandas as pd
 import tzlocal
+import pytz
 
 from zvt.contract import IntervalLevel
 
 
 CHINA_TZ = 'Asia/Shanghai'
+US_TZ = 'America/New_York'
 
 TIME_FORMAT_ISO8601 = "YYYY-MM-DDTHH:mm:ss.SSS"
 
@@ -47,7 +49,10 @@ def now_timestamp():
     return int(pd.Timestamp.utcnow().timestamp() * 1000)
 
 
-def now_pd_timestamp() -> pd.Timestamp:
+def now_pd_timestamp(region) -> pd.Timestamp:
+    if region == 'us':
+        tz = pytz.timezone('America/New_York')
+        return pd.Timestamp.now(tz).replace(tzinfo=None)
     return pd.Timestamp.now()
 
 
@@ -58,8 +63,8 @@ def to_time_str(the_time, fmt=TIME_FORMAT_DAY):
         return the_time
 
 
-def now_time_str(fmt=TIME_FORMAT_DAY):
-    return to_time_str(the_time=now_pd_timestamp(), fmt=fmt)
+def now_time_str(region, fmt=TIME_FORMAT_DAY):
+    return to_time_str(the_time=now_pd_timestamp(region), fmt=fmt)
 
 
 def next_date(the_time, days=1):
@@ -81,11 +86,11 @@ def get_year_quarter(time):
     return time.year, ((time.month - 1) // 3) + 1
 
 
-def day_offset_today(offset=0):
-    return now_pd_timestamp() + datetime.timedelta(days=offset)
+def day_offset_today(region, offset=0):
+    return now_pd_timestamp(region) + datetime.timedelta(days=offset)
 
 
-def get_year_quarters(start, end=now_pd_timestamp()):
+def get_year_quarters(start, end):
     start_year_quarter = get_year_quarter(start)
     current_year_quarter = get_year_quarter(end)
     if current_year_quarter[0] == start_year_quarter[0]:
@@ -144,8 +149,7 @@ def count_hours_from_day(the_time):
         _, hours, _, _ = time_delta(the_time, end)
         return hours
 
-def count_mins_before_close_time(close_hour, close_minute):
-    now = now_pd_timestamp()
+def count_mins_before_close_time(now, close_hour, close_minute):
     close_time = datetime.time(hour=close_hour, minute=close_minute)
     now_time = datetime.time(hour=now.hour, minute=now.minute, second=now.second)
     _, hours, minutes, _ = time_delta(now_time, close_time)
@@ -156,10 +160,10 @@ def next_timestamp(current_timestamp: pd.Timestamp, level: IntervalLevel) -> pd.
     return current_timestamp + pd.Timedelta(seconds=level.to_second())
 
 
-def evaluate_size_from_timestamp(start_timestamp,
+def evaluate_size_from_timestamp(start_timestamp: pd.Timestamp,
+                                 end_timestamp: pd.Timestamp,
                                  level: IntervalLevel,
                                  one_day_trading_minutes,
-                                 end_timestamp: pd.Timestamp = None,
                                  trade_day = None):
     """
     given from timestamp,level,one_day_trading_minutes,this func evaluate size of kdata to current.
@@ -172,10 +176,10 @@ def evaluate_size_from_timestamp(start_timestamp,
     :param one_day_trading_minutes:
     :type one_day_trading_minutes: int
     """
-    if not end_timestamp:
-        end_timestamp = now_pd_timestamp()
-    else:
-        end_timestamp = to_pd_timestamp(end_timestamp)
+    # if not end_timestamp:
+    #     end_timestamp = now_pd_timestamp()
+    # else:
+    #     end_timestamp = to_pd_timestamp(end_timestamp)
 
     time_delta = end_timestamp - to_pd_timestamp(start_timestamp)
 

@@ -188,7 +188,7 @@ class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder):
         }
         return call_eastmoney_api(http_session, self.page_url, param=param, path_fields=['TotalCount'])
 
-    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+    def evaluate_start_end_size_timestamps(self, now, entity, trade_day, stock_detail, http_session):
         remote_count = self.get_remote_count(entity, http_session)
 
         if remote_count == 0:
@@ -230,7 +230,7 @@ class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder):
         _, result = self.generate_domain(security_item, results[0])
         return result
 
-    def evaluate_start_end_size_timestamps(self, entity, trade_day, stock_detail, http_session):
+    def evaluate_start_end_size_timestamps(self, now, entity, trade_day, stock_detail, http_session):
         # get latest record
         latest_record = get_data(entity_id=entity.id,
                                  provider=self.provider,

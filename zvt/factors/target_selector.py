@@ -56,7 +56,7 @@ class TargetSelector(object):
             if end_timestamp:
                 self.end_timestamp = to_pd_timestamp(end_timestamp)
             else:
-                self.end_timestamp = now_pd_timestamp()
+                self.end_timestamp = now_pd_timestamp('chn')
 
         self.long_threshold = long_threshold
         self.short_threshold = short_threshold

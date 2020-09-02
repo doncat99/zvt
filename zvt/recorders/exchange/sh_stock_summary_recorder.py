@@ -27,7 +27,7 @@ class StockSummaryRecorder(TimestampsDataRecorder):
 
     def init_timestamps(self, entity, http_session):
         return pd.date_range(start=entity.timestamp,
-                             end=now_pd_timestamp(),
+                             end=now_pd_timestamp('chn'),
                              freq='B').tolist()
 
     def record(self, entity, start, end, size, timestamps, http_session):

@@ -101,7 +101,7 @@ class ChinaETFListSpider(Recorder):
             response_df['exchange'] = 'sh'
             response_df['code'] = etf_code
             response_df['name'] = etf['FUND_NAME']
-            response_df['timestamp'] = now_pd_timestamp()
+            response_df['timestamp'] = now_pd_timestamp('chn')
 
             response_df['stock_id'] = response_df['stock_code'].apply(lambda code: china_stock_code_to_id(code))
             response_df['id'] = response_df['stock_id'].apply(
@@ -150,7 +150,7 @@ class ChinaETFListSpider(Recorder):
             response_df['exchange'] = 'sz'
             response_df['code'] = etf_code
             response_df['name'] = etf['证券简称']
-            response_df['timestamp'] = now_pd_timestamp()
+            response_df['timestamp'] = now_pd_timestamp('chn')
 
             response_df['stock_id'] = response_df['stock_code'].apply(lambda code: china_stock_code_to_id(code))
             response_df['id'] = response_df['stock_id'].apply(

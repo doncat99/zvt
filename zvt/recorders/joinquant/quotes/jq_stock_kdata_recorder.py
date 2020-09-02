@@ -85,7 +85,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
         if self.adjust_type == AdjustType.hfq:
             fq_ref_date = '2000-01-01'
         else:
-            fq_ref_date = to_time_str(now_pd_timestamp())
+            fq_ref_date = to_time_str(now_pd_timestamp('chn'))
 
         if not self.end_timestamp:
             df = jq_get_bars(to_jq_entity_id(entity),

@@ -55,7 +55,7 @@ class DataReader(object):
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
-                 end_timestamp: Union[str, pd.Timestamp] = now_pd_timestamp(),
+                 end_timestamp: Union[str, pd.Timestamp] = now_pd_timestamp('chn'),
                  columns: List = None,
                  filters: List = None,
                  order: object = None,
@@ -242,7 +242,7 @@ class DataReader(object):
                             'category:{} level:{} getting data timeout,to_timestamp:{},now:{}'.format(entity_id,
                                                                                                       self.level,
                                                                                                       to_timestamp,
-                                                                                                      now_pd_timestamp()))
+                                                                                                      now_pd_timestamp('chn')))
                         continue
 
             if len(has_got) == len(self.data_df.index.levels[0]):

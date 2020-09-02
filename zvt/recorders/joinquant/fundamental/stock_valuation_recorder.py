@@ -37,8 +37,8 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         ).filter(
             valuation.code == to_jq_entity_id(entity)
         )
-        count: pd.Timedelta = now_pd_timestamp() - start
-        df = jq_get_fundamentals_continuously(q, end_date=now_time_str(), count=count.days + 1, panel=False)
+        count: pd.Timedelta = now_pd_timestamp('chn') - start
+        df = jq_get_fundamentals_continuously(q, end_date=now_time_str('chn'), count=count.days + 1, panel=False)
         df['entity_id'] = entity.id
         df['timestamp'] = pd.to_datetime(df['day'])
         df['code'] = entity.code
@@ -65,7 +65,7 @@ __all__ = ['JqChinaStockValuationRecorder']
 
 if __name__ == '__main__':
     # 上证50
-    df = Etf.get_stocks(code='510050')
+    df = Etf.get_stocks(timestamp=now_pd_timestamp('chn'), code='510050')
     stocks = df.stock_id.tolist()
     print(stocks)
     print(len(stocks))

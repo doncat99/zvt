@@ -20,17 +20,17 @@ def cal_ma_states(start='000001', end='002000'):
     codes = entities.index.to_list()
 
     ma_1d_stats = MaStateStatsFactor(codes=codes, start_timestamp='2005-01-01',
-                                     end_timestamp=now_pd_timestamp(),
+                                     end_timestamp=now_pd_timestamp('chn'),
                                      level=IntervalLevel.LEVEL_1DAY)
 
     ma_1d_factor = MaFactor(codes=codes, start_timestamp='2005-01-01',
-                            end_timestamp=now_pd_timestamp(),
+                            end_timestamp=now_pd_timestamp('chn'),
                             level=IntervalLevel.LEVEL_1DAY)
 
     logger.info(f'finish cal day ma stats {start}:{end}')
 
     ma_1wk_stats = MaStateStatsFactor(codes=codes, start_timestamp='2005-01-01',
-                                      end_timestamp=now_pd_timestamp(),
+                                      end_timestamp=now_pd_timestamp('chn'),
                                       level=IntervalLevel.LEVEL_1WEEK)
 
     logger.info(f'finish cal week ma stats {start}:{end}')

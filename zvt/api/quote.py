@@ -81,7 +81,7 @@ def to_report_period_type(report_date):
     return None
 
 
-def get_recent_report_date(the_date=now_pd_timestamp(), step=0):
+def get_recent_report_date(the_date, step=0):
     the_date = to_pd_timestamp(the_date)
     assert step >= 0
     if the_date.month >= 10:
@@ -100,7 +100,7 @@ def get_recent_report_date(the_date=now_pd_timestamp(), step=0):
         return get_recent_report_date(recent, step)
 
 
-def get_recent_report_period(the_date=now_pd_timestamp(), step=0):
+def get_recent_report_period(the_date, step=0):
     return to_report_period_type(get_recent_report_date(the_date, step=step))
 
 
@@ -208,7 +208,7 @@ def portfolio_relate_stock(df, portfolio):
 
 
 # etf半年报和年报才有全量的持仓信息，故根据离timestamp最近的报表(年报 or 半年报)来确定持仓
-def get_etf_stocks(code=None, codes=None, ids=None, timestamp=now_pd_timestamp(), provider=None):
+def get_etf_stocks(timestamp, code=None, codes=None, ids=None, provider=None):
     latests: List[EtfStock] = EtfStock.query_data(provider=provider, code=code, end_timestamp=timestamp,
                                                   order=EtfStock.timestamp.desc(), limit=1, return_type='domain')
     if latests:
@@ -262,7 +262,7 @@ def get_kdata(entity_id=None, entity_ids=None, level=IntervalLevel.LEVEL_1DAY.va
 
 
 if __name__ == '__main__':
-    df = get_etf_stocks(code='510050', provider='joinquant')
+    df = get_etf_stocks(timestamp=now_pd_timestamp('chn'), code='510050', provider='joinquant')
     print(df)
 
     # assert get_kdata_schema(entity_type='stock', level=IntervalLevel.LEVEL_1DAY) == Stock1dKdata

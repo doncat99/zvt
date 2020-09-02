@@ -71,7 +71,7 @@ class Trader(object):
         if real_time:
             logger.info(
                 'real_time mode, end_timestamp should be future,you could set it big enough for running forever')
-            assert self.end_timestamp >= now_pd_timestamp()
+            assert self.end_timestamp >= now_pd_timestamp('chn')
 
         self.kdata_use_begin_time = kdata_use_begin_time
         self.draw_result = draw_result
@@ -342,6 +342,7 @@ class Trader(object):
             l.on_trading_error(timestamp, error)
 
     def run(self):
+        now = now_pd_timestamp('chn')
         # iterate timestamp of the min level,e.g,9:30,9:35,9.40...for 5min level
         # timestamp represents the timestamp in kdata
         for timestamp in self.entity_schema.get_interval_timestamps(start_date=self.start_timestamp,
@@ -353,12 +354,11 @@ class Trader(object):
             waiting_seconds = 0
 
             if self.level == IntervalLevel.LEVEL_1DAY:
-                if is_same_date(timestamp, now_pd_timestamp()):
+                if is_same_date(timestamp, now):
                     while True:
-                        self.logger.info(f'time is:{now_pd_timestamp()},just smoke for minutes')
+                        self.logger.info(f'time is:{now},just smoke for minutes')
                         time.sleep(60)
-                        current = now_pd_timestamp()
-                        if current.hour >= 19:
+                        if now.hour >= 19:
                             waiting_seconds = 20
                             break
 
@@ -369,7 +369,7 @@ class Trader(object):
                 else:
                     real_end_timestamp = timestamp
 
-                seconds = (now_pd_timestamp() - real_end_timestamp).total_seconds()
+                seconds = (now - real_end_timestamp).total_seconds()
                 waiting_seconds = self.level.to_second() - seconds
 
             # meaning the future kdata not ready yet,we could move on to check

@@ -104,7 +104,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
-            response_df['timestamp'] = now_pd_timestamp()
+            response_df['timestamp'] = now_pd_timestamp('chn')
 
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
             response_df['id'] = response_df['stock_id'].apply(
@@ -153,7 +153,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
-            response_df['timestamp'] = now_pd_timestamp()
+            response_df['timestamp'] = now_pd_timestamp('chn')
 
             response_df.rename(columns={'证券代码': 'stock_code', '证券简称': 'stock_name'}, inplace=True)
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
@@ -234,7 +234,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
-            response_df['timestamp'] = now_pd_timestamp()
+            response_df['timestamp'] = now_pd_timestamp('chn')
 
             response_df.columns = ['stock_code']
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))

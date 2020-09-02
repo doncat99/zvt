@@ -55,7 +55,7 @@ class TopBottomFactor(TechnicalFactor):
 
 if __name__ == '__main__':
     factor = TopBottomFactor(codes=['601318'], start_timestamp='2005-01-01',
-                             end_timestamp=now_pd_timestamp(),
+                             end_timestamp=now_pd_timestamp('chn'),
                              level=IntervalLevel.LEVEL_1DAY, window=120)
     print(factor.factor_df)
 

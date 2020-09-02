@@ -15,7 +15,7 @@ from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.recorders.joinquant.common import to_yahoo_trading_level
 from zvt.domain import Stock, StockKdataCommon
 from zvt.utils.pd_utils import pd_is_not_null
-from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
+from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
 
 
 class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
@@ -82,11 +82,6 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
         super().on_finish()
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        # if self.adjust_type == AdjustType.hfq:
-        #     fq_ref_date = '2000-01-01'
-        # else:
-        #     fq_ref_date = to_time_str(now_pd_timestamp())
-
         ticker = yf.Ticker(entity.code)
 
         if not self.end_timestamp:

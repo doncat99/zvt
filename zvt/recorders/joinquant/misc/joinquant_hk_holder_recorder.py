@@ -47,7 +47,7 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
     def init_timestamps(self, entity, http_session):
         # 聚宽数据从2017年3月17开始
         return pd.date_range(start=to_pd_timestamp('2017-3-17'),
-                             end=now_pd_timestamp(),
+                             end=now_pd_timestamp('chn'),
                              freq='B').tolist()
 
     # 覆盖这个方式是因为，HkHolder里面entity其实是股票，而recorder中entity是 Index类型(沪股通/深股通)

@@ -25,7 +25,7 @@ class RightsIssueDetailRecorder(EastmoneyPageabeDataRecorder):
         }
 
     def on_finish(self):
-        last_year = str(now_pd_timestamp().year)
+        last_year = str(now_pd_timestamp('chn').year)
         codes = [item.code for item in self.entities]
         need_filleds = DividendFinancing.query_data(provider=self.provider, codes=codes,
                                                     return_type='domain',

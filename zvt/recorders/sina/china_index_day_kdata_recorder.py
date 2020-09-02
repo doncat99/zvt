@@ -35,7 +35,7 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
         return generate_kdata_id(entity.id, timestamp=original_data['timestamp'], level=self.level)
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        the_quarters = get_year_quarters(start)
+        the_quarters = get_year_quarters(start, now_pd_timestamp('chn'))
         if not is_same_date(entity.timestamp, start) and len(the_quarters) > 1:
             the_quarters = the_quarters[1:]
 

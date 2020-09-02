@@ -121,5 +121,5 @@ if __name__ == '__main__':
     codes = entities.index.to_list()
 
     factor = ZenFactor(codes=codes, start_timestamp='2005-01-01',
-                       end_timestamp=now_pd_timestamp(),
+                       end_timestamp=now_pd_timestamp('chn'),
                        level=level)

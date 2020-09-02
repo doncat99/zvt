@@ -34,7 +34,7 @@ class UsStockTradeDayRecorder(TimeSeriesDataRecorder):
             pass
 
         df = pd.DataFrame()
-        dates = self.nyse.schedule(start_date=to_time_str(start), end_date=to_time_str(now_pd_timestamp()))
+        dates = self.nyse.schedule(start_date=to_time_str(start), end_date=to_time_str(now_pd_timestamp('us')))
         dates = dates.index.to_list()
         self.logger.info(f'add dates:{dates}')
         df['timestamp'] = pd.to_datetime(dates)

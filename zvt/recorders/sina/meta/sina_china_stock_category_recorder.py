@@ -92,7 +92,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
                         'exchange': entity.exchange,
                         'code': entity.code,
                         'name': entity.name,
-                        'timestamp': now_pd_timestamp(),
+                        'timestamp': now_pd_timestamp('chn'),
                         'stock_id': stock_id,
                         'stock_code': stock_code,
                         'stock_name': category['name'],
