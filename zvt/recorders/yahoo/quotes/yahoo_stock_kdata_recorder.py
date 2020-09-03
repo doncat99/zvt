@@ -10,7 +10,7 @@ from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.recorders.joinquant.common import to_yahoo_trading_level
-from zvt.domain import Stock, StockKdataCommon
+from zvt.domain import Stock, StockKdataCommon, Stock1dKdata
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
 from zvt.utils.request_utils import yh_get_bars

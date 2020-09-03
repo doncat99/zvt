@@ -4,6 +4,7 @@ import time
 import uuid
 from typing import List
 import multiprocessing
+import asyncio
 
 import pandas as pd
 from sqlalchemy.orm import Session
@@ -371,7 +372,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
+    async def process_entity(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
         step1 = time.time()
 
         now = now_pd_timestamp(region)
@@ -449,12 +450,11 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             if self.real_time and (self.close_hour is not None) and (self.close_minute is not None):
                 if now.hour >= self.close_hour:
                     if now.minute - self.close_minute >= 5:
-                        self.logger.info('{} now is the close time: {}'.format(entity_item.id, current_timestamp))
+                        self.logger.info('{} now is the close time: {}'.format(entity_item.id, now))
                         entity_finished = True
 
         # add finished entity to finished_items
         if entity_finished:
-
             self.on_finish_entity(entity_item, http_session)
 
             if zvt_env['zvt_debug']:
@@ -477,10 +477,24 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         return False
 
+    async def process_loop(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
+        while True:
+            try:
+                if await self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar):
+                    return
+                # sleep for a while to next entity
+                self.sleep()
+            except Exception as e:
+                self.logger.exception("recording data for id:{}, {}, error:{}".format(entity_item.id, self.data_schema, e))
+                return
+
     def run(self):
+        loop = asyncio.new_event_loop()
+        loop.set_debug(False)
+
         http_session = get_http_session()
-        trade_day = StockTradeDay.query_data(order=StockTradeDay.timestamp.desc(), return_type='domain')
-        trade_day = [day.timestamp for day in trade_day]
+        trade_days= StockTradeDay.query_data(order=StockTradeDay.timestamp.desc(), return_type='domain')
+        trade_day = [day.timestamp for day in trade_days]
         stock_detail = StockDetail.query_data(columns=['entity_id', 'end_date'], index=['entity_id'], return_type='df')
 
         process_identity = multiprocessing.current_process()._identity
@@ -491,24 +505,18 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             worker_id = 0
         desc = "{:02d}: {}".format(worker_id, self.share_para[1])
         
-        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3]) as pbar:
-            for entity_item in self.entities:
-                while True:
-                    try:
-                        if self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar):
-                            break
-                        else:
-                            # sleep for a while to next entity
-                            self.sleep()
-                    except Exception as e:
-                        self.logger.info("record error:{}".format(str(e)))
-                        if not jq_swap_account(e):
-                            self.logger.exception(
-                                "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e))
-                            raise e
-                        break
+        tasks = []
+        pbar = tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3])
+        for entity_item in self.entities:
+            tasks.append(loop.create_task(self.process_loop(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar)))
 
-        self.on_finish()
+        try:
+            loop.run_until_complete(asyncio.wait(tasks))
+            self.on_finish()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            loop.close()
 
 
 class FixedCycleDataRecorder(TimeSeriesDataRecorder):
@@ -607,7 +615,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
             end_date = stock_detail.loc[entity.id].at['end_date']
             days = date_delta(now, end_date)
         except Exception as e:
-            self.logger.warning("can't find stock in stock detail:{}".format(e))
+            # self.logger.warning("can't find stock in stock detail:{}".format(e))
             days = -1
 
         # self.logger.info("step 3: get end date: {}".format(time.time()-step1))

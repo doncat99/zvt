@@ -136,5 +136,5 @@ def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low
 
 def yh_get_bars(code, interval, start=None, end=None):
     logger.info("HTTP GET: bars, with code={}, unit={}, start={}, end={}".format(code, interval, start, end))
-    return yf.Ticker(code).history(interval=interval, start=start, end=end)
+    return yf.Ticker(code).history(interval=interval, start=start, end=end, debug=False)
     
