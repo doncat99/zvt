@@ -375,6 +375,8 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         step1 = time.time()
 
         now = now_pd_timestamp(region)
+        # self.logger.info("now entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
+
         start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(now, entity_item, trade_day, stock_detail, http_session)
         size = int(size)
 
@@ -382,7 +384,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         # no more to record
         if size == 0:
-            self.logger.info("finish recording {} id: {},latest_timestamp: {}, time cost: {}".format(
+            self.logger.info("quick finish {} id: {}, latest_timestamp: {}, time cost: {}".format(
                 self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
             self.on_finish_entity(entity_item, http_session)
             self.share_para[2].acquire()

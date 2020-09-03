@@ -9,7 +9,8 @@ from functools import wraps
 from jqdatasdk import is_auth, auth, query, logout, \
                       get_fundamentals, get_mtss, get_fundamentals_continuously, \
                       get_all_securities, get_trade_days, get_bars, get_query_count
-                      
+import yfinance as yf
+
 from zvt import zvt_env
 
 logger = logging.getLogger(__name__)
@@ -132,4 +133,8 @@ def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low
     logger.info("HTTP GET: bars, with unit={}, fq_ref_date={}".format(unit, fq_ref_date))
     return get_bars(security, count, unit=unit, fields=fields, include_now=include_now, 
                     end_dt=end_dt, fq_ref_date=fq_ref_date, df=df)
+
+def yh_get_bars(code, interval, start=None, end=None):
+    logger.info("HTTP GET: bars, with code={}, unit={}, start={}, end={}".format(code, interval, start, end))
+    return yf.Ticker(code).history(interval=interval, start=start, end=end)
     

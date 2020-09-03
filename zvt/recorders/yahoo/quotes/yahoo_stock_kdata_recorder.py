@@ -2,9 +2,6 @@
 import argparse
 
 import pandas as pd
-# from pandas_datareader import data as pdr
-import yfinance as yf
-# yf.pdr_override()
 
 from zvt import init_log
 from zvt.api import get_kdata, AdjustType
@@ -16,6 +13,7 @@ from zvt.recorders.joinquant.common import to_yahoo_trading_level
 from zvt.domain import Stock, StockKdataCommon
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
+from zvt.utils.request_utils import yh_get_bars
 
 
 class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
@@ -82,14 +80,13 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
         super().on_finish()
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        ticker = yf.Ticker(entity.code)
 
         if not self.end_timestamp:
-            df = ticker.history(interval=self.yahoo_trading_level, start=start)
+            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start)
             # df = pdr.get_data_yahoo(entity.code, interval=self.yahoo_trading_level, start=start)
         else:
             end_timestamp = to_time_str(self.end_timestamp)
-            df = ticker.history(interval=self.yahoo_trading_level, start=start, end=end_timestamp)
+            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start, end=end_timestamp)
             # df = pdr.get_data_yahoo(entity.code, interval=self.yahoo_trading_level, start=start, end=end_timestamp)
 
         if pd_is_not_null(df):

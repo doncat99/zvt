@@ -336,12 +336,12 @@ def fetch_data(lock, region):
         data_set = data_set_chn
         interface.get_stock_list_data("joinquant")
         interface.get_etf_list("joinquant")
-        interface.get_stock_trade_day("joinquant", lock)
+        interface.get_stock_trade_day("joinquant", lock, 'chn')
 
     elif region == 'us':
         data_set = data_set_us
         # interface.get_stock_list_data("yahoo")
-        # interface.get_stock_trade_day("yahoo", lock)
+        # interface.get_stock_trade_day("yahoo", lock, 'us')
 
     else:
         data_set = []

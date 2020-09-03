@@ -72,7 +72,7 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
                   finance.STK_HK_HOLD_INFO.day == to_time_str(timestamp))
 
             df = finance.run_query(q)
-            print(df)
+            # print(df)
 
             if pd_is_not_null(df):
                 df.rename(columns={'day': 'timestamp', 'link_id': 'holder_code', 'link_name': 'holder_name'},

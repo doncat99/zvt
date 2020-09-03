@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import logging
+import time
 from typing import List, Union
 import platform
 
@@ -17,6 +19,7 @@ from zvt.contract import zvt_context
 from zvt.utils.pd_utils import pd_is_not_null, index_df
 from zvt.utils.time_utils import to_pd_timestamp
 
+logger = logging.getLogger(__name__)
 
 def build_engine(region, data_path, provider, db_name):
     if "db_engine" in zvt_env and zvt_env['db_engine'] == "postgresql":
@@ -186,16 +189,16 @@ def table_name_to_domain_name(table_name: str) -> DeclarativeMeta:
     return domain_name
 
 
-def get_entity_schema(entity_type: str) -> object:
-    """
-    get entity schema from name
+# def get_entity_schema(entity_type: str) -> object:
+#     """
+#     get entity schema from name
 
-    :param entity_type:
-    :type entity_type:
-    :return:
-    :rtype:
-    """
-    return zvt_context.zvt_entity_schema_map[entity_type]
+#     :param entity_type:
+#     :type entity_type:
+#     :return:
+#     :rtype:
+#     """
+#     return zvt_context.zvt_entity_schema_map[entity_type]
 
 
 def get_schema_by_name(name: str) -> DeclarativeMeta:
@@ -276,10 +279,14 @@ def get_data(data_schema,
     assert provider is not None
     assert provider in zvt_context.providers
 
+    # step1 = time.time()
+
     if not session:
         session = get_db_session(provider=provider, data_schema=data_schema)
 
     time_col = eval('data_schema.{}'.format(time_field))
+
+    # logger.info("get_data step1: {}".format(time.time()-step1))
 
     if columns:
         # support str
@@ -307,6 +314,8 @@ def get_data(data_schema,
     else:
         query = session.query(data_schema)
 
+    # logger.info("get_data step2: {}".format(time.time()-step1))
+
     if entity_id:
         query = query.filter(data_schema.entity_id == entity_id)
     if entity_ids:
@@ -317,6 +326,8 @@ def get_data(data_schema,
         query = query.filter(data_schema.code.in_(codes))
     if ids:
         query = query.filter(data_schema.id.in_(ids))
+
+    # logger.info("get_data step3: {}".format(time.time()-step1))
 
     # we always store different level in different schema,the level param is not useful now
     if level:
@@ -333,6 +344,8 @@ def get_data(data_schema,
                           end_timestamp=end_timestamp, filters=filters, order=order, limit=limit,
                           time_field=time_field)
 
+    # logger.info("get_data step4: {}".format(time.time()-step1))
+
     if return_type == 'df':
         df = pd.read_sql(query.statement, query.session.bind)
         if pd_is_not_null(df):
@@ -340,9 +353,21 @@ def get_data(data_schema,
                 df = index_df(df, index=index, time_field=time_field)
         return df
     elif return_type == 'domain':
-        return query.all()
+        return list(window_query(query, 100000))
     elif return_type == 'dict':
-        return [item.__dict__ for item in query.all()]
+        return [item.__dict__ for item in list(window_query(query, 100000))]
+
+
+def window_query(query, window_size):
+    start = 0
+    while True:
+        stop = start + window_size
+        things = query.slice(start, stop).all()
+        if len(things) == 0:
+            break
+        for thing in things:
+            yield thing
+        start += window_size
 
 
 def data_exist(session, schema, id):
