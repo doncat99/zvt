@@ -20,6 +20,7 @@ ZVT 源項目地址：https://github.com/zvtvz/zvt
 * 增加美股数据拉取功能（分库分表）。
 * 增加不同区域股市时区功能。
 * 修正增量数据请求的计算逻辑（原作者的 evaluate_start_end_size_timestamps() 有较大逻辑漏洞，导致重复请求较多数据）。
+* 修正800w单表数据下query.all()的数据库内存缓存溢出改写文件问题（增加window_query功能）。
 * 修正一些逻辑漏洞。
 
 为更好管控控制台信息输出，需要对jqdatasdk项目进行部分修改，详见：https://github.com/doncat99/jqdatasdk
