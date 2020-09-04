@@ -4,7 +4,6 @@ import time
 import uuid
 from typing import List
 import multiprocessing
-import asyncio
 
 import pandas as pd
 from sqlalchemy.orm import Session
@@ -372,7 +371,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    async def process_entity(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
+    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
         step1 = time.time()
 
         now = now_pd_timestamp(region)
@@ -477,10 +476,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         return False
 
-    async def process_loop(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
+    def process_loop(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
         while True:
             try:
-                if await self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar):
+                if self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar):
                     return
                 # sleep for a while to next entity
                 self.sleep()
@@ -489,9 +488,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 return
 
     def run(self):
-        loop = asyncio.new_event_loop()
-        loop.set_debug(False)
-
         http_session = get_http_session()
         trade_days= StockTradeDay.query_data(order=StockTradeDay.timestamp.desc(), return_type='domain')
         trade_day = [day.timestamp for day in trade_days]
@@ -504,19 +500,11 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         else:
             worker_id = 0
         desc = "{:02d}: {}".format(worker_id, self.share_para[1])
-        
-        tasks = []
+
         pbar = tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3])
         for entity_item in self.entities:
-            tasks.append(loop.create_task(self.process_loop(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar)))
-
-        try:
-            loop.run_until_complete(asyncio.wait(tasks))
-            self.on_finish()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            loop.close()
+            self.process_loop(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar)
+        self.on_finish()
 
 
 class FixedCycleDataRecorder(TimeSeriesDataRecorder):

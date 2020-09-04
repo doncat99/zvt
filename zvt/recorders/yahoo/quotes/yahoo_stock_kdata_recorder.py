@@ -80,7 +80,6 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
         super().on_finish()
 
     def record(self, entity, start, end, size, timestamps, http_session):
-
         if not self.end_timestamp:
             df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start)
             # df = pdr.get_data_yahoo(entity.code, interval=self.yahoo_trading_level, start=start)
