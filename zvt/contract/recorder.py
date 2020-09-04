@@ -371,7 +371,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
+    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session):
         step1 = time.time()
 
         now = now_pd_timestamp(region)
@@ -387,9 +387,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.logger.info("quick finish {} id: {}, latest_timestamp: {}, time cost: {}".format(
                 self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
             self.on_finish_entity(entity_item, http_session)
-            self.share_para[2].acquire()
-            pbar.update()
-            self.share_para[2].release()
             return True
         else:
             start = start_timestamp.strftime('%Y-%m-%d') if start_timestamp else None
@@ -425,10 +422,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                         # ignore
                         else:
                             self.logger.info("ignore original duplicate item: {}, time cost: {}".format(domain_item.id, time.time()-step1))
-
-                            self.share_para[2].acquire()
-                            pbar.update()
-                            self.share_para[2].release()
                             return True
 
                     domain_list.append(domain_item)
@@ -465,10 +458,6 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             else:
                 self.logger.info("finish recording {} id: {}, time cost: {}".format(
                     self.data_schema.__name__, entity_item.id, time.time()-step1))
-
-            self.share_para[2].acquire()
-            pbar.update()
-            self.share_para[2].release()
             return True
         else:
             self.logger.info("update recording {} id: {}, time cost: {}".format(
@@ -476,10 +465,10 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         return False
 
-    def process_loop(self, region, entity_item, trade_day, stock_detail, http_session, pbar):
+    def process_loop(self, region, entity_item, trade_day, stock_detail, http_session):
         while True:
             try:
-                if self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar):
+                if self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session):
                     return
                 # sleep for a while to next entity
                 self.sleep()
@@ -501,9 +490,12 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             worker_id = 0
         desc = "{:02d}: {}".format(worker_id, self.share_para[1])
 
-        pbar = tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3])
-        for entity_item in self.entities:
-            self.process_loop(self.share_para[4], entity_item, trade_day, stock_detail, http_session, pbar)
+        with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3]) as pbar:
+            for entity_item in self.entities:
+                self.process_loop(self.share_para[4], entity_item, trade_day, stock_detail, http_session)
+                self.share_para[2].acquire()
+                pbar.update()
+                self.share_para[2].release()
         self.on_finish()
 
 
