@@ -27,7 +27,7 @@ class ChinaStockTradeDayRecorder(TimeSeriesDataRecorder):
         try:
             trade_day = StockTradeDay.query_data(limit=1, order=StockTradeDay.timestamp.desc(), return_type='domain')
             if len(trade_day) > 0:
-                start = trade_day[0]
+                start = trade_day[0].timestamp
         except Exception as _:
             pass
 

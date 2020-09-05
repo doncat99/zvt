@@ -267,25 +267,25 @@ def run(args):
 
 
 data_set_chn = [
-    # [interface.get_top_ten_holder_data, "eastmoney", "Top Ten Holder", 24*6],
-    # [interface.get_finance_data, "eastmoney", "Finance Factor", 24*6],
-    # [interface.get_balance_data, "eastmoney", "Balance Sheet", 24*6],
-    # [interface.get_moneyflow_data, "sina", "MoneyFlow Statement", 24],
-    # [interface.get_dividend_financing_data, "eastmoney", "Divdend Financing", 24],
-    # [interface.get_dividend_detail_data, "eastmoney", "Divdend Detail", 24],
-    # [interface.get_spo_detail_data, "eastmoney", "SPO Detail", 24],
-    # [interface.get_rights_issue_detail_data, "eastmoney", "Rights Issue Detail", 24],
-    # [interface.get_holder_trading_data, "eastmoney", "Holder Trading", 24],
-    # [interface.get_top_ten_tradable_holder_data, "eastmoney", "Top Ten Tradable Holder", 24*6],
-    # [interface.get_etf_valuation_data, "joinquant", "ETF Valuation", 24],
-    # [interface.get_stock_summary_data, "joinquant", "Stock Summary", 24],  
-    # [interface.get_stock_detail_data, "eastmoney" "Stock Detail", 24], 
-    # [interface.get_income_data, "eastmoney", "Income Statement", 24*6],
-    # [interface.get_cashflow_data, "eastmoney", "CashFlow Statement", 24],
-    # [interface.get_stock_valuation_data, "joinquant", "Stock Valuation", 24],
-    # [interface.get_etf_stock_data, "joinquant", "ETF Stock", 24],
-    # [interface.get_margin_trading_summary_data, "joinquant", "Margin Trading Summary", 24],
-    # [interface.get_cross_market_summary_data, "joinquant", "Cross Market Summary", 24],
+    [interface.get_top_ten_holder_data, "eastmoney", "Top Ten Holder", 24*6],
+    [interface.get_finance_data, "eastmoney", "Finance Factor", 24*6],
+    [interface.get_balance_data, "eastmoney", "Balance Sheet", 24*6],
+    [interface.get_moneyflow_data, "sina", "MoneyFlow Statement", 24],
+    [interface.get_dividend_financing_data, "eastmoney", "Divdend Financing", 24],
+    [interface.get_dividend_detail_data, "eastmoney", "Divdend Detail", 24],
+    [interface.get_spo_detail_data, "eastmoney", "SPO Detail", 24],
+    [interface.get_rights_issue_detail_data, "eastmoney", "Rights Issue Detail", 24],
+    [interface.get_holder_trading_data, "eastmoney", "Holder Trading", 24],
+    [interface.get_top_ten_tradable_holder_data, "eastmoney", "Top Ten Tradable Holder", 24*6],
+    [interface.get_etf_valuation_data, "joinquant", "ETF Valuation", 24],
+    [interface.get_stock_summary_data, "joinquant", "Stock Summary", 24],  
+    [interface.get_stock_detail_data, "eastmoney", "Stock Detail", 24], 
+    [interface.get_income_data, "eastmoney", "Income Statement", 24*6],
+    [interface.get_cashflow_data, "eastmoney", "CashFlow Statement", 24],
+    [interface.get_stock_valuation_data, "joinquant", "Stock Valuation", 24],
+    [interface.get_etf_stock_data, "joinquant", "ETF Stock", 24],
+    [interface.get_margin_trading_summary_data, "joinquant", "Margin Trading Summary", 24],
+    [interface.get_cross_market_summary_data, "joinquant", "Cross Market Summary", 24],
 
     [interface.get_stock_1d_k_data, "joinquant", "Stock Daily K-Data", 24], 
     # [interface.get_stock_1d_hfq_k_data, "joinquant", "Stock Daily HFQ K-Data", 24],
@@ -335,13 +335,13 @@ def fetch_data(lock, region):
     if region == 'chn':
         data_set = data_set_chn
         interface.get_stock_list_data("joinquant")
-        interface.get_etf_list("joinquant")
+        # interface.get_etf_list("joinquant")
         interface.get_stock_trade_day("joinquant", lock, 'chn')
 
     elif region == 'us':
         data_set = data_set_us
         # interface.get_stock_list_data("yahoo")
-        # interface.get_stock_trade_day("yahoo", lock, 'us')
+        interface.get_stock_trade_day("yahoo", lock, 'us')
 
     else:
         data_set = []
@@ -354,15 +354,15 @@ def fetch_data(lock, region):
     sleep = 0
     batch_size = 50
 
-    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=3, reset=True)
+    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=6, reset=True)
 
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
 
-    # fetch_data(l, 'chn')
-    fetch_data(l, 'us')
+    fetch_data(l, 'chn')
+    # fetch_data(l, 'us')
 
       
     

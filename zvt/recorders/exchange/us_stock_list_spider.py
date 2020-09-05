@@ -40,7 +40,7 @@ class ExchangeUsStockListRecorder(Recorder):
             df['exchange'] = exchange
             df['entity_type'] = 'stock'
             df['id'] = df[['entity_type', 'exchange', 'code']].apply(lambda x: '_'.join(x.astype(str)), axis=1)
-            df['entity_id'] = df['id']
+            df['entity_id'] = df['id'].str.strip()
             df['timestamp'] = df['list_date']
             df = df.dropna(axis=0, how='any')
             df = df.drop_duplicates(subset=('id'), keep='last')

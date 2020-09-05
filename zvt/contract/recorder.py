@@ -371,37 +371,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
     def on_finish_entity(self, entity, http_session):
         pass
 
-    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session):
-        step1 = time.time()
-
-        now = now_pd_timestamp(region)
-        # self.logger.info("now entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
-
-        start_timestamp, end_timestamp, end_date, size, timestamps = self.evaluate_start_end_size_timestamps(now, entity_item, trade_day, stock_detail, http_session)
-        size = int(size)
-
-        # self.logger.info("evaluate entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
-
-        # no more to record
-        if size == 0:
-            self.logger.info("quick finish {} id: {}, latest_timestamp: {}, time cost: {}".format(
-                self.data_schema.__name__, entity_item.id, start_timestamp, time.time()-step1))
-            self.on_finish_entity(entity_item, http_session)
-            return True
-        else:
-            start = start_timestamp.strftime('%Y-%m-%d') if start_timestamp else None
-            trade_day = trade_day[0].strftime('%Y-%m-%d') if trade_day else None
-            end = end_date.strftime('%Y-%m-%d') if end_date else None
-
-            self.logger.info('{}, {}, {}, {}, {}, {}'.format(
-                entity_item.id, size, jq_get_query_count(), 
-                trade_day, start, end))
-
-        original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
-                                    timestamps=timestamps, http_session=http_session)
-        
-        # self.logger.info("record entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
-
+    def process_duplicate(self, original_list, entity_item):
         all_duplicated = True
 
         if original_list:
@@ -416,39 +386,76 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 if domain_item:
                     duplicate = [item for item in domain_list if item.id == domain_item.id]
                     if duplicate:
-                        # regenerate the id
-                        if self.fix_duplicate_way == 'add':
-                            domain_item.id = "{}_{}".format(domain_item.id, uuid.uuid1())
                         # ignore
-                        else:
-                            self.logger.info("ignore original duplicate item: {}, time cost: {}".format(domain_item.id, time.time()-step1))
-                            return True
-
+                        if self.fix_duplicate_way != 'add':
+                            return True, all_duplicated
+                        # regenerate the id
+                        domain_item.id = "{}_{}".format(domain_item.id, uuid.uuid1())
                     domain_list.append(domain_item)
 
             if domain_list:
                 self.persist(entity_item, domain_list)
             else:
                 self.logger.info('just got {} duplicated data in this cycle'.format(len(original_list)))
+        return False, all_duplicated
 
-        # could not get more data
+    def process_realtime(self, entity_item, original_list, all_duplicated, now, http_session):
         entity_finished = False
+        # could not get more data
         if not original_list or all_duplicated:
             # not realtime
             if not self.real_time:
                 entity_finished = True
 
             # realtime and to the close time
-            if self.real_time and (self.close_hour is not None) and (self.close_minute is not None):
+            elif (self.close_hour is not None) and (self.close_minute is not None):
                 if now.hour >= self.close_hour:
                     if now.minute - self.close_minute >= 5:
                         self.logger.info('{} now is the close time: {}'.format(entity_item.id, now))
                         entity_finished = True
-
+        
         # add finished entity to finished_items
         if entity_finished:
             self.on_finish_entity(entity_item, http_session)
+            return True
 
+        return False
+
+    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session):
+        step1 = time.time()
+        now = now_pd_timestamp(region)
+
+        start_timestamp, end_timestamp, end_date, size, timestamps = \
+            self.evaluate_start_end_size_timestamps(now, entity_item, trade_day, stock_detail, http_session)
+        size = int(size)
+        # self.logger.info("evaluate entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
+
+        # no more to record
+        if size == 0:
+            start = start_timestamp.strftime('%Y-%m-%d') if start_timestamp else None
+            self.logger.info("no update {} {}, {}, cost: {}".format(
+                self.data_schema.__name__, start_timestamp, entity_item.id, time.time()-step1))
+            self.on_finish_entity(entity_item, http_session)
+            return True
+
+        # fetch and save
+        start = start_timestamp.strftime('%Y-%m-%d') if start_timestamp else None
+        trade_day = trade_day[0].strftime('%Y-%m-%d') if trade_day else None
+        end = end_date.strftime('%Y-%m-%d') if end_date else None
+        self.logger.info('{}, {}, {}, {}, {}, {}'.format(entity_item.id, size, jq_get_query_count(), trade_day, start, end))
+        original_list = self.record(entity_item, start=start_timestamp, end=end_timestamp, size=size,
+                                    timestamps=timestamps, http_session=http_session)        
+        # self.logger.info("record entity_item:{}, time cost:{}".format(entity_item.id, time.time()-step1))
+
+        # handle duplicate items
+        entity_finished, all_duplicated = self.process_duplicate(original_list, entity_item)
+        if entity_finished:
+            # self.logger.info("ignore original duplicate item: {}, time cost: {}".format(domain_item.id, time.time()-step1))
+            return True
+
+        # handle realtime items
+        entity_finished = self.process_realtime(entity_item, original_list, all_duplicated, now, http_session)
+        if entity_finished:
             if zvt_env['zvt_debug']:
                 latest_saved_record = self.get_latest_saved_record(entity=entity_item)
                 if latest_saved_record:
@@ -459,10 +466,9 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 self.logger.info("finish recording {} id: {}, time cost: {}".format(
                     self.data_schema.__name__, entity_item.id, time.time()-step1))
             return True
-        else:
-            self.logger.info("update recording {} id: {}, time cost: {}".format(
-                self.data_schema.__name__, entity_item.id, time.time()-step1))
 
+        self.logger.info("update recording {} id: {}, time cost: {}".format(
+            self.data_schema.__name__, entity_item.id, time.time()-step1))
         return False
 
     def process_loop(self, region, entity_item, trade_day, stock_detail, http_session):

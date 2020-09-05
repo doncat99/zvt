@@ -58,35 +58,15 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
     def generate_domain_id(self, entity, original_data):
         return generate_kdata_id(entity_id=entity.id, timestamp=original_data['timestamp'], level=self.level)
 
-    # def recompute_qfq(self, entity, qfq_factor, last_timestamp):
-    #     # 重新计算前复权数据
-    #     if qfq_factor != 0:
-    #         kdatas = get_kdata(provider=self.provider, entity_id=entity.id, level=self.level.value,
-    #                            order=self.data_schema.timestamp.asc(),
-    #                            return_type='domain',
-    #                            session=self.session,
-    #                            filters=[self.data_schema.timestamp < last_timestamp])
-    #         if kdatas:
-    #             self.logger.info('recomputing {} qfq kdata,factor is:{}'.format(entity.code, qfq_factor))
-    #             for kdata in kdatas:
-    #                 kdata.open = round(kdata.open * qfq_factor, 2)
-    #                 kdata.close = round(kdata.close * qfq_factor, 2)
-    #                 kdata.high = round(kdata.high * qfq_factor, 2)
-    #                 kdata.low = round(kdata.low * qfq_factor, 2)
-    #             self.session.add_all(kdatas)
-    #             self.session.commit()
-
     def on_finish(self):
         super().on_finish()
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        if not self.end_timestamp:
-            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start)
-            # df = pdr.get_data_yahoo(entity.code, interval=self.yahoo_trading_level, start=start)
-        else:
+        if self.end_timestamp:
             end_timestamp = to_time_str(self.end_timestamp)
             df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start, end=end_timestamp)
-            # df = pdr.get_data_yahoo(entity.code, interval=self.yahoo_trading_level, start=start, end=end_timestamp)
+        else:
+            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start)
 
         if pd_is_not_null(df):
             df.reset_index(inplace=True)
@@ -100,22 +80,6 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
             df['provider'] = 'yahoo'
             df['level'] = self.level.value
             df['code'] = entity.code
-
-            # 判断是否需要重新计算之前保存的前复权数据
-            # if self.adjust_type == AdjustType.qfq:
-            #     check_df = df.head(1)
-            #     check_date = check_df['timestamp'][0]
-            #     current_df = get_kdata(entity_id=entity.id, provider=self.provider, start_timestamp=check_date,
-            #                            end_timestamp=check_date, limit=1, level=self.level,
-            #                            adjust_type=self.adjust_type)
-            #     if pd_is_not_null(current_df):
-            #         old = current_df.iloc[0, :]['close']
-            #         new = check_df['close'][0]
-            #         # 相同时间的close不同，表明前复权需要重新计算
-            #         if round(old, 2) != round(new, 2):
-            #             qfq_factor = new / old
-            #             last_timestamp = pd.Timestamp(check_date)
-            #             self.recompute_qfq(entity, qfq_factor=qfq_factor, last_timestamp=last_timestamp)
 
             def generate_kdata_id(se):
                 if self.level >= IntervalLevel.LEVEL_1DAY:
