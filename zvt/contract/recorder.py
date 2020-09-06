@@ -367,6 +367,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 self.entity_session.close()
         except Exception as e:
             self.logger.error(e)
+        
 
     def on_finish_entity(self, entity, http_session):
         pass

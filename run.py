@@ -250,28 +250,34 @@ def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
         args = [arg for arg in args if not valid(shared[2], arg[0].__name__, arg[3], data)]
         # The master process tqdm bar is at Position 0
         with tqdm(total=len(args), ncols=80, desc="total", leave=True) as pbar:
-            for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args]):
+            for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args], chunksize=1):
+                print("step1")
                 lock.acquire()
+                print("step2")
                 pbar.update()
-                if func_name is not None: dump(shared[2], func_name, data) 
+                print("step3")
+                if func_name is not None: dump(shared[2], func_name, data)
+                print("step4")
                 lock.release()
+                print("step5")
 
 def run(args):
     pc, shared, argset = args
     try:
         argset[0](argset[1], pc, argset[2], lock, shared)
+        print(argset[0].__name__)
         return argset[0].__name__
     except Exception as e:
         print(e)
-        return None
+    return None
 
 
 data_set_chn = [
+    [interface.get_dividend_financing_data, "eastmoney", "Divdend Financing", 24*6],
     [interface.get_top_ten_holder_data, "eastmoney", "Top Ten Holder", 24*6],
     [interface.get_finance_data, "eastmoney", "Finance Factor", 24*6],
     [interface.get_balance_data, "eastmoney", "Balance Sheet", 24*6],
     [interface.get_moneyflow_data, "sina", "MoneyFlow Statement", 24],
-    [interface.get_dividend_financing_data, "eastmoney", "Divdend Financing", 24],
     [interface.get_dividend_detail_data, "eastmoney", "Divdend Detail", 24],
     [interface.get_spo_detail_data, "eastmoney", "SPO Detail", 24],
     [interface.get_rights_issue_detail_data, "eastmoney", "Rights Issue Detail", 24],
@@ -334,7 +340,7 @@ def fetch_data(lock, region):
 
     if region == 'chn':
         data_set = data_set_chn
-        interface.get_stock_list_data("joinquant")
+        # interface.get_stock_list_data("joinquant")
         # interface.get_etf_list("joinquant")
         interface.get_stock_trade_day("joinquant", lock, 'chn')
 
@@ -354,7 +360,7 @@ def fetch_data(lock, region):
     sleep = 0
     batch_size = 50
 
-    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=6, reset=True)
+    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=1, reset=True)
 
 
 if __name__ == '__main__':

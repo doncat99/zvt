@@ -28,8 +28,8 @@ class DividendFinancingRecorder(EastmoneyPageabeDataRecorder):
 
     def on_finish(self):
         try:
-            code_security = {}
             for item in self.entities:
+                code_security = {}
                 code_security[item.code] = item
 
                 need_fill_items = DividendFinancing.query_data(provider=self.provider, codes=list(code_security.keys()),
@@ -38,7 +38,6 @@ class DividendFinancingRecorder(EastmoneyPageabeDataRecorder):
                                                                filters=[
                                                                    DividendFinancing.ipo_raising_fund.is_(None),
                                                                    DividendFinancing.ipo_issues != 0])
-
                 for need_fill_item in need_fill_items:
                     if need_fill_item:
                         need_fill_item.ipo_raising_fund = code_security[item.code].raising_fund
