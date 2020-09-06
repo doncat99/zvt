@@ -64,9 +64,9 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
     def record(self, entity, start, end, size, timestamps, http_session):
         if self.end_timestamp:
             end_timestamp = to_time_str(self.end_timestamp)
-            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start, end=end_timestamp)
+            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start, end=end_timestamp, actions=False)
         else:
-            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start)
+            df = yh_get_bars(code=entity.code, interval=self.yahoo_trading_level, start=start, actions=False)
 
         if pd_is_not_null(df):
             df.reset_index(inplace=True)
@@ -88,6 +88,8 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
                     return "{}_{}".format(se['entity_id'], to_time_str(se['timestamp'], fmt=TIME_FORMAT_ISO8601))
 
             df['id'] = df[['entity_id', 'timestamp']].apply(generate_kdata_id, axis=1)
+
+            # df.to_csv("{}.csv".format(entity.code))
 
             df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 

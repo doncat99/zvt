@@ -251,21 +251,15 @@ def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
         # The master process tqdm bar is at Position 0
         with tqdm(total=len(args), ncols=80, desc="total", leave=True) as pbar:
             for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args], chunksize=1):
-                print("step1")
                 lock.acquire()
-                print("step2")
                 pbar.update()
-                print("step3")
                 if func_name is not None: dump(shared[2], func_name, data)
-                print("step4")
                 lock.release()
-                print("step5")
 
 def run(args):
     pc, shared, argset = args
     try:
         argset[0](argset[1], pc, argset[2], lock, shared)
-        print(argset[0].__name__)
         return argset[0].__name__
     except Exception as e:
         print(e)
@@ -293,9 +287,9 @@ data_set_chn = [
     [interface.get_margin_trading_summary_data, "joinquant", "Margin Trading Summary", 24],
     [interface.get_cross_market_summary_data, "joinquant", "Cross Market Summary", 24],
 
-    [interface.get_stock_1d_k_data, "joinquant", "Stock Daily K-Data", 24], 
+    # [interface.get_stock_1d_k_data, "joinquant", "Stock Daily K-Data", 24], 
     # [interface.get_stock_1d_hfq_k_data, "joinquant", "Stock Daily HFQ K-Data", 24],
-    # [interface.get_stock_1w_k_data, "joinquant", "Stock Weekly K-Data", 24],
+    [interface.get_stock_1w_k_data, "joinquant", "Stock Weekly K-Data", 24],
     # [interface.get_stock_1w_hfq_k_data, "joinquant", "Stock Weekly HFQ K-Data", 24],
     # [interface.get_stock_1mon_k_data, "joinquant", "Stock Monthly K-Data", 24], 
     # [interface.get_etf_1d_k_data, "sina", "ETF Daily K-Data", 24],
@@ -316,9 +310,9 @@ data_set_chn = [
 data_set_us = [
     [interface.get_stock_1d_k_data, "yahoo", "Stock Daily K-Data", 24], 
     # [interface.get_stock_1d_hfq_k_data, "yahoo", "Stock Daily HFQ K-Data", 24],
-    # [interface.get_stock_1w_k_data, "yahoo", "Stock Weekly K-Data", 24],
+    [interface.get_stock_1w_k_data, "yahoo", "Stock Weekly K-Data", 24],
     # [interface.get_stock_1w_hfq_k_data, "yahoo", "Stock Weekly HFQ K-Data", 24],
-    # [interface.get_stock_1mon_k_data, "yahoo", "Stock Monthly K-Data", 24], 
+    [interface.get_stock_1mon_k_data, "yahoo", "Stock Monthly K-Data", 24], 
     # [interface.get_stock_1mon_hfq_k_data, "yahoo", "Stock Monthly HFQ K-Data", 24],
     # [interface.get_stock_1h_k_data, "yahoo", "Stock 1 hours K-Data", 24], 
     # [interface.get_stock_1h_hfq_k_data, "yahoo", "Stock 1 hours HFQ K-Data", 24],
@@ -347,7 +341,7 @@ def fetch_data(lock, region):
     elif region == 'us':
         data_set = data_set_us
         # interface.get_stock_list_data("yahoo")
-        interface.get_stock_trade_day("yahoo", lock, 'us')
+        # interface.get_stock_trade_day("yahoo", lock, 'us')
 
     else:
         data_set = []
@@ -360,15 +354,15 @@ def fetch_data(lock, region):
     sleep = 0
     batch_size = 50
 
-    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=1, reset=True)
+    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=4, reset=True)
 
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
 
-    fetch_data(l, 'chn')
-    # fetch_data(l, 'us')
+    # fetch_data(l, 'chn')
+    fetch_data(l, 'us')
 
       
     

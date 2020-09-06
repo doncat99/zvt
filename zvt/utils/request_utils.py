@@ -135,8 +135,8 @@ def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low
     return get_bars(security, count, unit=unit, fields=fields, include_now=include_now, 
                     end_dt=end_dt, fq_ref_date=fq_ref_date, df=df)
 
-def yh_get_bars(code, interval, start=None, end=None):
+def yh_get_bars(code, interval, start=None, end=None, actions=True):
     logger.info("HTTP GET: bars, with code={}, unit={}, start={}, end={}".format(code, interval, start, end))
-    return asyncio.run(yf.Ticker(code).history(interval=interval, start=start, end=end, debug=False))
+    return asyncio.run(yf.Ticker(code).history(interval=interval, start=start, end=end, actions=actions, debug=False))
     # return yf.Ticker(code).history(interval=interval, start=start, end=end, debug=False)
     
