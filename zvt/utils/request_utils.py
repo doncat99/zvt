@@ -4,6 +4,7 @@ import time
 from http import client
 import requests
 from requests.adapters import HTTPAdapter
+from retrying import retry
 from functools import wraps
 import asyncio
 
@@ -135,6 +136,13 @@ def jq_get_bars(security, count, unit="1d", fields=("date", "open", "high", "low
     return get_bars(security, count, unit=unit, fields=fields, include_now=include_now, 
                     end_dt=end_dt, fq_ref_date=fq_ref_date, df=df)
 
+def retry_if_connection_error(exception):
+    """ Specify an exception you need. or just True"""
+    return True
+    # return isinstance(exception, ConnectionError)
+
+# if exception retry with 2 second wait  
+@retry(retry_on_exception=retry_if_connection_error, stop_max_attempt_number=3, wait_fixed=500)
 def yh_get_bars(code, interval, start=None, end=None, actions=True):
     logger.info("HTTP GET: bars, with code={}, unit={}, start={}, end={}".format(code, interval, start, end))
     return asyncio.run(yf.Ticker(code).history(interval=interval, start=start, end=end, actions=actions, debug=False))

@@ -354,7 +354,7 @@ def fetch_data(lock, region):
     sleep = 0
     batch_size = 50
 
-    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=4, reset=True)
+    mp_tqdm(run, lock, shared=[sleep, batch_size, region], args=data_set, pc=3, reset=True)
 
 
 if __name__ == '__main__':

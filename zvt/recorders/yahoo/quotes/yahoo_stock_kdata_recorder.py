@@ -2,6 +2,7 @@
 import argparse
 
 import pandas as pd
+from sqlalchemy.exc import IntegrityError
 
 from zvt import init_log
 from zvt.api import get_kdata, AdjustType
@@ -89,10 +90,13 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
 
             df['id'] = df[['entity_id', 'timestamp']].apply(generate_kdata_id, axis=1)
 
-            # df.to_csv("{}.csv".format(entity.code))
-
-            df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
-
+            try:
+                df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            except IntegrityError as e:
+                if "psycopg2.errors.UniqueViolation" in e.__str__():
+                    self.logger.info("UniqueViolation for id:{}, {}".format(entity.id, self.data_schema))
+                    df.drop_duplicates(subset=['id'], keep='first', inplace=True)
+                    df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
         return None
 
 

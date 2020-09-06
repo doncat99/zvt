@@ -480,7 +480,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
                 # sleep for a while to next entity
                 self.sleep()
             except Exception as e:
-                self.logger.exception("recording data for id:{}, {}, error:{}".format(entity_item.id, self.data_schema, e))
+                self.logger.exception("recording data id:{}, {}, error:{}".format(entity_item.id, self.data_schema, e))
                 return
 
     def run(self):
