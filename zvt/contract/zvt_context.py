@@ -6,6 +6,7 @@ from sqlalchemy.sql import text
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.ext.declarative import declarative_base
 
+from zvt.contract.common import Region
 from zvt import zvt_env
 
 
@@ -106,9 +107,9 @@ us_map_key = [
     "zvt_trader_info",
 ]
 
-def build_map(region, map_key):
+def build_map(region: Region, map_key):
 
-    db_name = "{}_{}".format(zvt_env['db_name'], region)
+    db_name = "{}_{}".format(zvt_env['db_name'], region.value)
     link = 'postgresql+psycopg2://{}:{}@{}/{}'.format(
         zvt_env['db_user'], zvt_env['db_pass'], zvt_env['db_host'], db_name)
     db_engine = create_engine(link,
@@ -122,19 +123,19 @@ def build_map(region, map_key):
 
     with contextlib.suppress(sqlalchemy.exc.ProgrammingError):
         with sqlalchemy.create_engine('postgresql:///postgres', isolation_level='AUTOCOMMIT').connect() as connection:
-            cmd = "CREATE DATABASE {}_{}".format(zvt_env['db_name'], region)
+            cmd = "CREATE DATABASE {}_{}".format(zvt_env['db_name'], region.value)
             connection.execute(cmd)
 
     dict_ = {}
     for key in map_key:
-        new_key = "{}_{}".format(region, key)
+        new_key = "{}_{}".format(region.value, key)
         dict_.update({new_key: db_engine})
     return dict_
 
 # provider_dbname -> engine
 if "db_engine" in zvt_env and zvt_env['db_engine'] == "postgresql":
-    chn_map = build_map('chn', chn_map_key)
-    us_map = build_map('us', us_map_key)
+    chn_map = build_map(Region.CHN, chn_map_key)
+    us_map = build_map(Region.US, us_map_key)
     db_engine_map = {**chn_map, **us_map}
 else:
     db_engine_map = {}

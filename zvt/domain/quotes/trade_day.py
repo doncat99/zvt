@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 TradeDayBase = declarative_base()
 
@@ -15,6 +16,6 @@ class StockTradeDay(TradeDayBase, Mixin):
     # exchange = Column(String(length=32))
 
 
-register_schema(regions=['chn', 'us'], providers=['joinquant', 'yahoo'], db_name='trade_day', schema_base=TradeDayBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['joinquant', 'yahoo'], db_name='trade_day', schema_base=TradeDayBase)
 
 __all__ = ['StockTradeDay']

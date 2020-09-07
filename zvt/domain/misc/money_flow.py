@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 MoneyFlowBase = declarative_base()
 
@@ -78,6 +79,6 @@ class StockMoneyFlow(MoneyFlowBase, Mixin):
     net_small_inflow_rate = Column(Float)
 
 
-register_schema(regions=['chn', 'us'], providers=['sina'], db_name='money_flow', schema_base=MoneyFlowBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['sina'], db_name='money_flow', schema_base=MoneyFlowBase)
 
 __all__ = ['BlockMoneyFlow', 'StockMoneyFlow']

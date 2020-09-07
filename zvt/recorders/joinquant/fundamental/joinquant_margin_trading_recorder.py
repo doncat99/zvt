@@ -5,6 +5,7 @@ import pandas as pd
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import Stock, MarginTrading
+from zvt.contract.common import Region
 from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY
@@ -43,7 +44,7 @@ class MarginTradingRecorder(TimeSeriesDataRecorder):
             df['id'] = df[['entity_id', 'timestamp']].apply(
                 lambda se: "{}_{}".format(se['entity_id'], to_time_str(se['timestamp'], fmt=TIME_FORMAT_DAY)), axis=1)
 
-            df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
         return None
 

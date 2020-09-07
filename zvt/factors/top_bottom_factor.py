@@ -54,8 +54,9 @@ class TopBottomFactor(TechnicalFactor):
 
 
 if __name__ == '__main__':
+    from zvt.contract.common import Region
     factor = TopBottomFactor(codes=['601318'], start_timestamp='2005-01-01',
-                             end_timestamp=now_pd_timestamp('chn'),
+                             end_timestamp=now_pd_timestamp(Region.CHN),
                              level=IntervalLevel.LEVEL_1DAY, window=120)
     print(factor.factor_df)
 

@@ -8,6 +8,7 @@ import tzlocal
 import pytz
 
 from zvt.contract import IntervalLevel
+from zvt.contract.common import Region
 
 
 CHINA_TZ = 'Asia/Shanghai'
@@ -49,8 +50,8 @@ def now_timestamp():
     return int(pd.Timestamp.utcnow().timestamp() * 1000)
 
 
-def now_pd_timestamp(region) -> pd.Timestamp:
-    if region == 'us':
+def now_pd_timestamp(region: Region) -> pd.Timestamp:
+    if region == Region.US:
         tz = pytz.timezone('America/New_York')
         return pd.Timestamp.now(tz).replace(tzinfo=None)
     return pd.Timestamp.now()
@@ -63,7 +64,7 @@ def to_time_str(the_time, fmt=TIME_FORMAT_DAY):
         return the_time
 
 
-def now_time_str(region, fmt=TIME_FORMAT_DAY):
+def now_time_str(region: Region, fmt=TIME_FORMAT_DAY):
     return to_time_str(the_time=now_pd_timestamp(region), fmt=fmt)
 
 
@@ -86,7 +87,7 @@ def get_year_quarter(time):
     return time.year, ((time.month - 1) // 3) + 1
 
 
-def day_offset_today(region, offset=0):
+def day_offset_today(region: Region, offset=0):
     return now_pd_timestamp(region) + datetime.timedelta(days=offset)
 
 

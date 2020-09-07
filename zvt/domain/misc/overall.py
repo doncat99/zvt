@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 OverallBase = declarative_base()
 
@@ -64,6 +65,6 @@ class CrossMarketSummary(OverallBase, Mixin):
     quota_daily_balance = Column(Float)
 
 
-register_schema(regions=['chn', 'us'], providers=['joinquant', 'exchange'], db_name='overall', schema_base=OverallBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['joinquant', 'exchange'], db_name='overall', schema_base=OverallBase)
 
 __all__ = ['StockSummary', 'MarginTradingSummary', 'CrossMarketSummary']

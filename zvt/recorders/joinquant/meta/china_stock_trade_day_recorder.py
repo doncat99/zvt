@@ -3,9 +3,10 @@ import pandas as pd
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
+from zvt.domain import StockTradeDay, Stock
+from zvt.contract.common import Region
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.request_utils import jq_auth, jq_get_trade_days
-from zvt.domain import StockTradeDay, Stock
 
 
 class ChinaStockTradeDayRecorder(TimeSeriesDataRecorder):
@@ -38,7 +39,7 @@ class ChinaStockTradeDayRecorder(TimeSeriesDataRecorder):
         df['id'] = [to_time_str(date) for date in dates]
         df['entity_id'] = 'sz'
 
-        df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
 
 __all__ = ['ChinaStockTradeDayRecorder']

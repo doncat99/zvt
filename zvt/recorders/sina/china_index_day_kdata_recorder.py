@@ -5,10 +5,12 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.utils.time_utils import get_year_quarters, is_same_date
-from zvt.utils.request_utils import request_get
+from zvt.contract.common import Region
 from zvt.api.quote import generate_kdata_id
 from zvt.domain import Index, Index1dKdata
+from zvt.utils.time_utils import get_year_quarters, is_same_date, now_pd_timestamp
+from zvt.utils.request_utils import request_get
+
 
 
 class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
@@ -35,7 +37,7 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
         return generate_kdata_id(entity.id, timestamp=original_data['timestamp'], level=self.level)
 
     def record(self, entity, start, end, size, timestamps, http_session):
-        the_quarters = get_year_quarters(start, now_pd_timestamp('chn'))
+        the_quarters = get_year_quarters(start, now_pd_timestamp(Region.CHN))
         if not is_same_date(entity.timestamp, start) and len(the_quarters) > 1:
             the_quarters = the_quarters[1:]
 

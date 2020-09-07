@@ -251,7 +251,8 @@ def get_kdata(entity_id=None, entity_ids=None, level=IntervalLevel.LEVEL_1DAY.va
 
 
 if __name__ == '__main__':
-    df = get_etf_stocks(timestamp=now_pd_timestamp('chn'), code='510050', provider='joinquant')
+    from zvt.contract.common import Region
+    df = get_etf_stocks(timestamp=now_pd_timestamp(Region.CHN), code='510050', provider='joinquant')
     print(df)
 
     # assert get_kdata_schema(entity_type='stock', level=IntervalLevel.LEVEL_1DAY) == Stock1dKdata

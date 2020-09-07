@@ -8,10 +8,11 @@ import requests
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
-from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
-from zvt.utils.request_utils import get_http_session, request_get
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import IndexStock, Index
+from zvt.contract.common import Region
+from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
+from zvt.utils.request_utils import get_http_session, request_get
 
 
 class ChinaIndexListSpider(Recorder):
@@ -104,13 +105,13 @@ class ChinaIndexListSpider(Recorder):
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
-            response_df['timestamp'] = now_pd_timestamp('chn')
+            response_df['timestamp'] = now_pd_timestamp(Region.CHN)
 
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{index_id}_{x}')
 
-            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=True)
+            df_to_db(df=response_df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=True)
             self.logger.info(f'{index["name"]} - {index_code} 成分股抓取完成...')
 
             self.sleep()
@@ -153,7 +154,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
-            response_df['timestamp'] = now_pd_timestamp('chn')
+            response_df['timestamp'] = now_pd_timestamp(Region.CHN)
 
             response_df.rename(columns={'证券代码': 'stock_code', '证券简称': 'stock_name'}, inplace=True)
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
@@ -161,7 +162,7 @@ class ChinaIndexListSpider(Recorder):
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{index_id}_{x}')
 
-            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider)
+            df_to_db(df=response_df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider)
             self.logger.info(f'{index["name"]} - {index_code} 成分股抓取完成...')
 
             self.sleep()
@@ -234,14 +235,14 @@ class ChinaIndexListSpider(Recorder):
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
-            response_df['timestamp'] = now_pd_timestamp('chn')
+            response_df['timestamp'] = now_pd_timestamp(Region.CHN)
 
             response_df.columns = ['stock_code']
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
             response_df['id'] = response_df['stock_id'].apply(
                 lambda x: f'{index_id}_{x}')
 
-            df_to_db(df=response_df, region='chn', data_schema=self.data_schema, provider=self.provider)
+            df_to_db(df=response_df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider)
             self.logger.info(f'{index["name"]} - {index_code} 成分股抓取完成...')
 
             self.sleep()
@@ -257,7 +258,7 @@ class ChinaIndexListSpider(Recorder):
         df = df.dropna(axis=0, how='any')
         df = df.drop_duplicates(subset='id', keep='last')
 
-        df_to_db(df=df, region='chn', data_schema=Index, provider=self.provider, force_update=False)
+        df_to_db(df=df, region=Region.CHN, data_schema=Index, provider=self.provider, force_update=False)
 
 
 __all__ = ['ChinaIndexListSpider']

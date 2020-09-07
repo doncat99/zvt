@@ -9,6 +9,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.contract.common import Region
 from zvt.recorders.joinquant.common import to_jq_trading_level, to_jq_entity_id
 from zvt.domain import Stock, StockKdataCommon, Stock1dHfqKdata
 from zvt.utils.pd_utils import pd_is_not_null
@@ -85,7 +86,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
         if self.adjust_type == AdjustType.hfq:
             fq_ref_date = '2000-01-01'
         else:
-            fq_ref_date = to_time_str(now_pd_timestamp('chn'))
+            fq_ref_date = to_time_str(now_pd_timestamp(Region.CHN))
 
         if not self.end_timestamp:
             df = jq_get_bars(to_jq_entity_id(entity),
@@ -137,7 +138,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
 
             df['id'] = df[['entity_id', 'timestamp']].apply(generate_kdata_id, axis=1)
 
-            df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
         return None
 

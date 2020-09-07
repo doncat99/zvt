@@ -11,6 +11,7 @@ from tqdm import tqdm
 import pickle
 
 from zvt import zvt_env
+from zvt.contract.common import Region
 from zvt.domain import Stock, Etf, StockTradeDay, StockSummary, StockDetail, FinanceFactor, \
                        BalanceSheet, IncomeStatement, CashFlowStatement, StockMoneyFlow, \
                        DividendFinancing, DividendDetail, RightsIssueDetail, SpoDetail, \
@@ -30,16 +31,16 @@ def get_cache():
             return pickle.load(handle)
     return {}
 
-def valid(region, func_name, valid_time, data):
-    key = "{}_{}".format(region, func_name)
+def valid(region: Region, func_name, valid_time, data):
+    key = "{}_{}".format(region.value, func_name)
     lasttime = data.get(key, None)
     if lasttime is not None:
         if lasttime > (datetime.now() - timedelta(hours=valid_time)):
             return True
     return False
 
-def dump(region, func_name, data):
-    key = "{}_{}".format(region, func_name)
+def dump(region: Region, func_name, data):
+    key = "{}_{}".format(region.value, func_name)
     file = zvt_env['cache_path'] + '/' + 'cache.pkl'
     with open(file, 'wb+') as handle:
         data.update({key : datetime.now()})
@@ -329,21 +330,21 @@ data_set_us = [
 ]
 
 
-def fetch_data(lock, region):
+def fetch_data(lock, region: Region):
     print("*"*60)
     print("*    Start Fetching Stock information...")
     print("*"*60)
 
-    if region == 'chn':
+    if region == Region.CHN:
         data_set = data_set_chn
         # interface.get_stock_list_data("joinquant")
         # interface.get_etf_list("joinquant")
-        interface.get_stock_trade_day("joinquant", lock, 'chn')
+        interface.get_stock_trade_day("joinquant", lock, region)
 
-    elif region == 'us':
+    elif region == Region.US:
         data_set = data_set_us
         # interface.get_stock_list_data("yahoo")
-        # interface.get_stock_trade_day("yahoo", lock, 'us')
+        # interface.get_stock_trade_day("yahoo", lock, region)
 
     else:
         data_set = []
@@ -363,8 +364,8 @@ if __name__ == '__main__':
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
 
-    # fetch_data(l, 'chn')
-    fetch_data(l, 'us')
+    fetch_data(l, Region.CHN)
+    # fetch_data(l, Region.US)
 
       
     

@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 TraderBase = declarative_base()
 
@@ -98,6 +99,6 @@ class Order(TraderBase, Mixin):
     level = Column(String(length=32))
 
 
-register_schema(regions=['chn', 'us'], providers=['zvt'], db_name='trader_info', schema_base=TraderBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['zvt'], db_name='trader_info', schema_base=TraderBase)
 
 __all__ = ['TraderInfo', 'AccountStats', 'Position', 'Order']

@@ -6,6 +6,7 @@ from zvt.contract.api import df_to_db, get_data
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Index
 from zvt.domain.misc.holder import HkHolder
+from zvt.contract.common import Region
 from zvt.recorders.joinquant.common import to_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, to_pd_timestamp, now_pd_timestamp
@@ -47,7 +48,7 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
     def init_timestamps(self, entity, http_session):
         # 聚宽数据从2017年3月17开始
         return pd.date_range(start=to_pd_timestamp('2017-3-17'),
-                             end=now_pd_timestamp('chn'),
+                             end=now_pd_timestamp(Region.CHN),
                              freq='B').tolist()
 
     # 覆盖这个方式是因为，HkHolder里面entity其实是股票，而recorder中entity是 Index类型(沪股通/深股通)
@@ -88,7 +89,7 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
                                                  to_time_str(se['timestamp'], fmt=TIME_FORMAT_DAY)),
                     axis=1)
 
-                df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+                df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
 
 __all__ = ['JoinquantHkHolderRecorder']

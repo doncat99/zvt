@@ -10,12 +10,14 @@ from zvt.api.business_reader import AccountStatsReader
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
+from zvt.contract.common import Region
 from zvt.domain import Stock, TraderInfo, AccountStats, Position
 from zvt.drawer.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
 from zvt.trader import TradingSignal, TradingSignalType, TradingListener
 from zvt.trader.account import SimAccountService
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str, is_same_date
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +73,7 @@ class Trader(object):
         if real_time:
             logger.info(
                 'real_time mode, end_timestamp should be future,you could set it big enough for running forever')
-            assert self.end_timestamp >= now_pd_timestamp('chn')
+            assert self.end_timestamp >= now_pd_timestamp(Region.CHN)
 
         self.kdata_use_begin_time = kdata_use_begin_time
         self.draw_result = draw_result
@@ -342,7 +344,7 @@ class Trader(object):
             l.on_trading_error(timestamp, error)
 
     def run(self):
-        now = now_pd_timestamp('chn')
+        now = now_pd_timestamp(Region.CHN)
         # iterate timestamp of the min level,e.g,9:30,9:35,9.40...for 5min level
         # timestamp represents the timestamp in kdata
         for timestamp in self.entity_schema.get_interval_timestamps(start_date=self.start_timestamp,

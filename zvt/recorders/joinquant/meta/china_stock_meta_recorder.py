@@ -4,10 +4,11 @@ from jqdatasdk import finance
 
 from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
-from zvt.utils.pd_utils import pd_is_not_null
 from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.domain import EtfStock, Stock, Etf, StockDetail
+from zvt.contract.common import Region
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
+from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.request_utils import jq_auth, jq_get_all_securities, jq_query, jq_logout
 
 
@@ -46,9 +47,9 @@ class JqChinaStockRecorder(BaseJqChinaMetaRecorder):
     def run(self):
         # 抓取股票列表
         df_stock = self.to_zvt_entity(jq_get_all_securities(['stock']), entity_type='stock')
-        df_to_db(df_stock, region='chn', data_schema=Stock, provider=self.provider, force_update=self.force_update)
+        df_to_db(df_stock, region=Region.CHN, data_schema=Stock, provider=self.provider, force_update=self.force_update)
         # persist StockDetail too
-        df_to_db(df=df_stock, region='chn', data_schema=StockDetail, provider=self.provider, force_update=self.force_update)
+        df_to_db(df=df_stock, region=Region.CHN, data_schema=StockDetail, provider=self.provider, force_update=self.force_update)
 
         # self.logger.info(df_stock)
         self.logger.info("persist stock list success")
@@ -62,7 +63,7 @@ class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
     def run(self):
         # 抓取etf列表
         df_index = self.to_zvt_entity(jq_get_all_securities(['etf']), entity_type='etf', category='etf')
-        df_to_db(df_index, region='chn', data_schema=Etf, provider=self.provider, force_update=self.force_update)
+        df_to_db(df_index, region=Region.CHN, data_schema=Etf, provider=self.provider, force_update=self.force_update)
 
         # self.logger.info(df_index)
         self.logger.info("persist etf list success")
@@ -112,7 +113,7 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
             df['report_date'] = pd.to_datetime(df['period_end'])
             df['report_period'] = df['report_type'].apply(lambda x: jq_to_report_period(x))
 
-            df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
             # self.logger.info(df.tail())
             self.logger.info(f"persist etf {entity.code} portfolio success")

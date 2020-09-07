@@ -3,10 +3,11 @@ import pandas as pd
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
-from zvt.utils.pd_utils import pd_is_not_null
-from zvt.utils.time_utils import now_pd_timestamp
 from zvt.api.quote import get_etf_stocks
 from zvt.domain import StockValuation, Etf, EtfValuation
+from zvt.contract.common import Region
+from zvt.utils.pd_utils import pd_is_not_null
+from zvt.utils.time_utils import now_pd_timestamp
 
 
 class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):
@@ -27,7 +28,7 @@ class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):
 
     def record(self, entity, start, end, size, timestamps, http_session):
         if not end:
-            end = now_pd_timestamp('chn')
+            end = now_pd_timestamp(Region.CHN)
 
         date_range = pd.date_range(start=start, end=end, freq='1D').tolist()
         for date in date_range:
@@ -106,7 +107,7 @@ class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):
 
                     self.logger.info(df)
 
-                    df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider,
+                    df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider,
                              force_update=self.force_update)
 
         return None

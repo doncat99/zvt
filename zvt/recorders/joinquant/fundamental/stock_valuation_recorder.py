@@ -5,10 +5,12 @@ from jqdatasdk import valuation
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
-from zvt.utils.time_utils import now_pd_timestamp, now_time_str, to_time_str
 from zvt.domain import Stock, StockValuation, Etf
+from zvt.contract.common import Region
 from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.request_utils import jq_auth, jq_query, jq_get_fundamentals_continuously, jq_logout
+from zvt.utils.time_utils import now_pd_timestamp, now_time_str, to_time_str
+
 
 class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
     entity_provider = 'joinquant'
@@ -37,8 +39,8 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         ).filter(
             valuation.code == to_jq_entity_id(entity)
         )
-        count: pd.Timedelta = now_pd_timestamp('chn') - start
-        df = jq_get_fundamentals_continuously(q, end_date=now_time_str('chn'), count=count.days + 1, panel=False)
+        count: pd.Timedelta = now_pd_timestamp(Region.CHN) - start
+        df = jq_get_fundamentals_continuously(q, end_date=now_time_str(Region.CHN), count=count.days + 1, panel=False)
         df['entity_id'] = entity.id
         df['timestamp'] = pd.to_datetime(df['day'])
         df['code'] = entity.code
@@ -56,7 +58,7 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         df['capitalization'] = df['capitalization'] * 10000
         df['circulating_cap'] = df['circulating_cap'] * 10000
         df['turnover_ratio'] = df['turnover_ratio'] * 0.01
-        df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
         return None
 
@@ -65,7 +67,7 @@ __all__ = ['JqChinaStockValuationRecorder']
 
 if __name__ == '__main__':
     # 上证50
-    df = Etf.get_stocks(timestamp=now_pd_timestamp('chn'), code='510050')
+    df = Etf.get_stocks(timestamp=now_pd_timestamp(Region.CHN), code='510050')
     stocks = df.stock_id.tolist()
     print(stocks)
     print(len(stocks))

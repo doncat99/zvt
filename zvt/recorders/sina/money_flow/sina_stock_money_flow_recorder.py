@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.domain import StockMoneyFlow, Stock, StockTradeDay
+from zvt.contract.common import Region
 from zvt.utils.time_utils import to_pd_timestamp, is_same_date, now_pd_timestamp
 from zvt.utils.utils import to_float
 from zvt.utils.request_utils import request_get
-from zvt.domain import StockMoneyFlow, Stock, StockTradeDay
 
 
 class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
@@ -28,7 +29,7 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
         super().init_entities()
         # 过滤掉退市的
         self.entities = [entity for entity in self.entities if
-                         (entity.end_date is None) or (entity.end_date > now_pd_timestamp('chn'))]
+                         (entity.end_date is None) or (entity.end_date > now_pd_timestamp(Region.CHN))]
 
     def generate_url(self, code, number):
         return self.url.format(number, code)

@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 FinanceBase = declarative_base()
 
@@ -961,6 +962,6 @@ class FinanceFactor(FinanceBase, Mixin):
     broker_self_operated_fixed_income_securities_net_capital_ratio = Column(Float)
 
 
-register_schema(regions=['chn', 'us'], providers=['eastmoney'], db_name='finance', schema_base=FinanceBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['eastmoney'], db_name='finance', schema_base=FinanceBase)
 
 __all__ = ['FinanceFactor', 'BalanceSheet', 'IncomeStatement', 'CashFlowStatement']

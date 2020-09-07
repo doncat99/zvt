@@ -6,10 +6,11 @@ import pandas as pd
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
+from zvt.domain import Stock, StockDetail
+from zvt.contract.common import Region
+from zvt.recorders.consts import YAHOO_STOCK_LIST_HEADER
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
-from zvt.domain import Stock, StockDetail
-from zvt.recorders.consts import YAHOO_STOCK_LIST_HEADER
 
 
 class ExchangeUsStockListRecorder(Recorder):
@@ -46,10 +47,10 @@ class ExchangeUsStockListRecorder(Recorder):
             df = df.drop_duplicates(subset=('id'), keep='last')
 
             # persist StockDetail
-            df_to_db(df=df, region='us', data_schema=StockDetail, provider=self.provider, force_update=True)
+            df_to_db(df=df, region=Region.US, data_schema=StockDetail, provider=self.provider, force_update=True)
 
             df.drop(['industry','sector'], axis=1, inplace=True)
-            df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=True)
+            df_to_db(df=df, region=Region.US, data_schema=self.data_schema, provider=self.provider, force_update=True)
 
             self.logger.info("persist stock list successs")
 

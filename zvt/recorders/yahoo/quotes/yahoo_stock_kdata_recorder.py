@@ -10,6 +10,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.contract.common import Region
 from zvt.recorders.joinquant.common import to_yahoo_trading_level
 from zvt.domain import Stock, StockKdataCommon, Stock1dKdata
 from zvt.utils.pd_utils import pd_is_not_null
@@ -91,12 +92,12 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
             df['id'] = df[['entity_id', 'timestamp']].apply(generate_kdata_id, axis=1)
 
             try:
-                df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+                df_to_db(df=df, region=Region.US, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
             except IntegrityError as e:
                 if "psycopg2.errors.UniqueViolation" in e.__str__():
                     self.logger.info("UniqueViolation for id:{}, {}".format(entity.id, self.data_schema))
                     df.drop_duplicates(subset=['id'], keep='first', inplace=True)
-                    df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+                    df_to_db(df=df, region=Region.US, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
         return None
 
 

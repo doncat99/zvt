@@ -11,6 +11,7 @@ from zvt.contract.api import get_data, df_to_db
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader, DataListener
 from zvt.domain import Stock
+from zvt.contract.common import Region
 from zvt.drawer.drawer import Drawer
 from zvt.utils.pd_utils import pd_is_not_null
 
@@ -270,7 +271,7 @@ class Factor(DataReader, DataListener):
         """
         pass
 
-    def persist_factor(self, region):
+    def persist_factor(self, region: Region):
         df_to_db(df=self.factor_df, region=region, data_schema=self.factor_schema, provider='zvt', force_update=False)
 
 

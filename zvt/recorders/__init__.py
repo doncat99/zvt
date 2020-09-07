@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from zvt.contract.common import Region
 from zvt.recorders.eastmoney import *
 from zvt.recorders.exchange import *
 from zvt.recorders.joinquant import *
 from zvt.recorders.sina import *
 from zvt.recorders.yahoo import *
+
 
 CHINA_STOCK_MAIN_INDEX = [{'id': 'index_cn_000001',
                            'entity_id': 'index_cn_000001',
@@ -110,17 +112,17 @@ CHINA_STOCK_MAIN_INDEX = [{'id': 'index_cn_000001',
                           ]
 
 
-def init_main_index(region, provider='exchange'):
+def init_main_index(region: Region, provider='exchange'):
     from zvt.utils.time_utils import to_pd_timestamp
     import pandas as pd
     from zvt.contract.api import df_to_db
     from zvt.domain import Index
 
-    if region == 'chn':
+    if region == Region.CHN:
         for item in CHINA_STOCK_MAIN_INDEX:
             item['timestamp'] = to_pd_timestamp(item['timestamp'])
         df = pd.DataFrame(CHINA_STOCK_MAIN_INDEX)
-    elif region == 'us':
+    elif region == Region.US:
         df = pd.DataFrame()
         print("US region index not initialized, in file: init_main_index")
     else:
@@ -132,8 +134,4 @@ def init_main_index(region, provider='exchange'):
     except Exception as _:
         pass
 
-regions = ['chn']
-for region in regions:
-    init_main_index(region)
-
-
+init_main_index(Region.CHN)

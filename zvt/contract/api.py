@@ -16,17 +16,19 @@ from sqlalchemy.orm import sessionmaker, Session
 from zvt import zvt_env
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract import zvt_context
+from zvt.contract.common import Region
 from zvt.utils.pd_utils import pd_is_not_null, index_df
 from zvt.utils.time_utils import to_pd_timestamp
 
 logger = logging.getLogger(__name__)
 
-def build_engine(region, data_path, provider, db_name):
+
+def build_engine(region: Region, data_path, provider, db_name):
     if "db_engine" in zvt_env and zvt_env['db_engine'] == "postgresql":
-        # print("engine added require:{}_{}_{}".format(region, provider, db_name))
+        # print("engine added require:{}_{}_{}".format(region.value, provider, db_name))
         db_engine = None
     else:
-        db_path = os.path.join(data_path, '{}_{}_{}.db?check_same_thread=False'.format(region, provider, db_name))
+        db_path = os.path.join(data_path, '{}_{}_{}.db?check_same_thread=False'.format(region.value, provider, db_name))
         db_engine = create_engine('sqlite:///' + db_path, echo=False)
 
     return db_engine
@@ -45,7 +47,7 @@ def get_db_name(data_schema: DeclarativeMeta) -> str:
             return db_name
 
 
-def get_db_engine(region: str,
+def get_db_engine(region: Region,
                   provider: str,
                   db_name: str = None,
                   data_schema: object = None,
@@ -67,7 +69,7 @@ def get_db_engine(region: str,
     if data_schema:
         db_name = get_db_name(data_schema=data_schema)
 
-    engine_key = '{}_{}_{}'.format(region, provider, db_name)
+    engine_key = '{}_{}_{}'.format(region.value, provider, db_name)
     db_engine = zvt_context.db_engine_map.get(engine_key)
     if not db_engine:
         db_engine = build_engine(region, data_path, provider, db_name)
@@ -420,7 +422,7 @@ def get_entity_code(entity_id: str):
 
 
 def df_to_db(df: pd.DataFrame,
-             region: str,
+             region: Region,
              data_schema: DeclarativeMeta,
              provider: str,
              force_update: bool = False,

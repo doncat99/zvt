@@ -15,6 +15,7 @@ from zvt.domain import StockTradeDay, StockDetail
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_db_session, get_schema_columns
 from zvt.contract.api import get_entities, get_data
+from zvt.contract.common import Region
 from zvt.utils.time_utils import to_pd_timestamp, TIME_FORMAT_DAY, to_time_str, evaluate_size_from_timestamp, \
                                  is_in_same_interval, now_pd_timestamp, count_mins_before_close_time, \
                                  is_same_date, date_delta
@@ -423,7 +424,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
         return False
 
-    def process_entity(self, region, entity_item, trade_day, stock_detail, http_session):
+    def process_entity(self, region: Region, entity_item, trade_day, stock_detail, http_session):
         step1 = time.time()
         now = now_pd_timestamp(region)
 
@@ -473,7 +474,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
             self.data_schema.__name__, entity_item.id, time.time()-step1))
         return False
 
-    def process_loop(self, region, entity_item, trade_day, stock_detail, http_session):
+    def process_loop(self, region: Region, entity_item, trade_day, stock_detail, http_session):
         while True:
             try:
                 if self.process_entity(self.share_para[4], entity_item, trade_day, stock_detail, http_session):

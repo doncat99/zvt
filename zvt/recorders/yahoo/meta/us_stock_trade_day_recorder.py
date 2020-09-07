@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-
 import pandas_market_calendars as mcal
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
-from zvt.utils.time_utils import to_time_str, now_pd_timestamp, is_datetime
 from zvt.domain import StockTradeDay, Stock
+from zvt.contract.common import Region
+from zvt.utils.time_utils import to_time_str, now_pd_timestamp, is_datetime
 
 
 class UsStockTradeDayRecorder(TimeSeriesDataRecorder):
@@ -34,14 +34,14 @@ class UsStockTradeDayRecorder(TimeSeriesDataRecorder):
             pass
 
         df = pd.DataFrame()
-        dates = self.nyse.schedule(start_date=to_time_str(start), end_date=to_time_str(now_pd_timestamp('us')))
+        dates = self.nyse.schedule(start_date=to_time_str(start), end_date=to_time_str(now_pd_timestamp(Region.US)))
         dates = dates.index.to_list()
         self.logger.info(f'add dates:{dates}')
         df['timestamp'] = pd.to_datetime(dates)
         df['id'] = [to_time_str(date) for date in dates]
         df['entity_id'] = 'nyse'
 
-        df_to_db(df=df, region='us', data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(df=df, region=Region.US, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
 
 
 __all__ = ['UsStockTradeDayRecorder']

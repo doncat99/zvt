@@ -8,6 +8,7 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.orm import Session
 
 from zvt.contract import IntervalLevel
+from zvt.contract.common import Region
 from zvt.utils.time_utils import date_and_time, is_same_time, now_pd_timestamp
 
 
@@ -158,7 +159,7 @@ class Mixin(object):
 
 class NormalMixin(Mixin):
     # the record created time in db
-    created_timestamp = Column(DateTime, default=now_pd_timestamp('chn'))
+    created_timestamp = Column(DateTime, default=now_pd_timestamp(Region.CHN))
     # the record updated time in db, some recorder would check it for whether need to refresh
     updated_timestamp = Column(DateTime)
 
@@ -268,6 +269,6 @@ class EntityMixin(Mixin):
 
 class NormalEntityMixin(EntityMixin):
     # the record created time in db
-    created_timestamp = Column(DateTime, default=now_pd_timestamp('chn'))
+    created_timestamp = Column(DateTime, default=now_pd_timestamp(Region.CHN))
     # the record updated time in db, some recorder would check it for whether need to refresh
     updated_timestamp = Column(DateTime)

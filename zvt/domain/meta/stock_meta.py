@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import EntityMixin
 from zvt.contract.register import register_schema, register_entity
+from zvt.contract.common import Region
 
 StockMetaBase = declarative_base()
 
@@ -136,7 +137,7 @@ class StockDetail(StockMetaBase, BaseSecurity):
     net_winning_rate = Column(Float)
 
 
-register_schema(regions=['chn', 'us'], providers=['joinquant', 'eastmoney', 'exchange', 'sina', 'yahoo'], db_name='stock_meta',
+register_schema(regions=[Region.CHN, Region.US], providers=['joinquant', 'eastmoney', 'exchange', 'sina', 'yahoo'], db_name='stock_meta',
                 schema_base=StockMetaBase)
 
 __all__ = ['Stock', 'Index', 'Block', 'Etf', 'IndexStock', 'BlockStock', 'EtfStock', 'StockDetail']

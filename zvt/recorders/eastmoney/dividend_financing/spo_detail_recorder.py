@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.domain import SpoDetail, DividendFinancing
+from zvt.contract.common import Region
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp
@@ -24,7 +25,7 @@ class SPODetailRecorder(EastmoneyPageabeDataRecorder):
         }
 
     def on_finish(self):
-        last_year = str(now_pd_timestamp('chn').year)
+        last_year = str(now_pd_timestamp(Region.CHN).year)
         codes = [item.code for item in self.entities]
         need_filleds = DividendFinancing.query_data(provider=self.provider, codes=codes,
                                                     return_type='domain',

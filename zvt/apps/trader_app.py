@@ -10,6 +10,7 @@ from zvt.api.business import get_trader_info, get_order_securities
 from zvt.api.business_reader import AccountStatsReader, OrderReader
 from zvt.app import app
 from zvt.domain import TraderInfo
+from zvt.contract.common import Region
 from zvt.drawer.dcc_components import get_account_stats_figure, get_trading_signals_figure
 from zvt.utils.time_utils import TIME_FORMAT_DAY, now_pd_timestamp
 
@@ -96,7 +97,7 @@ def serve_layout():
                                             dcc.DatePickerRange(
                                                 id='date-picker-range',
                                                 start_date='2009-01-01',
-                                                end_date=now_pd_timestamp('chn'),
+                                                end_date=now_pd_timestamp(Region.CHN),
                                                 display_format=TIME_FORMAT_DAY
                                             )
                                         ],

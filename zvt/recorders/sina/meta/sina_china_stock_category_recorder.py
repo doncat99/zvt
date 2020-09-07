@@ -6,10 +6,11 @@ import pandas as pd
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
-from zvt.utils.time_utils import now_pd_timestamp
-from zvt.utils.request_utils import get_http_session, request_get
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import BlockStock, BlockCategory, Block
+from zvt.contract.common import Region
+from zvt.utils.time_utils import now_pd_timestamp
+from zvt.utils.request_utils import get_http_session, request_get
 
 
 class SinaChinaBlockRecorder(Recorder):
@@ -50,7 +51,7 @@ class SinaChinaBlockRecorder(Recorder):
                 })
             if the_list:
                 df = pd.DataFrame.from_records(the_list)
-                df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider,
+                df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider,
                          force_update=True)
 
             self.logger.info(f"finish record sina blocks:{category.value}")
@@ -92,7 +93,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
                         'exchange': entity.exchange,
                         'code': entity.code,
                         'name': entity.name,
-                        'timestamp': now_pd_timestamp('chn'),
+                        'timestamp': now_pd_timestamp(Region.CHN),
                         'stock_id': stock_id,
                         'stock_code': stock_code,
                         'stock_name': category['name'],
@@ -100,7 +101,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
                     })
                 if the_list:
                     df = pd.DataFrame.from_records(the_list)
-                    df_to_db(df=df, region='chn', data_schema=self.data_schema, provider=self.provider,
+                    df_to_db(df=df, region=Region.CHN, data_schema=self.data_schema, provider=self.provider,
                              force_update=True)
 
                 self.logger.info('finish recording BlockStock:{},{}'.format(entity.category, entity.name))

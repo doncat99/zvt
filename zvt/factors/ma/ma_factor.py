@@ -145,6 +145,7 @@ class ImprovedMaFactor(TechnicalFactor):
 
 
 if __name__ == '__main__':
+    from zvt.contract.common import Region
     print('start')
     parser = argparse.ArgumentParser()
     parser.add_argument('--level', help='trading level', default='1d',
@@ -164,6 +165,6 @@ if __name__ == '__main__':
     codes = entities.index.to_list()
 
     factor = ImprovedMaFactor(entity_ids=['stock_sz_000338'], start_timestamp='2020-01-01',
-                              end_timestamp=now_pd_timestamp('chn'), need_persist=False,
+                              end_timestamp=now_pd_timestamp(Region.CHN), need_persist=False,
                               level=level)
     print(factor.result_df)

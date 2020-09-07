@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 Stock1wkMaStateStatsBase = declarative_base()
 
@@ -20,4 +21,4 @@ class Stock1wkMaStateStats(Stock1wkMaStateStatsBase, Mixin):
     total_count = Column(Integer)
 
 
-register_schema(regions=['chn', 'us'], providers=['zvt'], db_name='stock_1wk_ma_stats', schema_base=Stock1wkMaStateStatsBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['zvt'], db_name='stock_1wk_ma_stats', schema_base=Stock1wkMaStateStatsBase)

@@ -3,6 +3,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 from zvt.domain.quotes import BlockKdataCommon
 
 KdataBase = declarative_base()
@@ -12,6 +13,6 @@ class Block1monKdata(KdataBase, BlockKdataCommon):
     __tablename__ = 'block_1mon_kdata'
 
 
-register_schema(regions=['chn', 'us'], providers=['eastmoney'], db_name='block_1mon_kdata', schema_base=KdataBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['eastmoney'], db_name='block_1mon_kdata', schema_base=KdataBase)
 
 __all__ = ['Block1monKdata']

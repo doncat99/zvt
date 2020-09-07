@@ -8,6 +8,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_entities
+from zvt.contract.common import Region
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
@@ -55,7 +56,7 @@ class DataReader(object):
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
-                 end_timestamp: Union[str, pd.Timestamp] = now_pd_timestamp('chn'),
+                 end_timestamp: Union[str, pd.Timestamp] = now_pd_timestamp(Region.CHN),
                  columns: List = None,
                  filters: List = None,
                  order: object = None,
@@ -242,7 +243,7 @@ class DataReader(object):
                             'category:{} level:{} getting data timeout,to_timestamp:{},now:{}'.format(entity_id,
                                                                                                       self.level,
                                                                                                       to_timestamp,
-                                                                                                      now_pd_timestamp('chn')))
+                                                                                                      now_pd_timestamp(Region.CHN)))
                         continue
 
             if len(has_got) == len(self.data_df.index.levels[0]):

@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+from zvt.contract.common import Region
 
 Stock1dMaFactorBase = declarative_base()
 
@@ -32,4 +33,4 @@ class Stock1dMaFactor(Stock1dMaFactorBase, Mixin):
     ma250 = Column(Float)
 
 
-register_schema(regions=['chn', 'us'], providers=['zvt'], db_name='stock_1d_ma_factor', schema_base=Stock1dMaFactorBase)
+register_schema(regions=[Region.CHN, Region.US], providers=['zvt'], db_name='stock_1d_ma_factor', schema_base=Stock1dMaFactorBase)
