@@ -4,6 +4,7 @@ import time
 import uuid
 from typing import List
 import multiprocessing
+import random
 
 import pandas as pd
 from sqlalchemy.orm import Session
@@ -489,6 +490,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
         trade_day = [day.timestamp for day in trade_days]
         stock_detail = StockDetail.query_data(columns=['entity_id', 'end_date'], index=['entity_id'], return_type='df')
 
+        time.sleep(random.randint(0, self.share_para[0]))
         process_identity = multiprocessing.current_process()._identity
         if len(process_identity) > 0:
             #  The worker process tqdm bar shall start at Position 1

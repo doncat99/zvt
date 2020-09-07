@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
+import time
+import random
 
 from zvt.contract.recorder import Recorder
 from zvt.utils.time_utils import to_pd_timestamp
@@ -43,6 +45,7 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
                                          provider=self.provider)
 
     def run(self):
+        time.sleep(random.randint(0, self.share_para[0]))
         process_identity = multiprocessing.current_process()._identity
         if len(process_identity) > 0:
             #  The worker process tqdm bar shall start at Position 1

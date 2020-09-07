@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import contextlib
+import sqlalchemy.exc
 from sqlalchemy import create_engine
+from sqlalchemy.sql import text
 from sqlalchemy.pool import QueuePool
-# from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.ext.declarative import declarative_base
+
 from zvt import zvt_env
 
 
@@ -104,6 +107,7 @@ us_map_key = [
 ]
 
 def build_map(region, map_key):
+
     db_name = "{}_{}".format(zvt_env['db_name'], region)
     link = 'postgresql+psycopg2://{}:{}@{}/{}'.format(
         zvt_env['db_user'], zvt_env['db_pass'], zvt_env['db_host'], db_name)
@@ -115,11 +119,12 @@ def build_map(region, map_key):
                               pool_timeout=30,
                               pool_pre_ping=True,
                               max_overflow=10)
-    # Base = declarative_base()
-    # Base.metadata.create_all(bind=db_engine)
-    # url = 'postgresql+psycopg2://{}@{}/{}'.format(zvt_env['db_name'], zvt_env['db_host'], zvt_env['db_user'])
-    # if not database_exists(url):
-    #     create_database(url)
+
+    with contextlib.suppress(sqlalchemy.exc.ProgrammingError):
+        with sqlalchemy.create_engine('postgresql:///postgres', isolation_level='AUTOCOMMIT').connect() as connection:
+            cmd = "CREATE DATABASE {}_{}".format(zvt_env['db_name'], region)
+            connection.execute(cmd)
+
     dict_ = {}
     for key in map_key:
         new_key = "{}_{}".format(region, key)

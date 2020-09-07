@@ -141,7 +141,7 @@ def retry_if_connection_error(exception):
     return True
     # return isinstance(exception, ConnectionError)
 
-# if exception retry with 2 second wait  
+# if exception retry with 0.5 second wait  
 @retry(retry_on_exception=retry_if_connection_error, stop_max_attempt_number=3, wait_fixed=500)
 def yh_get_bars(code, interval, start=None, end=None, actions=True):
     logger.info("HTTP GET: bars, with code={}, unit={}, start={}, end={}".format(code, interval, start, end))

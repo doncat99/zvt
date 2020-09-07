@@ -2,6 +2,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import os
+import time
 from datetime import datetime, timedelta
 from functools import wraps
 import multiprocessing
@@ -247,7 +248,7 @@ def init(l):
 def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
     with multiprocessing.Pool(pc, initializer=init, initargs=(lock,), maxtasksperchild = 1 if reset else None) as p:
         data = get_cache()
-        args = [arg for arg in args if not valid(shared[2], arg[0].__name__, arg[3], data)]
+        # args = [arg for arg in args if not valid(shared[2], arg[0].__name__, arg[3], data)]
         # The master process tqdm bar is at Position 0
         with tqdm(total=len(args), ncols=80, desc="total", leave=True) as pbar:
             for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args], chunksize=1):
@@ -255,6 +256,7 @@ def mp_tqdm(func, lock, shared=[], args=[], pc=4, reset=False):
                 pbar.update()
                 if func_name is not None: dump(shared[2], func_name, data)
                 lock.release()
+                time.sleep(1)
 
 def run(args):
     pc, shared, argset = args
@@ -271,25 +273,25 @@ data_set_chn = [
     [interface.get_top_ten_holder_data, "eastmoney", "Top Ten Holder", 24*6],
     [interface.get_finance_data, "eastmoney", "Finance Factor", 24*6],
     [interface.get_balance_data, "eastmoney", "Balance Sheet", 24*6],
+    [interface.get_top_ten_tradable_holder_data, "eastmoney", "Top Ten Tradable Holder", 24*6],
+    [interface.get_income_data, "eastmoney", "Income Statement", 24*6],
     [interface.get_moneyflow_data, "sina", "MoneyFlow Statement", 24],
     [interface.get_dividend_detail_data, "eastmoney", "Divdend Detail", 24],
     [interface.get_spo_detail_data, "eastmoney", "SPO Detail", 24],
     [interface.get_rights_issue_detail_data, "eastmoney", "Rights Issue Detail", 24],
     [interface.get_holder_trading_data, "eastmoney", "Holder Trading", 24],
-    [interface.get_top_ten_tradable_holder_data, "eastmoney", "Top Ten Tradable Holder", 24*6],
     [interface.get_etf_valuation_data, "joinquant", "ETF Valuation", 24],
     [interface.get_stock_summary_data, "joinquant", "Stock Summary", 24],  
     [interface.get_stock_detail_data, "eastmoney", "Stock Detail", 24], 
-    [interface.get_income_data, "eastmoney", "Income Statement", 24*6],
     [interface.get_cashflow_data, "eastmoney", "CashFlow Statement", 24],
     [interface.get_stock_valuation_data, "joinquant", "Stock Valuation", 24],
     [interface.get_etf_stock_data, "joinquant", "ETF Stock", 24],
     [interface.get_margin_trading_summary_data, "joinquant", "Margin Trading Summary", 24],
     [interface.get_cross_market_summary_data, "joinquant", "Cross Market Summary", 24],
 
-    # [interface.get_stock_1d_k_data, "joinquant", "Stock Daily K-Data", 24], 
+    [interface.get_stock_1d_k_data, "joinquant", "Stock Daily K-Data", 24], 
     # [interface.get_stock_1d_hfq_k_data, "joinquant", "Stock Daily HFQ K-Data", 24],
-    [interface.get_stock_1w_k_data, "joinquant", "Stock Weekly K-Data", 24],
+    # [interface.get_stock_1w_k_data, "joinquant", "Stock Weekly K-Data", 24],
     # [interface.get_stock_1w_hfq_k_data, "joinquant", "Stock Weekly HFQ K-Data", 24],
     # [interface.get_stock_1mon_k_data, "joinquant", "Stock Monthly K-Data", 24], 
     # [interface.get_etf_1d_k_data, "sina", "ETF Daily K-Data", 24],
@@ -308,7 +310,7 @@ data_set_chn = [
 ]
 
 data_set_us = [
-    [interface.get_stock_1d_k_data, "yahoo", "Stock Daily K-Data", 24], 
+    [interface.get_stock_1d_k_data, "yahoo", "Stock Daily K-Data", 24],
     # [interface.get_stock_1d_hfq_k_data, "yahoo", "Stock Daily HFQ K-Data", 24],
     [interface.get_stock_1w_k_data, "yahoo", "Stock Weekly K-Data", 24],
     # [interface.get_stock_1w_hfq_k_data, "yahoo", "Stock Weekly HFQ K-Data", 24],
