@@ -1,6 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+import logging
 import os
 import time
 from datetime import datetime, timedelta
@@ -9,6 +10,7 @@ import multiprocessing
 
 from tqdm import tqdm
 import pickle
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from zvt import zvt_env
 from zvt.contract.common import Region, Provider
@@ -22,6 +24,9 @@ from zvt.domain import Stock, Etf, StockTradeDay, StockSummary, StockDetail, Fin
                        Stock1mKdata, Stock1mHfqKdata, Stock1mHfqKdata, Stock5mKdata, Stock5mHfqKdata, \
                        Stock15mKdata, Stock15mHfqKdata, Stock30mKdata, Stock30mHfqKdata, \
                        Stock1hKdata, Stock1hHfqKdata, Etf1dKdata
+
+logger = logging.getLogger(__name__)
+sched = BackgroundScheduler()
 
 
 def get_cache():
@@ -65,181 +70,181 @@ class interface():
     @staticmethod
     def get_stock_summary_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 市场整体估值
-        StockSummary.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        StockSummary.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_detail_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 个股详情
-        StockDetail.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        StockDetail.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_finance_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 主要财务指标
-        FinanceFactor.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        FinanceFactor.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_balance_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 资产负债表
-        BalanceSheet.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        BalanceSheet.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_income_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 收益表
-        IncomeStatement.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        IncomeStatement.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_cashflow_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 现金流量表
-        CashFlowStatement.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        CashFlowStatement.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
     
     @staticmethod
     def get_moneyflow_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 股票资金流向表
-        StockMoneyFlow.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        StockMoneyFlow.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
     
     @staticmethod
     def get_dividend_financing_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 除权概览表
-        DividendFinancing.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        DividendFinancing.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_dividend_detail_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 除权具细表
-        DividendDetail.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        DividendDetail.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_rights_issue_detail_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 配股表
-        RightsIssueDetail.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        RightsIssueDetail.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_spo_detail_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 现金增资
-        SpoDetail.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        SpoDetail.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_margin_trading_summary_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 融资融券概况
-        MarginTradingSummary.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        MarginTradingSummary.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_cross_market_summary_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 北向/南向成交概况
-        CrossMarketSummary.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        CrossMarketSummary.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_holder_trading_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 股东交易
-        HolderTrading.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        HolderTrading.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_top_ten_holder_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 前十股东表
-        TopTenHolder.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        TopTenHolder.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_top_ten_tradable_holder_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 前十可交易股东表
-        TopTenTradableHolder.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        TopTenTradableHolder.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_valuation_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 个股估值数据
-        StockValuation.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        StockValuation.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_etf_stock_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # ETF股票
-        EtfStock.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        EtfStock.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_etf_valuation_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # ETF估值数据
-        EtfValuation.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        EtfValuation.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1d_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 日线
-        Stock1dKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1dKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1d_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 日线复权
-        Stock1dHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1dHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1w_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 周线
-        Stock1wkKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1wkKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1w_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 周线复权
-        Stock1wkHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1wkHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
     
     @staticmethod
     def get_stock_1mon_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 月线
-        Stock1monKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1monKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1mon_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 月线复权
-        Stock1monHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1monHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1m_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 1分钟线
-        Stock1mKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1mKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1m_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 1分钟线复权
-        Stock1mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_5m_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 5分钟线
-        Stock5mKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock5mKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_5m_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 5分钟线复权
-        Stock5mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock5mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_15m_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 15分钟线
-        Stock15mKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock15mKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_15m_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 15分钟线复权
-        Stock15mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock15mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_30m_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 30分钟线
-        Stock30mKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock30mKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_30m_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 30分钟线复权
-        Stock30mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock30mHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1h_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 1小时线
-        Stock1hKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1hKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_stock_1h_hfq_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
         # 1小时线复权
-        Stock1hHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Stock1hHfqKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
     @staticmethod
     def get_etf_1d_k_data(provider: Provider, sleep, desc, pc, lock, region, batch):
-        Etf1dKdata.record_data(provider=provider, share_para=(desc, pc, lock, False, region), sleeping_time=sleep, batch_size=batch)
+        Etf1dKdata.record_data(provider=provider, share_para=(desc, pc, lock, True, region), sleeping_time=sleep, batch_size=batch)
 
 
 def init(l):
@@ -276,7 +281,7 @@ data_set_chn = [
     [interface.get_balance_data,                 Provider.EastMoney, 0, "Balance Sheet",            24*6],
     [interface.get_top_ten_tradable_holder_data, Provider.EastMoney, 0, "Top Ten Tradable Holder",  24*6],
     [interface.get_income_data,                  Provider.EastMoney, 0, "Income Statement",         24*6],
-    [interface.get_moneyflow_data,               Provider.Sina,      3, "MoneyFlow Statement",      24],
+    [interface.get_moneyflow_data,               Provider.Sina,      1, "MoneyFlow Statement",      24],
     [interface.get_dividend_detail_data,         Provider.EastMoney, 0, "Divdend Detail",           24*6],
     [interface.get_spo_detail_data,              Provider.EastMoney, 0, "SPO Detail",               24*6],
     [interface.get_rights_issue_detail_data,     Provider.EastMoney, 0, "Rights Issue Detail",      24],
@@ -295,7 +300,7 @@ data_set_chn = [
     # [interface.get_stock_1w_k_data,              Provider.JoinQuant, 0, "Stock Weekly K-Data",      24],
     # [interface.get_stock_1w_hfq_k_data,          Provider.JoinQuant, 0, "Stock Weekly HFQ K-Data",  24],
     # [interface.get_stock_1mon_k_data,            Provider.JoinQuant, 0, "Stock Monthly K-Data",     24], 
-    # [interface.get_etf_1d_k_data,                Provider.Sina,      3, "ETF Daily K-Data",         24],
+    # [interface.get_etf_1d_k_data,                Provider.Sina,      1, "ETF Daily K-Data",         24],
 
     # [interface.get_stock_1mon_hfq_k_data,        Provider.JoinQuant, 0, "Stock Monthly HFQ K-Data", 24],
     # [interface.get_stock_1h_k_data,              Provider.JoinQuant, 0, "Stock 1 hours K-Data",     24], 
@@ -318,15 +323,14 @@ data_set_us = [
     # [interface.get_stock_30m_k_data,        Provider.Yahoo, 0, "Stock 30 mins K-Data",     24], 
     # [interface.get_stock_15m_k_data,        Provider.Yahoo, 0, "Stock 15 mins K-Data",     24], 
     # [interface.get_stock_5m_k_data,         Provider.Yahoo, 0, "Stock 5 mins K-Data",      24], 
-    # [interface.get_stock_1m_k_data,         Provider.Yahoo, 0, "Stock 1 mins K-Data",      24], 
-
+    # [interface.get_stock_1m_k_data,         Provider.Yahoo, 0, "Stock 1 mins K-Data",      24],
 ]
 
-
 def fetch_data(lock, region: Region):
-    print("*"*60)
-    print("*    Start Fetching Stock information...")
-    print("*"*60)
+    print("")
+    print("*"*80)
+    print("*    Start Fetching {} Stock information...      {}".format(region.value.upper(), datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    print("*"*80)
 
     if region == Region.CHN:
         data_set = data_set_chn
@@ -337,11 +341,10 @@ def fetch_data(lock, region: Region):
     elif region == Region.US:
         data_set = data_set_us
         # interface.get_stock_list_data(Provider.Yahoo)
-        # interface.get_stock_trade_day(Provider.Yahoo, lock, region)
+        interface.get_stock_trade_day(Provider.Yahoo, lock, region)
 
     else:
         data_set = []
-
 
     print("")
     print("parallel processing...")
@@ -351,13 +354,26 @@ def fetch_data(lock, region: Region):
 
     mp_tqdm(run, lock, region, shared=[region, batch_size], args=data_set, pc=3, reset=True)
 
+    print("")
+    print("\/"*40)
 
-if __name__ == '__main__':
+
+@sched.scheduled_job('cron', days=1)
+def main():
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
 
     fetch_data(l, Region.CHN)
-    # fetch_data(l, Region.US)
+    fetch_data(l, Region.US)
+
+    l.release
+
+
+if __name__ == '__main__':
+    main()
+
+    sched.start()
+    sched._thread.join()
 
       
     
