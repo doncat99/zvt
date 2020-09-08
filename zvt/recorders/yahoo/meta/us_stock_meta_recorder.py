@@ -47,10 +47,10 @@ class YahooUsStockDetailRecorder(Recorder):
         process_identity = multiprocessing.current_process()._identity
         if len(process_identity) > 0:
             #  The worker process tqdm bar shall start at Position 1
-            worker_id = (process_identity[0]-1)%self.share_para[0] + 1
+            worker_id = (process_identity[0]-1)%self.share_para[1] + 1
         else:
             worker_id = 0
-        desc = "{:02d} : {}".format(worker_id, self.share_para[1])
+        desc = "{:02d} : {}".format(worker_id, self.share_para[0])
 
         with tqdm(total=len(self.entities), ncols=80, position=worker_id, desc=desc, leave=self.share_para[3]) as pbar:
             http_session = get_http_session()
