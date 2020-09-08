@@ -10,7 +10,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import IndexStock, Index
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
 
@@ -18,7 +18,7 @@ from zvt.utils.request_utils import get_http_session, request_get
 class ChinaIndexListSpider(Recorder):
     data_schema = IndexStock
 
-    def __init__(self, batch_size=10, force_update=False, sleeping_time=2.0, provider='exchange') -> None:
+    def __init__(self, batch_size=10, force_update=False, sleeping_time=2.0, provider: Provider=Provider.Exchange) -> None:
         self.provider = provider
         super().__init__(batch_size, force_update, sleeping_time)
 
@@ -264,5 +264,5 @@ class ChinaIndexListSpider(Recorder):
 __all__ = ['ChinaIndexListSpider']
 
 if __name__ == '__main__':
-    spider = ChinaIndexListSpider(provider='exchange')
+    spider = ChinaIndexListSpider(provider=Provider.Exchange)
     spider.run()

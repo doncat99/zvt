@@ -5,17 +5,17 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.api.quote import get_etf_stocks
 from zvt.domain import StockValuation, Etf, EtfValuation
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp
 
 
 class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Etf
 
     # 数据来自jq
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
 
     data_schema = EtfValuation
 

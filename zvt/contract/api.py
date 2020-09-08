@@ -16,19 +16,19 @@ from sqlalchemy.orm import sessionmaker, Session
 from zvt import zvt_env
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract import zvt_context
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.pd_utils import pd_is_not_null, index_df
 from zvt.utils.time_utils import to_pd_timestamp
 
 logger = logging.getLogger(__name__)
 
 
-def build_engine(region: Region, data_path, provider, db_name):
+def build_engine(region: Region, data_path, provider: Provider, db_name):
     if "db_engine" in zvt_env and zvt_env['db_engine'] == "postgresql":
         # print("engine added require:{}_{}_{}".format(region.value, provider, db_name))
         db_engine = None
     else:
-        db_path = os.path.join(data_path, '{}_{}_{}.db?check_same_thread=False'.format(region.value, provider, db_name))
+        db_path = os.path.join(data_path, '{}_{}_{}.db?check_same_thread=False'.format(region.value, provider.value, db_name))
         db_engine = create_engine('sqlite:///' + db_path, echo=False)
 
     return db_engine
@@ -48,7 +48,7 @@ def get_db_name(data_schema: DeclarativeMeta) -> str:
 
 
 def get_db_engine(region: Region,
-                  provider: str,
+                  provider: Provider,
                   db_name: str = None,
                   data_schema: object = None,
                   data_path: str = zvt_env['data_path']) -> Engine:
@@ -69,7 +69,7 @@ def get_db_engine(region: Region,
     if data_schema:
         db_name = get_db_name(data_schema=data_schema)
 
-    engine_key = '{}_{}_{}'.format(region.value, provider, db_name)
+    engine_key = '{}_{}_{}'.format(region.value, provider.value, db_name)
     db_engine = zvt_context.db_engine_map.get(engine_key)
     if not db_engine:
         db_engine = build_engine(region, data_path, provider, db_name)
@@ -77,7 +77,7 @@ def get_db_engine(region: Region,
     return db_engine
 
 
-def get_schemas(provider: str) -> List[DeclarativeMeta]:
+def get_schemas(provider: Provider) -> List[DeclarativeMeta]:
     """
     get domain schemas supported by the provider
 
@@ -96,7 +96,7 @@ def get_schemas(provider: str) -> List[DeclarativeMeta]:
     return schemas
 
 
-def get_db_session(provider: str,
+def get_db_session(provider: Provider,
                    db_name: str = None,
                    data_schema: object = None,
                    force_new: bool = False) -> Session:
@@ -118,7 +118,7 @@ def get_db_session(provider: str,
     if data_schema:
         db_name = get_db_name(data_schema=data_schema)
 
-    session_key = '{}_{}'.format(provider, db_name)
+    session_key = '{}_{}'.format(provider.value, db_name)
 
     if force_new:
         return get_db_session_factory(provider, db_name, data_schema)()
@@ -130,7 +130,7 @@ def get_db_session(provider: str,
     return session
 
 
-def get_db_session_factory(provider: str,
+def get_db_session_factory(provider: Provider,
                            db_name: str = None,
                            data_schema: object = None):
     """
@@ -148,7 +148,7 @@ def get_db_session_factory(provider: str,
     if data_schema:
         db_name = get_db_name(data_schema=data_schema)
 
-    session_key = '{}_{}'.format(provider, db_name)
+    session_key = '{}_{}'.format(provider.value, db_name)
     session = zvt_context.db_session_map.get(session_key)
     if not session:
         session = sessionmaker()
@@ -265,7 +265,7 @@ def get_data(data_schema,
              codes: List[str] = None,
              code: str = None,
              level: Union[IntervalLevel, str] = None,
-             provider: str = None,
+             provider: Provider = Provider.Default,
              columns: List = None,
              col_label: dict = None,
              return_type: str = 'df',
@@ -277,8 +277,10 @@ def get_data(data_schema,
              limit: int = None,
              index: Union[str, list] = None,
              time_field: str = 'timestamp'):
+    if provider.value is None:
+        a = 0
     assert data_schema is not None
-    assert provider is not None
+    assert provider.value is not None
     assert provider in zvt_context.providers
 
     # step1 = time.time()
@@ -387,7 +389,7 @@ def get_data_count(data_schema, filters=None, session=None):
     return count
 
 
-def get_group(provider, data_schema, column, group_func=func.count, session=None):
+def get_group(provider: Provider, data_schema, column, group_func=func.count, session=None):
     if not session:
         session = get_db_session(provider=provider, data_schema=data_schema)
     if group_func:
@@ -424,7 +426,7 @@ def get_entity_code(entity_id: str):
 def df_to_db(df: pd.DataFrame,
              region: Region,
              data_schema: DeclarativeMeta,
-             provider: str,
+             provider: Provider,
              force_update: bool = False,
              sub_size: int = 5000) -> object:
     """
@@ -500,7 +502,7 @@ def get_entities(
         entity_id: str = None,
         codes: List[str] = None,
         code: str = None,
-        provider: str = None,
+        provider: Provider = Provider.Default,
         columns: List = None,
         col_label: dict = None,
         return_type: str = 'df',
@@ -514,7 +516,7 @@ def get_entities(
     if not entity_schema:
         entity_schema = zvt_context.entity_schema_map[entity_type]
 
-    if not provider:
+    if provider.value is not None:
         provider = entity_schema.providers[0]
 
     if not order:
@@ -532,7 +534,8 @@ def get_entities(
                     filters=filters, session=session, order=order, limit=limit, index=index)
 
 
-def get_entity_ids(entity_type='stock', entity_schema: EntityMixin = None, exchanges=None, codes=None, provider=None):
+def get_entity_ids(entity_type='stock', entity_schema: EntityMixin = None, exchanges=None, codes=None, 
+                   provider: Provider=Provider.Default):
     df = get_entities(entity_type=entity_type, entity_schema=entity_schema, exchanges=exchanges, codes=codes,
                       provider=provider)
     if pd_is_not_null(df):

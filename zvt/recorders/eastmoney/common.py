@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from zvt.contract.common import Provider
 from zvt.contract.api import get_data_count, get_data
 from zvt.contract.recorder import TimestampsDataRecorder, TimeSeriesDataRecorder
 from zvt.utils.time_utils import to_pd_timestamp
@@ -145,10 +146,10 @@ class BaseEastmoneyRecorder(TimestampsDataRecorder):
 
 
 class EastmoneyTimestampsDataRecorder(BaseEastmoneyRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = StockDetail
 
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
 
     timestamps_fetching_url = None
     timestamp_list_path_fields = None
@@ -172,10 +173,10 @@ class EastmoneyTimestampsDataRecorder(BaseEastmoneyRecorder):
 
 
 class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = StockDetail
 
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
 
     page_url = None
 
@@ -214,10 +215,10 @@ class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder):
 
 
 class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = StockDetail
 
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
 
     def get_remote_latest_record(self, security_item, http_session):
         param = {

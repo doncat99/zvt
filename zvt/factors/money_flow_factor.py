@@ -7,6 +7,7 @@ from zvt.utils.pd_utils import normal_index_df
 from zvt.domain import BlockMoneyFlow, Block, BlockCategory
 from zvt.factors import ScoreFactor, Union, Scorer
 from zvt.factors.algorithm import RankScorer
+from zvt.contract.common import Provider
 
 
 #     # 净流入
@@ -19,8 +20,8 @@ from zvt.factors.algorithm import RankScorer
 #     net_main_inflow_rate = Column(Float)
 class BlockMoneyFlowFactor(ScoreFactor):
     def __init__(self,
-                 provider: str = 'sina',
-                 entity_provider: str = 'sina',
+                 provider: Provider = Provider.Sina,
+                 entity_provider: Provider = Provider.Sina,
                  the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -32,8 +33,9 @@ class BlockMoneyFlowFactor(ScoreFactor):
         entity_ids = df['entity_id'].tolist()
         self.window = window
         super().__init__(BlockMoneyFlow, Block, provider=provider, entity_provider=entity_provider,
-                         entity_ids=entity_ids, the_timestamp=the_timestamp, start_timestamp=start_timestamp,
-                         end_timestamp=end_timestamp, columns=columns, scorer=scorer)
+                         entity_ids=entity_ids, the_timestamp=the_timestamp, 
+                         start_timestamp=start_timestamp, end_timestamp=end_timestamp, 
+                         columns=columns, scorer=scorer)
 
     def pre_compute(self):
         super().pre_compute()

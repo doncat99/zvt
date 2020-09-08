@@ -9,7 +9,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.joinquant.common import to_jq_trading_level, to_jq_entity_id
 from zvt.domain import Stock, StockKdataCommon, Stock1dHfqKdata
 from zvt.utils.pd_utils import pd_is_not_null
@@ -18,11 +18,11 @@ from zvt.utils.request_utils import jq_auth, jq_get_bars, jq_logout
 
 
 class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Stock
 
     # 数据来自jq
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
 
     # 只是为了把recorder注册到data_schema
     data_schema = StockKdataCommon
@@ -110,7 +110,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
 
             df['entity_id'] = entity.id
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['provider'] = 'joinquant'
+            df['provider'] = Provider.JoinQuant.value
             df['level'] = self.level.value
             df['code'] = entity.code
 

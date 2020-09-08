@@ -9,6 +9,7 @@ from zvt.api.business import get_trader_info
 from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
+from zvt.contract.common import Provider
 from zvt.domain.trader_info import AccountStats, Position, Order, TraderInfo
 from zvt.trader import TradingSignalType, TradingListener, TradingSignal
 from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError, \
@@ -99,7 +100,7 @@ class SimAccountService(AccountService):
                  entity_schema: EntityMixin,
                  trader_name,
                  timestamp,
-                 provider=None,
+                 provider: Provider=Provider.Default,
                  level=IntervalLevel.LEVEL_1DAY,
                  base_capital=1000000,
                  buy_cost=0.001,

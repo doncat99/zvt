@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import EntityMixin
 from zvt.contract.register import register_schema, register_entity
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 
 StockMetaBase = declarative_base()
 
@@ -19,7 +19,7 @@ class BaseSecurity(EntityMixin):
 
 class BasePortfolio(BaseSecurity):
     @classmethod
-    def get_stocks(cls, timestamp, code=None, codes=None, ids=None, provider=None):
+    def get_stocks(cls, timestamp, code=None, codes=None, ids=None, provider: Provider=Provider.Default):
         """
 
         :param code: portfolio(etf/block/index...) code
@@ -67,7 +67,7 @@ class Etf(StockMetaBase, BasePortfolio):
     category = Column(String(length=64))
 
     @classmethod
-    def get_stocks(cls, timestamp, code=None, codes=None, ids=None, provider=None):
+    def get_stocks(cls, timestamp, code=None, codes=None, ids=None, provider: Provider=Provider.Default):
         from zvt.api.quote import get_etf_stocks
         return get_etf_stocks(code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider)
 
@@ -137,7 +137,10 @@ class StockDetail(StockMetaBase, BaseSecurity):
     net_winning_rate = Column(Float)
 
 
-register_schema(regions=[Region.CHN, Region.US], providers=['joinquant', 'eastmoney', 'exchange', 'sina', 'yahoo'], db_name='stock_meta',
+register_schema(regions=[Region.CHN, Region.US], 
+                providers=[Provider.JoinQuant, Provider.EastMoney, Provider.Exchange, 
+                           Provider.Sina, Provider.Yahoo], 
+                db_name='stock_meta',
                 schema_base=StockMetaBase)
 
 __all__ = ['Stock', 'Index', 'Block', 'Etf', 'IndexStock', 'BlockStock', 'EtfStock', 'StockDetail']

@@ -8,13 +8,13 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import BlockStock, BlockCategory, Block
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
 
 
 class SinaChinaBlockRecorder(Recorder):
-    provider = 'sina'
+    provider = Provider.Sina
     data_schema = Block
 
     # 用于抓取行业/概念/地域列表
@@ -58,10 +58,10 @@ class SinaChinaBlockRecorder(Recorder):
 
 
 class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'sina'
+    entity_provider = Provider.Sina
     entity_schema = Block
 
-    provider = 'sina'
+    provider = Provider.Sina
     data_schema = BlockStock
 
     # 用于抓取行业包含的股票

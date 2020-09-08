@@ -3,7 +3,7 @@ import multiprocessing
 import time
 import random
 
-from zvt.contract.recorder import Recorder
+from zvt.contract.recorder import Recorder, Provider
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import to_float, pct_to_float
 from zvt.utils.request_utils import get_http_session, request_post
@@ -16,14 +16,14 @@ from tqdm import tqdm
 
 class EastmoneyChinaStockListRecorder(ExchangeChinaStockListRecorder):
     data_schema = Stock
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
     
     def __init__(self, batch_size=10, force_update=False, sleeping_time=5, share_para=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
 
 
 class EastmoneyChinaStockDetailRecorder(Recorder):
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
     data_schema = StockDetail
 
     def __init__(self, batch_size=10, force_update=False, sleeping_time=5, codes=None, share_para=None) -> None:
@@ -116,4 +116,4 @@ if __name__ == '__main__':
 
     # recorder = EastmoneyChinaStockDetailRecorder()
     # recorder.run()
-    StockDetail.record_data(codes=['000338', '000777'], provider='eastmoney')
+    StockDetail.record_data(codes=['000338', '000777'], provider=Provider.EastMoney)

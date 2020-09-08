@@ -5,7 +5,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import BlockStock, BlockCategory, Block
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.utils import json_callback_param
 from zvt.utils.request_utils import get_http_session, request_get
@@ -13,7 +13,7 @@ from zvt.utils.request_utils import get_http_session, request_get
 
 
 class EastmoneyChinaBlockRecorder(Recorder):
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
     data_schema = Block
 
     # 用于抓取行业/概念/地域列表
@@ -51,10 +51,10 @@ class EastmoneyChinaBlockRecorder(Recorder):
 
 
 class EastmoneyChinaBlockStockRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'eastmoney'
+    entity_provider = Provider.EastMoney
     entity_schema = Block
 
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
     data_schema = BlockStock
 
     # 用于抓取行业包含的股票

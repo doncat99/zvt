@@ -1,6 +1,7 @@
 from jqdatasdk import finance
 
 from zvt.contract.recorder import TimeSeriesDataRecorder
+from zvt.contract.common import Provider
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.request_utils import jq_auth, jq_query
 from zvt.domain import Index, MarginTradingSummary
@@ -16,10 +17,10 @@ code_map_jq = {
 
 
 class MarginTradingSummaryRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'exchange'
+    entity_provider = Provider.Exchange
     entity_schema = Index
 
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
     data_schema = MarginTradingSummary
 
     def __init__(self, batch_size=10,
@@ -45,7 +46,7 @@ class MarginTradingSummaryRecorder(TimeSeriesDataRecorder):
 
         for item in df.to_dict(orient='records'):
             result = {
-                'provider': self.provider,
+                'provider': self.provider.value,
                 'timestamp': item['date'],
                 'name': entity.name,
                 'margin_value': item['fin_value'],

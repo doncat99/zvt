@@ -3,7 +3,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract.register import register_schema
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.domain.quotes import IndexKdataCommon
 
 
@@ -14,6 +14,8 @@ class Index1dKdata(KdataBase, IndexKdataCommon):
     __tablename__ = 'index_1d_kdata'
 
 
-register_schema(regions=[Region.CHN, Region.US], providers=['sina'], db_name='index_1d_kdata', schema_base=KdataBase)
+register_schema(regions=[Region.CHN, Region.US], 
+                providers=[Provider.Sina], 
+                db_name='index_1d_kdata', schema_base=KdataBase)
 
 __all__ = ['Index1dKdata']

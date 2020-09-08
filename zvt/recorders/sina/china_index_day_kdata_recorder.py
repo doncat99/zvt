@@ -5,7 +5,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.api.quote import generate_kdata_id
 from zvt.domain import Index, Index1dKdata
 from zvt.utils.time_utils import get_year_quarters, is_same_date, now_pd_timestamp
@@ -14,10 +14,10 @@ from zvt.utils.request_utils import request_get
 
 
 class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
-    entity_provider = 'exchange'
+    entity_provider = Provider.Exchange
     entity_schema = Index
 
-    provider = 'sina'
+    provider = Provider.Sina
     data_schema = Index1dKdata
     url = 'http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{}/type/S.phtml?year={}&jidu={}'
 
@@ -74,7 +74,7 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
             df['name'] = security_item.name
             df['level'] = level
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['provider'] = 'sina'
+            df['provider'] = Provider.Sina
 
             result_df = pd.concat([result_df, df])
 

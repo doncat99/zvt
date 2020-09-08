@@ -6,14 +6,14 @@ from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.domain import EtfStock, Stock, Etf, StockDetail
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.request_utils import jq_auth, jq_get_all_securities, jq_query, jq_logout
 
 
 class BaseJqChinaMetaRecorder(Recorder):
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
 
     def __init__(self, batch_size=10, force_update=True, sleeping_time=10, share_para=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
@@ -71,11 +71,11 @@ class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
 
 
 class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Etf
 
     # 数据来自jq
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
 
     data_schema = EtfStock
 

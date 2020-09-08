@@ -15,7 +15,7 @@ from zvt.domain import StockTradeDay, StockDetail
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_db_session, get_schema_columns
 from zvt.contract.api import get_entities, get_data
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import to_pd_timestamp, TIME_FORMAT_DAY, to_time_str, evaluate_size_from_timestamp, \
                                  is_in_same_interval, now_pd_timestamp, count_mins_before_close_time, \
                                  is_same_date, date_delta
@@ -38,7 +38,7 @@ class Recorder(metaclass=Meta):
     logger = logging.getLogger(__name__)
 
     # overwrite them to setup the data you want to record
-    provider: str = None
+    provider: Provider = Provider.Default
     data_schema: Mixin = None
 
     url = None
@@ -59,7 +59,7 @@ class Recorder(metaclass=Meta):
         """
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        assert self.provider is not None
+        assert self.provider.value is not None
         assert self.data_schema is not None
         assert self.provider in self.data_schema.providers
 
@@ -82,7 +82,7 @@ class Recorder(metaclass=Meta):
 
 class RecorderForEntities(Recorder):
     # overwrite them to fetch the entity list
-    entity_provider: str = None
+    entity_provider: Provider = Provider.Default
     entity_schema: EntityMixin = None
 
     def __init__(self,
@@ -113,7 +113,7 @@ class RecorderForEntities(Recorder):
         """
         super().__init__(batch_size=batch_size, force_update=force_update, sleeping_time=sleeping_time)
 
-        assert self.entity_provider is not None
+        assert self.entity_provider.value is not None
         assert self.entity_schema is not None
 
         # setup the entities you want to record

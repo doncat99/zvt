@@ -8,7 +8,7 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.orm import Session
 
 from zvt.contract import IntervalLevel
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import date_and_time, is_same_time, now_pd_timestamp
 
 
@@ -33,7 +33,7 @@ class Mixin(object):
         return 'timestamp'
 
     @classmethod
-    def register_recorder_cls(cls, provider, recorder_cls):
+    def register_recorder_cls(cls, provider: Provider, recorder_cls):
         """
         register the recorder for the schema
 
@@ -48,7 +48,7 @@ class Mixin(object):
             cls.provider_map_recorder[provider] = recorder_cls
 
     @classmethod
-    def register_provider(cls, provider):
+    def register_provider(cls, provider: Provider):
         # dont't make providers as class field,it should be created for the sub class as need
         if not hasattr(cls, 'providers'):
             cls.providers = []
@@ -65,7 +65,7 @@ class Mixin(object):
                    codes: List[str] = None,
                    code: str = None,
                    level: Union[IntervalLevel, str] = None,
-                   provider: str = None,
+                   provider: Provider = Provider.Default,
                    columns: List = None,
                    col_label: dict = None,
                    return_type: str = 'df',
@@ -78,7 +78,7 @@ class Mixin(object):
                    index: Union[str, list] = None,
                    time_field: str = 'timestamp'):
         from .api import get_data
-        if not provider:
+        if provider == Provider.Default:
             provider = cls.providers[provider_index]
         return get_data(data_schema=cls, ids=ids, entity_ids=entity_ids, entity_id=entity_id, codes=codes,
                         code=code, level=level, provider=provider, columns=columns, col_label=col_label,
@@ -88,7 +88,7 @@ class Mixin(object):
     @classmethod
     def record_data(cls,
                     provider_index: int = 0,
-                    provider: str = None,
+                    provider: Provider = Provider.Default,
                     exchanges=None,
                     entity_ids=None,
                     codes=None,

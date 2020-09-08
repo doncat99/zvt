@@ -10,7 +10,7 @@ from zvt.api.business_reader import AccountStatsReader
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.domain import Stock, TraderInfo, AccountStats, Position
 from zvt.drawer.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
@@ -31,7 +31,7 @@ class Trader(object):
                  codes: List[str] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
-                 provider: str = None,
+                 provider: Provider = Provider.Default,
                  level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY,
                  trader_name: str = None,
                  real_time: bool = False,

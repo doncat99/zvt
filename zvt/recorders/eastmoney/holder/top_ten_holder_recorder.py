@@ -3,11 +3,12 @@ from zvt.utils.time_utils import to_time_str, to_pd_timestamp
 from zvt.utils.utils import to_float
 from zvt.api.quote import to_report_period_type
 from zvt.domain.misc.holder import TopTenHolder
+from zvt.contract.common import Provider
 from zvt.recorders.eastmoney.common import EastmoneyTimestampsDataRecorder, get_fc
 
 
 class TopTenHolderRecorder(EastmoneyTimestampsDataRecorder):
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
     data_schema = TopTenHolder
 
     url = 'https://emh5.eastmoney.com/api/GuBenGuDong/GetShiDaGuDong'

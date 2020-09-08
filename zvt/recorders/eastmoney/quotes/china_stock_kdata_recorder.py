@@ -3,6 +3,7 @@ from zvt.contract import IntervalLevel
 from zvt.contract.api import get_entities
 from zvt.contract.api import get_db_session
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import to_pd_timestamp, now_time_str, TIME_FORMAT_DAY1
 from zvt.utils.utils import json_callback_param, to_float
 from zvt.utils.request_utils import request_get
@@ -24,10 +25,10 @@ def level_flag(level: IntervalLevel):
 
 # 抓取行业的日线,周线,月线数据，用于中期选行业
 class ChinaStockKdataRecorder(FixedCycleDataRecorder):
-    entity_provider: str = 'eastmoney'
+    entity_provider: str = Provider.EastMoney
     entity_schema = Block
 
-    provider = 'eastmoney'
+    provider = Provider.EastMoney
     url = 'https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=90.{}&cb=fsdata1567673076&klt={}&fqt=0&lmt={}&end={}&iscca=1&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&fsdata1567673076=fsdata1567673076'
 
     def __init__(self, entity_type='index', exchanges=None, entity_ids=None, codes=None, batch_size=10,
@@ -55,7 +56,7 @@ class ChinaStockKdataRecorder(FixedCycleDataRecorder):
 
     def record(self, entity, start, end, size, timestamps, http_session):
         the_url = self.url.format("{}".format(entity.code), level_flag(self.level), size,
-                                  now_time_str(fmt=TIME_FORMAT_DAY1))
+                                  now_time_str(region=Region.CHN, fmt=TIME_FORMAT_DAY1))
         
         resp = request_get(http_session, the_url)
         results = json_callback_param(resp.text)

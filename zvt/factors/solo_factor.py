@@ -4,6 +4,7 @@ from typing import List, Union
 import pandas as pd
 
 from zvt.contract import IntervalLevel, EntityMixin
+from zvt.contract.common import Provider
 from zvt.domain import Stock
 from zvt.factors import Accumulator
 from zvt.factors.algorithm import IntersectTransformer
@@ -12,7 +13,8 @@ from zvt.factors.technical_factor import TechnicalFactor
 
 
 class SoloFactor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,

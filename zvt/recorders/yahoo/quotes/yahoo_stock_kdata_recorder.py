@@ -10,7 +10,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.joinquant.common import to_yahoo_trading_level
 from zvt.domain import Stock, StockKdataCommon, Stock1dKdata
 from zvt.utils.pd_utils import pd_is_not_null
@@ -19,11 +19,11 @@ from zvt.utils.request_utils import yh_get_bars
 
 
 class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
-    entity_provider = 'yahoo'
+    entity_provider = Provider.Yahoo
     entity_schema = Stock
 
     # 数据来自yahoo
-    provider = 'yahoo'
+    provider = Provider.Yahoo
 
     # 只是为了把recorder注册到data_schema
     data_schema = StockKdataCommon
@@ -79,7 +79,7 @@ class YahooUsStockKdataRecorder(FixedCycleDataRecorder):
 
             df['entity_id'] = entity.id
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['provider'] = 'yahoo'
+            df['provider'] = Provider.Yahoo.value
             df['level'] = self.level.value
             df['code'] = entity.code
 

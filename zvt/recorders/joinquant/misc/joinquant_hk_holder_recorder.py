@@ -6,7 +6,7 @@ from zvt.contract.api import df_to_db, get_data
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Index
 from zvt.domain.misc.holder import HkHolder
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.joinquant.common import to_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, to_pd_timestamp, now_pd_timestamp
@@ -20,10 +20,10 @@ from zvt.utils.request_utils import jq_auth, jq_query, jq_logout
 # 抓取的角度是entity从Index中获取 沪股通/深股通，然后按 每日 去获取
 
 class JoinquantHkHolderRecorder(TimestampsDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Index
 
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
     data_schema = HkHolder
 
     def __init__(self,

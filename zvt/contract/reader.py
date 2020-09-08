@@ -8,7 +8,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_entities
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
@@ -49,8 +49,8 @@ class DataReader(object):
     def __init__(self,
                  data_schema: Mixin,
                  entity_schema: EntityMixin,
-                 provider: str = None,
-                 entity_provider: str = None,
+                 provider: Provider = Provider.Default,
+                 entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None,
                  exchanges: List[str] = None,
                  codes: List[str] = None,
@@ -139,7 +139,7 @@ class DataReader(object):
 
         self.load_data()
 
-    def load_window_df(self, provider, data_schema, window):
+    def load_window_df(self, provider: Provider, data_schema, window):
         window_df = None
 
         dfs = []
@@ -161,9 +161,11 @@ class DataReader(object):
         start_time = time.time()
 
         self.data_df = self.data_schema.query_data(entity_ids=self.entity_ids,
-                                                   provider=self.provider, columns=self.columns,
+                                                   provider=self.provider, 
+                                                   columns=self.columns,
                                                    start_timestamp=self.start_timestamp,
-                                                   end_timestamp=self.end_timestamp, filters=self.filters,
+                                                   end_timestamp=self.end_timestamp, 
+                                                   filters=self.filters,
                                                    order=self.order,
                                                    limit=self.limit,
                                                    level=self.level,

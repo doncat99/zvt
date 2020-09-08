@@ -10,7 +10,7 @@ from zvt.contract import IntervalLevel
 from zvt.drawer.drawer import Drawer
 from zvt.factors.factor import FilterFactor, ScoreFactor, Factor, StateFactor
 from zvt.domain.meta.stock_meta import Stock, Etf, Block, Index
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.pd_utils import index_df, pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
@@ -35,7 +35,7 @@ class TargetSelector(object):
                  long_threshold=0.8,
                  short_threshold=0.2,
                  level=IntervalLevel.LEVEL_1DAY,
-                 provider=None,
+                 provider: Provider=Provider.Default,
                  portfolio_selector=None) -> None:
         self.entity_ids = entity_ids
         self.entity_schema = entity_schema

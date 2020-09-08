@@ -1,6 +1,7 @@
 from jqdatasdk import finance
 
 from zvt.contract.recorder import TimeSeriesDataRecorder
+from zvt.contract.common import Provider
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import multiple_number
 from zvt.utils.request_utils import jq_auth, jq_query
@@ -8,10 +9,10 @@ from zvt.domain import Index, CrossMarketSummary
 
 
 class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'exchange'
+    entity_provider = Provider.Exchange
     entity_schema = Index
 
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
     data_schema = CrossMarketSummary
 
     def __init__(self, batch_size=10,
@@ -47,7 +48,7 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
 
         for item in df.to_dict(orient='records'):
             result = {
-                'provider': self.provider,
+                'provider': self.provider.value,
                 'timestamp': item['day'],
                 'name': entity.name,
                 'buy_amount': multiple_number(item['buy_amount'], 100000000),

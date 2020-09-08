@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 
 Stock1dMaStateStatsBase = declarative_base()
 
@@ -28,4 +28,6 @@ class Stock1dMaStateStats(Stock1dMaStateStatsBase, Mixin):
     # total_pct = Column(Integer)
 
 
-register_schema(regions=[Region.CHN, Region.US], providers=['zvt'], db_name='stock_1d_ma_stats', schema_base=Stock1dMaStateStatsBase)
+register_schema(regions=[Region.CHN, Region.US], 
+                providers=[Provider.ZVT], 
+                db_name='stock_1d_ma_stats', schema_base=Stock1dMaStateStatsBase)

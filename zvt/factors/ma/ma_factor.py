@@ -7,6 +7,7 @@ import pandas as pd
 from zvt.api import AdjustType
 from zvt.api.quote import get_ma_factor_schema
 from zvt.contract import IntervalLevel, EntityMixin
+from zvt.contract.common import Provider
 from zvt.contract.api import get_entities
 from zvt.domain import Stock
 from zvt.factors import Accumulator
@@ -18,7 +19,8 @@ from zvt.utils.time_utils import now_pd_timestamp
 
 class MaFactor(TechnicalFactor):
 
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -57,7 +59,8 @@ class CrossMaFactor(MaFactor):
 
 
 class VolumeUpMa250Factor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -99,7 +102,8 @@ class VolumeUpMa250Factor(TechnicalFactor):
 
 
 class ImprovedMaFactor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -159,7 +163,8 @@ if __name__ == '__main__':
     start = args.start
     end = args.end
 
-    entities = get_entities(provider='eastmoney', entity_type='stock', columns=[Stock.entity_id, Stock.code],
+    entities = get_entities(provider=Provider.EastMoney, entity_type='stock', 
+                            columns=[Stock.entity_id, Stock.code],
                             filters=[Stock.code >= start, Stock.code < end])
 
     codes = entities.index.to_list()

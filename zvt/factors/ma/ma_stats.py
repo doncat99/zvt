@@ -7,6 +7,7 @@ import pandas as pd
 from zvt.api import Stock
 from zvt.api.quote import get_ma_state_stats_schema
 from zvt.contract import IntervalLevel, EntityMixin
+from zvt.contract.common import Provider
 from zvt.contract.api import get_entities
 from zvt.factors.algorithm import MaTransformer
 from zvt.factors.factor import Accumulator, Transformer
@@ -127,7 +128,8 @@ class MaAccumulator(Accumulator):
 
 class MaStateStatsFactor(TechnicalFactor):
 
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -182,7 +184,8 @@ if __name__ == '__main__':
     start = args.start
     end = args.end
 
-    entities = get_entities(provider='joinquant', entity_type='stock', columns=[Stock.entity_id, Stock.code],
+    entities = get_entities(provider=Provider.JoinQuant, entity_type='stock', 
+                            columns=[Stock.entity_id, Stock.code],
                             filters=[Stock.code >= start, Stock.code < end])
 
     codes = entities.index.to_list()

@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 
 HolderBase = declarative_base()
 
@@ -94,6 +94,8 @@ class InstitutionalInvestorHolder(HolderBase, Mixin):
     shareholding_ratio = Column(Float)
 
 
-register_schema(regions=[Region.CHN, Region.US], providers=['eastmoney', 'joinquant'], db_name='holder', schema_base=HolderBase)
+register_schema(regions=[Region.CHN, Region.US], 
+                providers=[Provider.EastMoney, Provider.JoinQuant], 
+                db_name='holder', schema_base=HolderBase)
 
 __all__ = ['TopTenTradableHolder', 'TopTenHolder', 'InstitutionalInvestorHolder', 'HkHolder']

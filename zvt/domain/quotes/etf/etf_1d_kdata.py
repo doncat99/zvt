@@ -3,7 +3,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract.register import register_schema
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.domain.quotes import EtfKdataCommon
 
 KdataBase = declarative_base()
@@ -13,6 +13,8 @@ class Etf1dKdata(KdataBase, EtfKdataCommon):
     __tablename__ = 'etf_1d_kdata'
 
 
-register_schema(regions=[Region.CHN, Region.US], providers=['sina'], db_name='etf_1d_kdata', schema_base=KdataBase)
+register_schema(regions=[Region.CHN, Region.US], 
+                providers=[Provider.Sina], 
+                db_name='etf_1d_kdata', schema_base=KdataBase)
 
 __all__ = ['Etf1dKdata']

@@ -6,6 +6,7 @@ import pandas as pd
 
 from zvt.api import AdjustType, get_kdata, get_kdata_schema
 from zvt.contract import EntityMixin, IntervalLevel
+from zvt.contract.common import Provider
 from zvt.domain import Stock
 from zvt.factors import TechnicalFactor, Transformer, Accumulator
 
@@ -26,7 +27,8 @@ def get_ref_vector(entity_id, end, window=100, level=IntervalLevel.LEVEL_1DAY, e
 
 class SimilarityFactor(TechnicalFactor):
 
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,

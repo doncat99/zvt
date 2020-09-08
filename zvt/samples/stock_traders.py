@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
+from zvt.contract.common import Provider
 from zvt.factors.ma.ma_factor import CrossMaFactor
 from zvt.factors.target_selector import TargetSelector
 from zvt.factors.technical_factor import BullFactor
@@ -11,7 +12,7 @@ class MyMaTrader(StockTrader):
     def init_selectors(self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp):
         myselector = TargetSelector(entity_ids=entity_ids, entity_schema=entity_schema, exchanges=exchanges,
                                     codes=codes, start_timestamp=start_timestamp, end_timestamp=end_timestamp,
-                                    provider='joinquant')
+                                    provider=Provider.JoinQuant)
 
         myselector.add_filter_factor(
             CrossMaFactor(entity_ids=entity_ids, entity_schema=entity_schema, exchanges=exchanges,
@@ -25,7 +26,7 @@ class MyBullTrader(StockTrader):
     def init_selectors(self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp):
         myselector = TargetSelector(entity_ids=entity_ids, entity_schema=entity_schema, exchanges=exchanges,
                                     codes=codes, start_timestamp=start_timestamp, end_timestamp=end_timestamp,
-                                    provider='joinquant')
+                                    provider=Provider.JoinQuant)
 
         myselector.add_filter_factor(
             BullFactor(entity_ids=entity_ids, entity_schema=entity_schema, exchanges=exchanges,

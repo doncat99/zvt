@@ -4,7 +4,7 @@ import pandas as pd
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Index
 from zvt.domain.misc import StockSummary
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.consts import DEFAULT_SH_SUMMARY_HEADER
 from zvt.utils.time_utils import to_time_str, now_pd_timestamp
 from zvt.utils.utils import to_float
@@ -12,10 +12,10 @@ from zvt.utils.request_utils import request_get
 
 
 class StockSummaryRecorder(TimestampsDataRecorder):
-    entity_provider = 'exchange'
+    entity_provider = Provider.Exchange
     entity_schema = Index
 
-    provider = 'exchange'
+    provider = Provider.Exchange
     data_schema = StockSummary
 
     url = 'http://query.sse.com.cn/marketdata/tradedata/queryTradingByProdTypeData.do?jsonCallBack=jsonpCallback30731&searchDate={}&prodType=gp&_=1515717065511'
@@ -44,7 +44,7 @@ class StockSummaryRecorder(TimestampsDataRecorder):
                 result_json = result[0]
                 # 有些较老的数据不存在,默认设为0.0
                 json_results.append({
-                    'provider': 'exchange',
+                    'provider': Provider.Exchange.value,
                     'timestamp': timestamp,
                     'name': '上证指数',
                     'pe': to_float(result_json['profitRate'], 0.0),

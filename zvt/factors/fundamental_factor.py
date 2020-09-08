@@ -6,6 +6,7 @@ from typing import List, Union
 import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
+from zvt.contract.common import Provider
 from zvt.domain import FinanceFactor, BalanceSheet, Stock
 from zvt.factors import Transformer, Accumulator, FilterFactor
 from zvt.factors.factor import Factor
@@ -13,8 +14,9 @@ from zvt.factors.factor import Factor
 
 class FinanceBaseFactor(Factor):
 
-    def __init__(self, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, provider: str = None,
-                 entity_provider: str = None, entity_ids: List[str] = None, exchanges: List[str] = None,
+    def __init__(self, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default, 
+                 entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None, end_timestamp: Union[str, pd.Timestamp] = None,
                  columns: List = None, filters: List = None, order: object = None, limit: int = None,
@@ -33,8 +35,9 @@ class FinanceBaseFactor(Factor):
 
 class GoodCompanyFactor(FinanceBaseFactor, FilterFactor):
 
-    def __init__(self, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, provider: str = None,
-                 entity_provider: str = None, entity_ids: List[str] = None, exchanges: List[str] = None,
+    def __init__(self, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default, 
+                 entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None, end_timestamp: Union[str, pd.Timestamp] = None,
                  # 高roe,高现金流,低财务杠杆，有增长

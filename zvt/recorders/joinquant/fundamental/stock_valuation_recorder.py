@@ -6,18 +6,18 @@ from jqdatasdk import valuation
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import Stock, StockValuation, Etf
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.request_utils import jq_auth, jq_query, jq_get_fundamentals_continuously, jq_logout
 from zvt.utils.time_utils import now_pd_timestamp, now_time_str, to_time_str
 
 
 class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Stock
 
     # 数据来自jq
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
 
     data_schema = StockValuation
 

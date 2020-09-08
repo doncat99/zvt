@@ -5,6 +5,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.contract.common import Provider
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.request_utils import request_get
@@ -16,10 +17,10 @@ from zvt.recorders.consts import EASTMONEY_ETF_NET_VALUE_HEADER
 
 
 class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
-    entity_provider = 'exchange'
+    entity_provider = Provider.Exchange
     entity_schema = Index
 
-    provider = 'sina'
+    provider = Provider.Sina
     data_schema = Etf1dKdata
     url = 'http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?' \
           'symbol={}{}&scale=240&&datalen={}&ma=no'

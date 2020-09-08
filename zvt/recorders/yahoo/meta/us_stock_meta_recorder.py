@@ -2,6 +2,7 @@
 import multiprocessing
 
 from zvt.contract.recorder import Recorder
+from zvt.contract.common import Provider
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import to_float, pct_to_float
 from zvt.utils.request_utils import get_http_session, request_post
@@ -14,14 +15,14 @@ from tqdm import tqdm
 
 class YahooUsStockListRecorder(ExchangeUsStockListRecorder):
     data_schema = Stock
-    provider = 'yahoo'
+    provider = Provider.Yahoo
 
     def __init__(self, batch_size=10, force_update=False, sleeping_time=5, share_para=None) -> None:
         super().__init__(batch_size, force_update, sleeping_time)
 
 
 class YahooUsStockDetailRecorder(Recorder):
-    provider = 'yahoo'
+    provider = Provider.Yahoo
     data_schema = StockDetail
 
     def __init__(self, batch_size=10, force_update=False, sleeping_time=5, codes=None, share_para=None) -> None:
@@ -113,4 +114,4 @@ if __name__ == '__main__':
 
     # recorder = EastmoneyChinaStockDetailRecorder()
     # recorder.run()
-    StockDetail.record_data(codes=['000338', '000777'], provider='eastmoney')
+    StockDetail.record_data(codes=['A'], provider=Provider.Yahoo)

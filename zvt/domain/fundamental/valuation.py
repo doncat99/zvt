@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 
 ValuationBase = declarative_base()
 
@@ -63,6 +63,8 @@ class EtfValuation(ValuationBase, Mixin):
     pcf1 = Column(Float)
 
 
-register_schema(regions=[Region.CHN, Region.US], providers=['joinquant'], db_name='valuation', schema_base=ValuationBase)
+register_schema(regions=[Region.CHN, Region.US], 
+                providers=[Provider.JoinQuant],
+                db_name='valuation', schema_base=ValuationBase)
 
 __all__ = ['StockValuation', 'EtfValuation']

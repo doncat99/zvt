@@ -11,7 +11,7 @@ from zvt.contract.api import get_data, df_to_db
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader, DataListener
 from zvt.domain import Stock
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.drawer.drawer import Drawer
 from zvt.utils.pd_utils import pd_is_not_null
 
@@ -80,8 +80,8 @@ class Factor(DataReader, DataListener):
     def __init__(self,
                  data_schema: Mixin,
                  entity_schema: EntityMixin = Stock,
-                 provider: str = None,
-                 entity_provider: str = None,
+                 provider: Provider = Provider.Default,
+                 entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None,
                  exchanges: List[str] = None,
                  codes: List[str] = None,
@@ -147,10 +147,11 @@ class Factor(DataReader, DataListener):
             if self.dry_run:
                 # 如果只是为了计算因子，只需要读取acc_window的factor_df
                 if self.accumulator is not None:
-                    self.factor_df = self.load_window_df(provider='zvt', data_schema=self.factor_schema,
+                    self.factor_df = self.load_window_df(provider=Provider.ZVT, 
+                                                         data_schema=self.factor_schema,
                                                          window=accumulator.acc_window)
             else:
-                self.factor_df = get_data(provider='zvt',
+                self.factor_df = get_data(provider=Provider.ZVT,
                                           data_schema=self.factor_schema,
                                           start_timestamp=self.start_timestamp,
                                           end_timestamp=self.end_timestamp,
@@ -162,7 +163,7 @@ class Factor(DataReader, DataListener):
             if pd_is_not_null(self.data_df) and self.computing_window:
                 dfs = []
                 for entity_id, df in self.data_df.groupby(level=0):
-                    latest_laved = get_data(provider='zvt',
+                    latest_laved = get_data(provider=Provider.ZVT,
                                             data_schema=self.factor_schema,
                                             entity_id=entity_id,
                                             order=self.factor_schema.timestamp.desc(),
@@ -272,7 +273,8 @@ class Factor(DataReader, DataListener):
         pass
 
     def persist_factor(self, region: Region):
-        df_to_db(df=self.factor_df, region=region, data_schema=self.factor_schema, provider='zvt', force_update=False)
+        df_to_db(df=self.factor_df, region=region, data_schema=self.factor_schema, 
+                 provider=Provider.ZVT, force_update=False)
 
 
 class FilterFactor(Factor):
@@ -282,8 +284,9 @@ class FilterFactor(Factor):
 class ScoreFactor(Factor):
     factor_type = FactorType.score
 
-    def __init__(self, data_schema: Mixin, entity_schema: EntityMixin = Stock, provider: str = None,
-                 entity_provider: str = None, entity_ids: List[str] = None, exchanges: List[str] = None,
+    def __init__(self, data_schema: Mixin, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default, 
+                 entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None, end_timestamp: Union[str, pd.Timestamp] = None,
                  columns: List = None, filters: List = None, order: object = None, limit: int = None,

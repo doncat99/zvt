@@ -10,7 +10,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import EtfStock, BlockCategory, Etf
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.consts import DEFAULT_SH_ETF_LIST_HEADER
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
@@ -18,7 +18,7 @@ from zvt.utils.request_utils import get_http_session, request_get
 class ChinaETFListSpider(Recorder):
     data_schema = EtfStock
 
-    def __init__(self, batch_size=10, force_update=False, sleeping_time=10.0, provider='exchange') -> None:
+    def __init__(self, batch_size=10, force_update=False, sleeping_time=10.0, provider: Provider=Provider.Exchange) -> None:
         self.provider = provider
         super().__init__(batch_size, force_update, sleeping_time)
 
@@ -213,5 +213,5 @@ class ChinaETFListSpider(Recorder):
 __all__ = ['ChinaETFListSpider']
 
 if __name__ == '__main__':
-    spider = ChinaETFListSpider(provider='exchange')
+    spider = ChinaETFListSpider(provider=Provider.Exchange)
     spider.run()

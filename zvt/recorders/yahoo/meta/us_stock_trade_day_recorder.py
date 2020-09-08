@@ -5,15 +5,15 @@ import pandas_market_calendars as mcal
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import StockTradeDay, Stock
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import to_time_str, now_pd_timestamp, is_datetime
 
 
 class UsStockTradeDayRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'yahoo'
+    entity_provider = Provider.Yahoo
     entity_schema = Stock
 
-    provider = 'yahoo'
+    provider = Provider.Yahoo
     data_schema = StockTradeDay
 
     def __init__(self, entity_type='stock', exchanges=['NYSE', 'NASDAQ'], entity_ids=None, codes=None, batch_size=10,

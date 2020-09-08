@@ -6,6 +6,7 @@ import pandas as pd
 from zvt.api import AdjustType
 from zvt.api.quote import get_kdata_schema, Stock
 from zvt.contract import IntervalLevel, EntityMixin
+from zvt.contract.common import Provider
 from zvt.factors.algorithm import MacdTransformer, consecutive_count
 from zvt.factors.factor import Factor, Transformer, Accumulator
 
@@ -13,8 +14,8 @@ from zvt.factors.factor import Factor, Transformer, Accumulator
 class TechnicalFactor(Factor):
     def __init__(self,
                  entity_schema: EntityMixin = Stock,
-                 provider: str = None,
-                 entity_provider: str = None,
+                 provider: Provider = Provider.Default,
+                 entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None,
                  exchanges: List[str] = None,
                  codes: List[str] = None,
@@ -64,7 +65,8 @@ class BullFactor(TechnicalFactor):
 
 
 class KeepBullFactor(BullFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,

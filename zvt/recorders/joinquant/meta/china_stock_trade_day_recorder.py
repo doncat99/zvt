@@ -4,16 +4,16 @@ import pandas as pd
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import StockTradeDay, Stock
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.request_utils import jq_auth, jq_get_trade_days
 
 
 class ChinaStockTradeDayRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Stock
 
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
     data_schema = StockTradeDay
 
     def __init__(self, entity_type='stock', exchanges=['sh', 'sz'], entity_ids=None, codes=None, batch_size=10,

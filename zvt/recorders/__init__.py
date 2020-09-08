@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zvt.contract.common import Region
+from zvt.contract.common import *
 from zvt.recorders.eastmoney import *
 from zvt.recorders.exchange import *
 from zvt.recorders.joinquant import *
@@ -112,7 +112,7 @@ CHINA_STOCK_MAIN_INDEX = [{'id': 'index_cn_000001',
                           ]
 
 
-def init_main_index(region: Region, provider='exchange'):
+def init_main_index(region: Region, provider=Provider.Exchange):
     from zvt.utils.time_utils import to_pd_timestamp
     import pandas as pd
     from zvt.contract.api import df_to_db

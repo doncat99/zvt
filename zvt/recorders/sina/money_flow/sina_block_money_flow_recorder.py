@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.contract.common import Provider
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.request_utils import request_get
 from zvt.utils.utils import to_float
@@ -14,12 +15,12 @@ from zvt.domain import BlockMoneyFlow, BlockCategory, Block
 
 class SinaBlockMoneyFlowRecorder(FixedCycleDataRecorder):
     # entity的信息从哪里来
-    entity_provider = 'sina'
+    entity_provider = Provider.Sina
     # entity的schema
     entity_schema = Block
 
     # 记录的信息从哪里来
-    provider = 'sina'
+    provider = Provider.Sina
     # 记录的schema
     data_schema = BlockMoneyFlow
 

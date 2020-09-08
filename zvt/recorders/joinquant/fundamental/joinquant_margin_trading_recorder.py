@@ -5,7 +5,7 @@ import pandas as pd
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import Stock, MarginTrading
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY
@@ -13,11 +13,11 @@ from zvt.utils.request_utils import jq_auth, jq_get_mtss, jq_logout
 
 
 class MarginTradingRecorder(TimeSeriesDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Stock
 
     # 数据来自jq
-    provider = 'joinquant'
+    provider = Provider.JoinQuant
 
     data_schema = MarginTrading
 

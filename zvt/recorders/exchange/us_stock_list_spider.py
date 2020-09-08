@@ -7,7 +7,7 @@ import pandas as pd
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.domain import Stock, StockDetail
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.recorders.consts import YAHOO_STOCK_LIST_HEADER
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
@@ -15,7 +15,7 @@ from zvt.utils.request_utils import get_http_session, request_get
 
 class ExchangeUsStockListRecorder(Recorder):
     data_schema = Stock
-    provider = 'exchange'
+    provider = Provider.Exchange
 
     def run(self):
         http_session = get_http_session()

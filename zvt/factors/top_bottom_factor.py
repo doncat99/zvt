@@ -5,6 +5,7 @@ import pandas as pd
 
 from zvt.api import AdjustType
 from zvt.contract import IntervalLevel, EntityMixin
+from zvt.contract.common import Provider
 from zvt.contract.reader import DataReader
 from zvt.domain import Stock, Stock1dKdata
 from zvt.drawer.drawer import Drawer
@@ -32,7 +33,8 @@ class TopBottomTransformer(Transformer):
 
 
 class TopBottomFactor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, provider: str = None, entity_provider: str = None,
+    def __init__(self, entity_schema: EntityMixin = Stock, 
+                 provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,

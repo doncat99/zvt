@@ -5,7 +5,7 @@ from zvt.contract import IntervalLevel
 from zvt.contract.api import get_entities
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.domain import Stock
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.factors.ma.ma_factor import MaFactor
 from zvt.factors.ma.ma_stats import MaStateStatsFactor
 
@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 def cal_ma_states(start='000001', end='002000'):
     logger.info(f'start cal day ma stats {start}:{end}')
 
-    entities = get_entities(provider='eastmoney', entity_type='stock', columns=[Stock.entity_id, Stock.code],
+    entities = get_entities(provider=Provider.Default, entity_type='stock', 
+                            columns=[Stock.entity_id, Stock.code],
                             filters=[Stock.code >= start, Stock.code < end])
 
     codes = entities.index.to_list()

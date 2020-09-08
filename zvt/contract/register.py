@@ -8,7 +8,7 @@ from sqlalchemy.engine.reflection import Inspector
 
 from zvt.contract import EntityMixin, zvt_context, Mixin
 from zvt.contract.api import get_db_engine, get_db_session_factory
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.utils import add_to_map_list
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ def register_entity(entity_type: str = None):
 
 
 def register_schema(regions: List[Region],
-                    providers: List[str],
+                    providers: List[Provider],
                     db_name: str,
                     schema_base: DeclarativeMeta,
                     entity_type: str = 'stock'):

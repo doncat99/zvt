@@ -2,17 +2,17 @@
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.domain import StockMoneyFlow, Stock, StockTradeDay
-from zvt.contract.common import Region
+from zvt.contract.common import Region, Provider
 from zvt.utils.time_utils import to_pd_timestamp, is_same_date, now_pd_timestamp
 from zvt.utils.utils import to_float
 from zvt.utils.request_utils import request_get
 
 
 class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
-    entity_provider = 'joinquant'
+    entity_provider = Provider.JoinQuant
     entity_schema = Stock
 
-    provider = 'sina'
+    provider = Provider.Sina
     data_schema = StockMoneyFlow
 
     url = 'http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/MoneyFlow.ssl_qsfx_lscjfb?page=1&num={}&sort=opendate&asc=0&daima={}'
