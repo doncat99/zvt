@@ -5,7 +5,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.contract.common import Provider
+from zvt.contract.common import Provider, EntityType
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.request_utils import request_get
@@ -25,7 +25,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
     url = 'http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?' \
           'symbol={}{}&scale=240&&datalen={}&ma=no'
 
-    def __init__(self, entity_type='index', exchanges=['sh', 'sz'], entity_ids=None, codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.Index, exchanges=['sh', 'sz'], entity_ids=None, codes=None, batch_size=10,
                  force_update=False, sleeping_time=10, default_size=2000, real_time=True, fix_duplicate_way='add',
                  start_timestamp=None, end_timestamp=None,
                  level=IntervalLevel.LEVEL_1DAY, kdata_use_begin_time=False, close_hour=0, close_minute=0,

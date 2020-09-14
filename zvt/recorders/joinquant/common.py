@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
+from zvt.contract.common import EntityType
 from zvt.domain import ReportPeriod
 
 
@@ -20,21 +21,21 @@ def to_jq_trading_level(trading_level: IntervalLevel):
 
 
 def to_jq_entity_id(security_item):
-    if security_item.entity_type == 'stock' or security_item.entity_type == 'index':
+    if security_item.entity_type == EntityType.Stock.value or security_item.entity_type == EntityType.Index.value:
         if security_item.exchange == 'sh':
             return '{}.XSHG'.format(security_item.code)
         if security_item.exchange == 'sz':
             return '{}.XSHE'.format(security_item.code)
 
 
-def to_entity_id(jq_code: str, entity_type):
+def to_entity_id(jq_code: str, entity_type: EntityType):
     code, exchange = jq_code.split('.')
     if exchange == 'XSHG':
         exchange = 'sh'
     elif exchange == 'XSHE':
         exchange = 'sz'
 
-    return f'{entity_type}_{exchange}_{code}'
+    return f'{entity_type.value}_{exchange}_{code}'
 
 
 def jq_to_report_period(jq_report_type):

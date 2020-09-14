@@ -254,7 +254,7 @@ def init(l):
 def mp_tqdm(func, lock, region, shared=[], args=[], pc=4, reset=False):
     with multiprocessing.Pool(pc, initializer=init, initargs=(lock,), maxtasksperchild = 1 if reset else None) as p:
         data = get_cache()
-        args = [arg for arg in args if not valid(shared[0], arg[0].__name__, arg[4], data)]
+        # args = [arg for arg in args if not valid(shared[0], arg[0].__name__, arg[4], data)]
         # The master process tqdm bar is at Position 0
         with tqdm(total=len(args), ncols=80, desc="total", leave=True) as pbar:
             for func_name in p.imap_unordered(func, [[pc, shared, arg] for arg in args], chunksize=1):
@@ -275,25 +275,25 @@ def run(args):
 
 
 data_set_chn = [
-    [interface.get_dividend_financing_data,      Provider.EastMoney, 0, "Divdend Financing",        24*6],
-    [interface.get_top_ten_holder_data,          Provider.EastMoney, 0, "Top Ten Holder",           24*6],
-    [interface.get_finance_data,                 Provider.EastMoney, 0, "Finance Factor",           24*6],
-    [interface.get_balance_data,                 Provider.EastMoney, 0, "Balance Sheet",            24*6],
-    [interface.get_top_ten_tradable_holder_data, Provider.EastMoney, 0, "Top Ten Tradable Holder",  24*6],
-    [interface.get_income_data,                  Provider.EastMoney, 0, "Income Statement",         24*6],
-    [interface.get_moneyflow_data,               Provider.Sina,      1, "MoneyFlow Statement",      24],
-    [interface.get_dividend_detail_data,         Provider.EastMoney, 0, "Divdend Detail",           24*6],
-    [interface.get_spo_detail_data,              Provider.EastMoney, 0, "SPO Detail",               24*6],
-    [interface.get_rights_issue_detail_data,     Provider.EastMoney, 0, "Rights Issue Detail",      24],
-    [interface.get_holder_trading_data,          Provider.EastMoney, 0, "Holder Trading",           24],
-    [interface.get_etf_valuation_data,           Provider.JoinQuant, 0, "ETF Valuation",            24],
-    [interface.get_stock_summary_data,           Provider.JoinQuant, 0, "Stock Summary",            24],  
-    [interface.get_stock_detail_data,            Provider.EastMoney, 0, "Stock Detail",             24], 
-    [interface.get_cashflow_data,                Provider.EastMoney, 0, "CashFlow Statement",       24],
-    [interface.get_stock_valuation_data,         Provider.JoinQuant, 0, "Stock Valuation",          24],
-    [interface.get_etf_stock_data,               Provider.JoinQuant, 0, "ETF Stock",                24],
-    [interface.get_margin_trading_summary_data,  Provider.JoinQuant, 0, "Margin Trading Summary",   24],
-    [interface.get_cross_market_summary_data,    Provider.JoinQuant, 0, "Cross Market Summary",     24],
+    # [interface.get_dividend_financing_data,      Provider.EastMoney, 0, "Divdend Financing",        24*6],
+    # [interface.get_top_ten_holder_data,          Provider.EastMoney, 0, "Top Ten Holder",           24*6],
+    # [interface.get_finance_data,                 Provider.EastMoney, 0, "Finance Factor",           24*6],
+    # [interface.get_balance_data,                 Provider.EastMoney, 0, "Balance Sheet",            24*6],
+    # [interface.get_top_ten_tradable_holder_data, Provider.EastMoney, 0, "Top Ten Tradable Holder",  24*6],
+    # [interface.get_income_data,                  Provider.EastMoney, 0, "Income Statement",         24*6],
+    # [interface.get_moneyflow_data,               Provider.Sina,      1, "MoneyFlow Statement",      24],
+    # [interface.get_dividend_detail_data,         Provider.EastMoney, 0, "Divdend Detail",           24*6],
+    # [interface.get_spo_detail_data,              Provider.EastMoney, 0, "SPO Detail",               24*6],
+    # [interface.get_rights_issue_detail_data,     Provider.EastMoney, 0, "Rights Issue Detail",      24],
+    # [interface.get_holder_trading_data,          Provider.EastMoney, 0, "Holder Trading",           24],
+    # [interface.get_etf_valuation_data,           Provider.JoinQuant, 0, "ETF Valuation",            24],
+    # [interface.get_stock_summary_data,           Provider.JoinQuant, 0, "Stock Summary",            24],  
+    # [interface.get_stock_detail_data,            Provider.EastMoney, 0, "Stock Detail",             24], 
+    # [interface.get_cashflow_data,                Provider.EastMoney, 0, "CashFlow Statement",       24],
+    # [interface.get_stock_valuation_data,         Provider.JoinQuant, 0, "Stock Valuation",          24],
+    # [interface.get_etf_stock_data,               Provider.JoinQuant, 0, "ETF Stock",                24],
+    # [interface.get_margin_trading_summary_data,  Provider.JoinQuant, 0, "Margin Trading Summary",   24],
+    # [interface.get_cross_market_summary_data,    Provider.JoinQuant, 0, "Cross Market Summary",     24],
 
     [interface.get_stock_1d_k_data,              Provider.JoinQuant, 0, "Stock Daily K-Data",       24], 
     # [interface.get_stock_1d_hfq_k_data,          Provider.JoinQuant, 0, "Stock Daily HFQ K-Data",   24],
@@ -358,7 +358,7 @@ def fetch_data(lock, region: Region):
     print("\/"*40)
 
 
-@sched.scheduled_job('cron', days=1)
+@sched.scheduled_job('interval', days=1, next_run_time=datetime.now())
 def main():
     multiprocessing.freeze_support()
     l = multiprocessing.Lock()
@@ -375,9 +375,3 @@ if __name__ == '__main__':
     sched.start()
     sched._thread.join()
 
-      
-    
-
-    
-
-    

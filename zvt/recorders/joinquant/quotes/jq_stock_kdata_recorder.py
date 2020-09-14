@@ -9,7 +9,7 @@ from zvt.api.quote import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.recorders.joinquant.common import to_jq_trading_level, to_jq_entity_id
 from zvt.domain import Stock, StockKdataCommon, Stock1dHfqKdata
 from zvt.utils.pd_utils import pd_is_not_null
@@ -48,10 +48,10 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                  share_para=None) -> None:
         level = IntervalLevel(level)
         adjust_type = AdjustType(adjust_type)
-        self.data_schema = get_kdata_schema(entity_type='stock', level=level, adjust_type=adjust_type)
+        self.data_schema = get_kdata_schema(entity_type=EntityType.Stock, level=level, adjust_type=adjust_type)
         self.jq_trading_level = to_jq_trading_level(level)
 
-        super().__init__('stock', exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
+        super().__init__(EntityType.Stock, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
                          default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
                          close_minute, level, kdata_use_begin_time, one_day_trading_minutes, share_para=share_para)
         self.adjust_type = adjust_type

@@ -10,7 +10,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import EtfStock, BlockCategory, Etf
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.recorders.consts import DEFAULT_SH_ETF_LIST_HEADER
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
@@ -64,7 +64,7 @@ class ChinaETFListSpider(Recorder):
         df['id'] = df['code'].apply(lambda code: f'etf_{exchange}_{code}')
         df['entity_id'] = df['id']
         df['exchange'] = exchange
-        df['entity_type'] = 'etf'
+        df['entity_type'] = EntityType.ETF.value
         df['category'] = BlockCategory.etf.value
 
         df = df.dropna(axis=0, how='any')
@@ -97,7 +97,7 @@ class ChinaETFListSpider(Recorder):
             response_df.rename(columns={'instrumentId': 'stock_code', 'instrumentName': 'stock_name'}, inplace=True)
 
             response_df['entity_id'] = etf_id
-            response_df['entity_type'] = 'etf'
+            response_df['entity_type'] = EntityType.ETF.value
             response_df['exchange'] = 'sh'
             response_df['code'] = etf_code
             response_df['name'] = etf['FUND_NAME']
@@ -146,7 +146,7 @@ class ChinaETFListSpider(Recorder):
             response_df.rename(columns={'品种代码': 'stock_code', '品种名称': 'stock_name'}, inplace=True)
 
             response_df['entity_id'] = etf_id
-            response_df['entity_type'] = 'etf'
+            response_df['entity_type'] = EntityType.ETF.value
             response_df['exchange'] = 'sz'
             response_df['code'] = etf_code
             response_df['name'] = etf['证券简称']

@@ -7,7 +7,7 @@ import pandas as pd
 from zvt.api import AdjustType
 from zvt.api.quote import get_ma_factor_schema
 from zvt.contract import IntervalLevel, EntityMixin
-from zvt.contract.common import Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.contract.api import get_entities
 from zvt.domain import Stock
 from zvt.factors import Accumulator
@@ -19,7 +19,7 @@ from zvt.utils.time_utils import now_pd_timestamp
 
 class MaFactor(TechnicalFactor):
 
-    def __init__(self, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
@@ -33,12 +33,12 @@ class MaFactor(TechnicalFactor):
                  windows=[5, 10, 34, 55, 89, 144, 120, 250],
                  adjust_type: Union[AdjustType, str] = None) -> None:
         self.adjust_type = adjust_type
-        self.factor_schema = get_ma_factor_schema(entity_type=entity_schema.__name__, level=level)
+        self.factor_schema = get_ma_factor_schema(entity_type=EntityType(entity_schema.__name__), level=level)
         self.windows = windows
 
         transformer: Transformer = MaTransformer(windows=windows)
 
-        super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
+        super().__init__(region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
                          accumulator, need_persist, dry_run, adjust_type)
@@ -59,7 +59,7 @@ class CrossMaFactor(MaFactor):
 
 
 class VolumeUpMa250Factor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
@@ -76,7 +76,7 @@ class VolumeUpMa250Factor(TechnicalFactor):
 
         transformer: Transformer = MaAndVolumeTransformer(windows=windows, vol_windows=vol_windows)
 
-        super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
+        super().__init__(region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
                          accumulator, need_persist, dry_run)
@@ -102,7 +102,7 @@ class VolumeUpMa250Factor(TechnicalFactor):
 
 
 class ImprovedMaFactor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
@@ -120,7 +120,7 @@ class ImprovedMaFactor(TechnicalFactor):
 
         transformer: Transformer = MaAndVolumeTransformer(windows=windows, vol_windows=vol_windows)
 
-        super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
+        super().__init__(region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
                          accumulator, need_persist, dry_run)
@@ -149,7 +149,7 @@ class ImprovedMaFactor(TechnicalFactor):
 
 
 if __name__ == '__main__':
-    from zvt.contract.common import Region
+
     print('start')
     parser = argparse.ArgumentParser()
     parser.add_argument('--level', help='trading level', default='1d',
@@ -163,13 +163,18 @@ if __name__ == '__main__':
     start = args.start
     end = args.end
 
-    entities = get_entities(provider=Provider.EastMoney, entity_type='stock', 
+    entities = get_entities(provider=Provider.EastMoney, 
+                            entity_type=EntityType.Stock, 
                             columns=[Stock.entity_id, Stock.code],
                             filters=[Stock.code >= start, Stock.code < end])
 
     codes = entities.index.to_list()
 
-    factor = ImprovedMaFactor(entity_ids=['stock_sz_000338'], start_timestamp='2020-01-01',
-                              end_timestamp=now_pd_timestamp(Region.CHN), need_persist=False,
+    region = Region.CHN
+    factor = ImprovedMaFactor(region=region, 
+                              entity_ids=['stock_sz_000338'], 
+                              start_timestamp='2020-01-01',
+                              end_timestamp=now_pd_timestamp(region), 
+                              need_persist=False,
                               level=level)
     print(factor.result_df)

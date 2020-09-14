@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 
 from zvt import zvt_env
 from zvt.contract.api import decode_entity_id
+from zvt.contract.common import Region
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader
 from zvt.domain import Stock1dKdata, Stock1dMaStateStats, Stock
@@ -51,16 +52,16 @@ class Drawer(object):
         # 主图的标记数据
         self.annotation_df = annotation_df
 
-    def _draw(self,
-              main_chart='kline',
-              sub_chart='bar',
-              mode='lines',
-              width=None,
-              height=None,
-              title=None,
-              keep_ui_state=True,
-              show=False,
-              **kwargs):
+    def draw(self,
+             main_chart='kline',
+             sub_chart='bar',
+             mode='lines',
+             width=None,
+             height=None,
+             title=None,
+             keep_ui_state=True,
+             show=False,
+             **kwargs):
         if pd_is_not_null(self.sub_data):
             subplot = True
             fig = make_subplots(rows=2, cols=1, row_heights=[0.8, 0.2], vertical_spacing=0.08, shared_xaxes=True)
@@ -138,8 +139,8 @@ class Drawer(object):
             return fig
 
     def draw_kline(self, width=None, height=None, title=None, keep_ui_state=True, show=False, **kwargs):
-        return self._draw('kline', width=width, height=height, title=title, keep_ui_state=keep_ui_state, show=show,
-                          **kwargs)
+        return self.draw('kline', width=width, height=height, title=title, keep_ui_state=keep_ui_state, show=show,
+                         **kwargs)
 
     def draw_line(self, width=None, height=None, title=None, keep_ui_state=True, show=False, **kwargs):
         return self.draw_scatter(mode='lines', width=width, height=height, title=title,
@@ -151,8 +152,8 @@ class Drawer(object):
 
     def draw_scatter(self, mode='markers', width=None, height=None,
                      title=None, keep_ui_state=True, show=False, **kwargs):
-        return self._draw('scatter', mode=mode, width=width, height=height, title=title, keep_ui_state=keep_ui_state,
-                          show=show, **kwargs)
+        return self.draw('scatter', mode=mode, width=width, height=height, title=title, keep_ui_state=keep_ui_state,
+                         show=show, **kwargs)
 
     def draw_table(self, width=None, height=None, title=None, keep_ui_state=True, **kwargs):
         cols = self.main_data.data_df.index.names + self.main_data.data_df.columns.tolist()
@@ -207,9 +208,9 @@ class Drawer(object):
         return layout
 
 
-def get_ui_path(name):
+def get_ui_path(region: Region, name):
     if name is None:
-        return os.path.join(zvt_env['ui_path'], '{}.html'.format(now_time_str(fmt=TIME_FORMAT_ISO8601)))
+        return os.path.join(zvt_env['ui_path'], '{}.html'.format(now_time_str(region=region, fmt=TIME_FORMAT_ISO8601)))
     return os.path.join(zvt_env['ui_path'], f'{name}.html')
 
 
@@ -228,7 +229,7 @@ def to_annotations(annotation_df: pd.DataFrame):
     annotations = []
 
     if pd_is_not_null(annotation_df):
-        for trace_name, df in annotation_df.groupby(level=0):
+        for _, df in annotation_df.groupby(level=0):
             if pd_is_not_null(df):
                 for (_, timestamp), item in df.iterrows():
                     if 'color' in item:
@@ -261,8 +262,8 @@ def to_annotations(annotation_df: pd.DataFrame):
 
 
 if __name__ == '__main__':
-    data_reader1 = DataReader(codes=['002223'], data_schema=Stock1dKdata, entity_schema=Stock)
-    data_reader2 = DataReader(codes=['002223'], data_schema=Stock1dMaStateStats, entity_schema=Stock,
+    data_reader1 = DataReader(region=Region.CHN, codes=['002223'], data_schema=Stock1dKdata, entity_schema=Stock)
+    data_reader2 = DataReader(region=Region.CHN, codes=['002223'], data_schema=Stock1dMaStateStats, entity_schema=Stock,
                               columns=['ma5', 'ma10', 'current_count', 'current_pct'])
 
     data_reader2.data_df['slope'] = 100 * data_reader2.data_df['current_pct'] / data_reader2.data_df['current_count']

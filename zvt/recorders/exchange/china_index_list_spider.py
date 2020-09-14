@@ -10,7 +10,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import IndexStock, Index
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
 
@@ -101,7 +101,7 @@ class ChinaIndexListSpider(Recorder):
 
             index_id = f'index_cn_{index_code}'
             response_df['entity_id'] = index_id
-            response_df['entity_type'] = 'index'
+            response_df['entity_type'] = EntityType.Index.value
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
@@ -150,7 +150,7 @@ class ChinaIndexListSpider(Recorder):
 
             index_id = f'index_cn_{index_code}'
             response_df['entity_id'] = index_id
-            response_df['entity_type'] = 'index'
+            response_df['entity_type'] = EntityType.Index.value
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
@@ -231,7 +231,7 @@ class ChinaIndexListSpider(Recorder):
                 response_df = response_df[['证券代码']]
 
             response_df['entity_id'] = index_id
-            response_df['entity_type'] = 'index'
+            response_df['entity_type'] = EntityType.Index.value
             response_df['exchange'] = 'cn'
             response_df['code'] = index_code
             response_df['name'] = index['name']
@@ -253,7 +253,7 @@ class ChinaIndexListSpider(Recorder):
         df['id'] = df['code'].apply(lambda code: f'index_cn_{code}')
         df['entity_id'] = df['id']
         df['exchange'] = 'cn'
-        df['entity_type'] = 'index'
+        df['entity_type'] = EntityType.Index.value
 
         df = df.dropna(axis=0, how='any')
         df = df.drop_duplicates(subset='id', keep='last')

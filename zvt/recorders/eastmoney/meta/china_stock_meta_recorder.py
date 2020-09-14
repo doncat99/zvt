@@ -3,7 +3,7 @@ import multiprocessing
 import time
 import random
 
-from zvt.contract.recorder import Recorder, Provider
+from zvt.contract.recorder import Recorder, Provider, EntityType
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import to_float, pct_to_float
 from zvt.utils.request_utils import get_http_session, request_post
@@ -37,7 +37,7 @@ class EastmoneyChinaStockDetailRecorder(Recorder):
         
         if not self.force_update:
             self.entities = get_entities(session=self.session,
-                                         entity_type='stock_detail',
+                                         entity_type=EntityType.StockDetail,
                                          exchanges=['sh', 'sz'],
                                          codes=self.codes,
                                          filters=[StockDetail.profile.is_(None)],

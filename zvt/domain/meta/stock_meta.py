@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract import EntityMixin
 from zvt.contract.register import register_schema, register_entity
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 
 StockMetaBase = declarative_base()
 
@@ -33,24 +33,24 @@ class BasePortfolio(BaseSecurity):
 
 
 # 个股
-@register_entity(entity_type='stock')
+@register_entity(entity_type=EntityType.Stock)
 class Stock(StockMetaBase, BaseSecurity):
-    __tablename__ = 'stock'
+    __tablename__ = EntityType.Stock.value
 
 
 # 板块
-@register_entity(entity_type='block')
+@register_entity(entity_type=EntityType.Block)
 class Block(StockMetaBase, BasePortfolio):
-    __tablename__ = 'block'
+    __tablename__ = EntityType.Block.value
 
     # 板块类型，行业(industry),概念(concept)
     category = Column(String(length=64))
 
 
 # 指数
-@register_entity(entity_type='index')
+@register_entity(entity_type=EntityType.Index)
 class Index(StockMetaBase, BasePortfolio):
-    __tablename__ = 'index'
+    __tablename__ = EntityType.Index.value
 
     # 发布商
     publisher = Column(String(length=64))
@@ -61,9 +61,9 @@ class Index(StockMetaBase, BasePortfolio):
 
 
 # etf
-@register_entity(entity_type='etf')
+@register_entity(entity_type=EntityType.ETF)
 class Etf(StockMetaBase, BasePortfolio):
-    __tablename__ = 'etf'
+    __tablename__ = EntityType.ETF.value
     category = Column(String(length=64))
 
     @classmethod
@@ -109,9 +109,9 @@ class EtfStock(StockMetaBase, BasePortfolioStockHistory):
 
 
 # 个股详情
-@register_entity(entity_type='stock_detail')
+@register_entity(entity_type=EntityType.StockDetail)
 class StockDetail(StockMetaBase, BaseSecurity):
-    __tablename__ = 'stock_detail'
+    __tablename__ = EntityType.StockDetail.value
 
     industry = Column(String(length=64))
     sector = Column(String(length=64))

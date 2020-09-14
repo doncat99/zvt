@@ -5,7 +5,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.api.quote import get_etf_stocks
 from zvt.domain import StockValuation, Etf, EtfValuation
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp
 
@@ -19,7 +19,7 @@ class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):
 
     data_schema = EtfValuation
 
-    def __init__(self, entity_type='etf', exchanges=None, entity_ids=None, codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.ETF, exchanges=None, entity_ids=None, codes=None, batch_size=10,
                  force_update=False, sleeping_time=5, default_size=2000, real_time=False, fix_duplicate_way='add',
                  start_timestamp=None, end_timestamp=None, close_hour=0, close_minute=0, share_para=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,

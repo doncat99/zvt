@@ -6,7 +6,7 @@ from zvt.contract.api import df_to_db, get_data
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Index
 from zvt.domain.misc.holder import HkHolder
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.recorders.joinquant.common import to_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, to_pd_timestamp, now_pd_timestamp
@@ -80,7 +80,7 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
                           inplace=True)
                 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-                df['entity_id'] = df['code'].apply(lambda x: to_entity_id(entity_type='stock', jq_code=x))
+                df['entity_id'] = df['code'].apply(lambda x: to_entity_id(entity_type=EntityType.Stock, jq_code=x))
                 df['code'] = df['code'].apply(lambda x: x.split('.')[0])
 
                 # id格式为:{holder_name}_{entity_id}_{timestamp}

@@ -5,7 +5,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.api.quote import generate_kdata_id
 from zvt.domain import Index, Index1dKdata
 from zvt.utils.time_utils import get_year_quarters, is_same_date, now_pd_timestamp
@@ -21,7 +21,7 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
     data_schema = Index1dKdata
     url = 'http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{}/type/S.phtml?year={}&jidu={}'
 
-    def __init__(self, entity_type='index', exchanges=['cn'], entity_ids=None, codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.Index, exchanges=['cn'], entity_ids=None, codes=None, batch_size=10,
                  force_update=False, sleeping_time=10, default_size=2000, real_time=False, fix_duplicate_way='add',
                  start_timestamp=None, end_timestamp=None,
                  level=IntervalLevel.LEVEL_1DAY, kdata_use_begin_time=False, close_hour=0, close_minute=0,

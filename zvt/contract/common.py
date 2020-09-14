@@ -15,3 +15,11 @@ class Provider(enum.Enum):
     Sina = 'sina'
     Yahoo = 'yahoo'
     Default = None
+
+class EntityType(enum.Enum):
+    Stock = 'stock'
+    Block = 'block'
+    Coin = 'coin'
+    Index = 'index'
+    ETF = 'etf'
+    StockDetail = 'stock_detail'

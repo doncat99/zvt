@@ -79,6 +79,7 @@ class Factor(DataReader, DataListener):
 
     def __init__(self,
                  data_schema: Mixin,
+                 region: Region,
                  entity_schema: EntityMixin = Stock,
                  provider: Provider = Provider.Default,
                  entity_provider: Provider = Provider.Default,
@@ -116,7 +117,7 @@ class Factor(DataReader, DataListener):
         :param dry_run: True for just computing factor, False for backtesting
         """
 
-        super().__init__(data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
+        super().__init__(data_schema, entity_schema, region, provider, entity_provider, entity_ids, exchanges, codes,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, limit, level,
                          category_field, time_field, computing_window)
 
@@ -272,8 +273,8 @@ class Factor(DataReader, DataListener):
         """
         pass
 
-    def persist_factor(self, region: Region):
-        df_to_db(df=self.factor_df, region=region, data_schema=self.factor_schema, 
+    def persist_factor(self):
+        df_to_db(df=self.factor_df, region=self.region, data_schema=self.factor_schema, 
                  provider=Provider.ZVT, force_update=False)
 
 
@@ -284,7 +285,7 @@ class FilterFactor(Factor):
 class ScoreFactor(Factor):
     factor_type = FactorType.score
 
-    def __init__(self, data_schema: Mixin, entity_schema: EntityMixin = Stock, 
+    def __init__(self, data_schema: Mixin, region:Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default, 
                  entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
@@ -296,7 +297,7 @@ class ScoreFactor(Factor):
                  accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  scorer: Scorer = None) -> None:
         self.scorer = scorer
-        super().__init__(data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
+        super().__init__(data_schema, region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, limit, level,
                          category_field, time_field, computing_window, keep_all_timestamp, fill_method,
                          effective_number, transformer, accumulator, need_persist, dry_run)

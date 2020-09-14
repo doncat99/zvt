@@ -16,7 +16,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from zvt import zvt_env
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract import zvt_context
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.utils.pd_utils import pd_is_not_null, index_df
 from zvt.utils.time_utils import to_pd_timestamp
 
@@ -191,7 +191,7 @@ def table_name_to_domain_name(table_name: str) -> DeclarativeMeta:
     return domain_name
 
 
-# def get_entity_schema(entity_type: str) -> object:
+# def get_entity_schema(entity_type: EntityType) -> object:
 #     """
 #     get entity schema from name
 
@@ -277,8 +277,6 @@ def get_data(data_schema,
              limit: int = None,
              index: Union[str, list] = None,
              time_field: str = 'timestamp'):
-    if provider.value is None:
-        a = 0
     assert data_schema is not None
     assert provider.value is not None
     assert provider in zvt_context.providers
@@ -402,7 +400,7 @@ def get_group(provider: Provider, data_schema, column, group_func=func.count, se
 
 def decode_entity_id(entity_id: str):
     result = entity_id.split('_')
-    entity_type = result[0]
+    entity_type = EntityType(result[0])
     exchange = result[1]
     code = ''.join(result[2:])
     return entity_type, exchange, code
@@ -495,7 +493,7 @@ def df_to_db(df: pd.DataFrame,
 
 def get_entities(
         entity_schema: EntityMixin = None,
-        entity_type: str = None,
+        entity_type: EntityType = None,
         exchanges: List[str] = None,
         ids: List[str] = None,
         entity_ids: List[str] = None,
@@ -534,8 +532,11 @@ def get_entities(
                     filters=filters, session=session, order=order, limit=limit, index=index)
 
 
-def get_entity_ids(entity_type='stock', entity_schema: EntityMixin = None, exchanges=None, codes=None, 
-                   provider: Provider=Provider.Default):
+def get_entity_ids(entity_type: EntityType = EntityType.Stock, 
+                   entity_schema: EntityMixin = None, 
+                   exchanges=None, 
+                   codes=None, 
+                   provider: Provider = Provider.Default):
     df = get_entities(entity_type=entity_type, entity_schema=entity_schema, exchanges=exchanges, codes=codes,
                       provider=provider)
     if pd_is_not_null(df):

@@ -6,7 +6,7 @@ from typing import List, Union
 import pandas as pd
 
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
-from zvt.contract.common import Provider
+from zvt.contract.common import Region, Provider
 from zvt.domain import FinanceFactor, BalanceSheet, Stock
 from zvt.factors import Transformer, Accumulator, FilterFactor
 from zvt.factors.factor import Factor
@@ -14,7 +14,7 @@ from zvt.factors.factor import Factor
 
 class FinanceBaseFactor(Factor):
 
-    def __init__(self, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default, 
                  entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
@@ -27,7 +27,7 @@ class FinanceBaseFactor(Factor):
         if not columns:
             columns = data_schema.important_cols()
 
-        super().__init__(data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
+        super().__init__(data_schema, region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, limit, level,
                          category_field, time_field, computing_window, keep_all_timestamp, fill_method,
                          effective_number, transformer, accumulator, need_persist, dry_run)
@@ -35,7 +35,7 @@ class FinanceBaseFactor(Factor):
 
 class GoodCompanyFactor(FinanceBaseFactor, FilterFactor):
 
-    def __init__(self, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, data_schema: Mixin = FinanceFactor, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default, 
                  entity_ids: List[str] = None, exchanges: List[str] = None,
                  codes: List[str] = None, the_timestamp: Union[str, pd.Timestamp] = None,
@@ -76,7 +76,7 @@ class GoodCompanyFactor(FinanceBaseFactor, FilterFactor):
 
         self.logger.info(f'using data_schema:{data_schema.__name__}')
 
-        super().__init__(data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
+        super().__init__(region, data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, limit, level,
                          category_field, time_field, computing_window, keep_all_timestamp, fill_method,
                          effective_number, transformer, accumulator, need_persist, dry_run)
@@ -129,7 +129,8 @@ if __name__ == '__main__':
     # print(f1.result_df)
 
     # 高股息 低应收
-    factor2 = GoodCompanyFactor(data_schema=BalanceSheet,
+    factor2 = GoodCompanyFactor(region=Region.CHN,
+                                data_schema=BalanceSheet,
                                 columns=[BalanceSheet.accounts_receivable],
                                 filters=[
                                     BalanceSheet.accounts_receivable <= 0.2 * BalanceSheet.total_current_assets],

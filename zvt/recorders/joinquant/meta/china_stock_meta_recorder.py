@@ -6,7 +6,7 @@ from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.domain import EtfStock, Stock, Etf, StockDetail
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.request_utils import jq_auth, jq_get_all_securities, jq_query, jq_logout
@@ -19,7 +19,7 @@ class BaseJqChinaMetaRecorder(Recorder):
         super().__init__(batch_size, force_update, sleeping_time)
         jq_auth()
 
-    def to_zvt_entity(self, df, entity_type, category=None):
+    def to_zvt_entity(self, df, entity_type: EntityType, category=None):
         df.index.name = 'entity_id'
         df = df.reset_index()
         # 上市日期
@@ -30,7 +30,7 @@ class BaseJqChinaMetaRecorder(Recorder):
 
         df['entity_id'] = df['entity_id'].apply(lambda x: to_entity_id(entity_type=entity_type, jq_code=x))
         df['id'] = df['entity_id']
-        df['entity_type'] = entity_type
+        df['entity_type'] = entity_type.value
         df['exchange'] = df['entity_id'].apply(lambda x: get_entity_exchange(x))
         df['code'] = df['entity_id'].apply(lambda x: get_entity_code(x))
         df['name'] = df['display_name']
@@ -46,7 +46,7 @@ class JqChinaStockRecorder(BaseJqChinaMetaRecorder):
 
     def run(self):
         # 抓取股票列表
-        df_stock = self.to_zvt_entity(jq_get_all_securities(['stock']), entity_type='stock')
+        df_stock = self.to_zvt_entity(jq_get_all_securities(['stock']), entity_type=EntityType.Stock)
         df_to_db(df_stock, region=Region.CHN, data_schema=Stock, provider=self.provider, force_update=self.force_update)
         # persist StockDetail too
         df_to_db(df=df_stock, region=Region.CHN, data_schema=StockDetail, provider=self.provider, force_update=self.force_update)
@@ -62,7 +62,7 @@ class JqChinaEtfRecorder(BaseJqChinaMetaRecorder):
 
     def run(self):
         # 抓取etf列表
-        df_index = self.to_zvt_entity(jq_get_all_securities(['etf']), entity_type='etf', category='etf')
+        df_index = self.to_zvt_entity(jq_get_all_securities(['etf']), entity_type=EntityType.ETF, category='etf')
         df_to_db(df_index, region=Region.CHN, data_schema=Etf, provider=self.provider, force_update=self.force_update)
 
         # self.logger.info(df_index)
@@ -79,7 +79,7 @@ class JqChinaStockEtfPortfolioRecorder(TimeSeriesDataRecorder):
 
     data_schema = EtfStock
 
-    def __init__(self, entity_type='etf', exchanges=['sh', 'sz'], entity_ids=None, codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.ETF, exchanges=['sh', 'sz'], entity_ids=None, codes=None, batch_size=10,
                  force_update=False, sleeping_time=5, default_size=2000, real_time=False, fix_duplicate_way='add',
                  start_timestamp=None, end_timestamp=None, close_hour=0, close_minute=0, share_para=None) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,

@@ -5,7 +5,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import BlockStock, BlockCategory, Block
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.utils import json_callback_param
 from zvt.utils.request_utils import get_http_session, request_get
@@ -38,7 +38,7 @@ class EastmoneyChinaBlockRecorder(Recorder):
                 the_list.append({
                     'id': entity_id,
                     'entity_id': entity_id,
-                    'entity_type': 'block',
+                    'entity_type': EntityType.Block.value,
                     'exchange': 'cn',
                     'code': code,
                     'name': name,
@@ -81,7 +81,7 @@ class EastmoneyChinaBlockStockRecorder(TimeSeriesDataRecorder):
                 the_list.append({
                     'id': '{}_{}'.format(block_id, stock_id),
                     'entity_id': block_id,
-                    'entity_type': 'block',
+                    'entity_type': EntityType.Block.value,
                     'exchange': entity.exchange,
                     'code': entity.code,
                     'name': entity.name,

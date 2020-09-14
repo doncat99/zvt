@@ -6,13 +6,14 @@ import pandas as pd
 from zvt.api import AdjustType
 from zvt.api.quote import get_kdata_schema, Stock
 from zvt.contract import IntervalLevel, EntityMixin
-from zvt.contract.common import Provider
+from zvt.contract.common import Region, Provider
 from zvt.factors.algorithm import MacdTransformer, consecutive_count
 from zvt.factors.factor import Factor, Transformer, Accumulator
 
 
 class TechnicalFactor(Factor):
     def __init__(self,
+                 region: Region,
                  entity_schema: EntityMixin = Stock,
                  provider: Provider = Provider.Default,
                  entity_provider: Provider = Provider.Default,
@@ -44,7 +45,7 @@ class TechnicalFactor(Factor):
         if transformer:
             self.indicator_cols = transformer.indicators
 
-        super().__init__(self.data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
+        super().__init__(self.data_schema, region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, limit, level,
                          category_field, time_field, computing_window, keep_all_timestamp, fill_method,
                          effective_number, transformer, accumulator, need_persist, dry_run)
@@ -65,7 +66,7 @@ class BullFactor(TechnicalFactor):
 
 
 class KeepBullFactor(BullFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region:Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
@@ -78,7 +79,7 @@ class KeepBullFactor(BullFactor):
                  accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  adjust_type: Union[AdjustType, str] = None, keep_window=20) -> None:
         self.keep_window = keep_window
-        super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
+        super().__init__(region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
                          accumulator, need_persist, dry_run, adjust_type)
@@ -115,7 +116,8 @@ class GoldCrossFactor(LiveOrDeadFactor):
 
 
 if __name__ == '__main__':
-    factor = TechnicalFactor(codes=['000338', '000778'],
+    factor = TechnicalFactor(region=Region.CHN,
+                             codes=['000338', '000778'],
                              start_timestamp='2019-01-01',
                              end_timestamp='2019-06-10',
                              transformer=MacdTransformer(normal=True))

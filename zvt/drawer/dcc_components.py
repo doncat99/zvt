@@ -4,6 +4,7 @@ import dash_core_components as dcc
 
 from zvt.api.business_reader import OrderReader, AccountStatsReader
 from zvt.api.quote import decode_entity_id, get_kdata_schema
+from zvt.contract.common import Region
 from zvt.contract.reader import DataReader
 from zvt.contract.zvt_context import entity_schema_map
 from zvt.drawer.drawer import Drawer
@@ -35,7 +36,9 @@ def get_trading_signals_figure(order_reader: OrderReader,
         start_timestamp = order_reader.start_timestamp
     if not end_timestamp:
         end_timestamp = order_reader.end_timestamp
-    kdata_reader = DataReader(entity_ids=[entity_id], data_schema=data_schema,
+    kdata_reader = DataReader(region=Region.CHN,
+                              entity_ids=[entity_id], 
+                              data_schema=data_schema,
                               entity_schema=entity_schema_map.get(entity_type),
                               start_timestamp=start_timestamp,
                               end_timestamp=end_timestamp,

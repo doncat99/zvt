@@ -15,9 +15,10 @@ from zvt.domain import StockTradeDay, StockDetail
 from zvt.contract import IntervalLevel, Mixin, EntityMixin
 from zvt.contract.api import get_db_session, get_schema_columns
 from zvt.contract.api import get_entities, get_data
-from zvt.contract.common import Region, Provider
-from zvt.utils.time_utils import to_pd_timestamp, TIME_FORMAT_DAY, to_time_str, evaluate_size_from_timestamp, \
-                                 is_in_same_interval, now_pd_timestamp, count_mins_before_close_time, \
+from zvt.contract.common import Region, Provider, EntityType
+from zvt.utils.time_utils import to_pd_timestamp, TIME_FORMAT_DAY, to_time_str, \
+                                 evaluate_size_from_timestamp, is_in_same_interval, \
+                                 now_pd_timestamp, count_mins_before_close_time, \
                                  is_same_date, date_delta
 from zvt.utils.utils import fill_domain_from_dict
 from zvt.utils.request_utils import get_http_session, jq_swap_account, jq_get_query_count
@@ -86,7 +87,7 @@ class RecorderForEntities(Recorder):
     entity_schema: EntityMixin = None
 
     def __init__(self,
-                 entity_type='stock',
+                 entity_type: EntityType = EntityType.Stock,
                  exchanges=['sh', 'sz'],
                  entity_ids=None,
                  codes=None,
@@ -95,7 +96,6 @@ class RecorderForEntities(Recorder):
                  sleeping_time=10,
                  share_para=None) -> None:
         """
-
         :param entity_type:
         :type entity_type:
         :param exchanges:
@@ -152,7 +152,7 @@ class RecorderForEntities(Recorder):
 
 class TimeSeriesDataRecorder(RecorderForEntities):
     def __init__(self,
-                 entity_type='stock',
+                 entity_type: EntityType = EntityType.Stock,
                  exchanges=['sh', 'sz'],
                  entity_ids=None,
                  codes=None,
@@ -511,7 +511,7 @@ class TimeSeriesDataRecorder(RecorderForEntities):
 
 class FixedCycleDataRecorder(TimeSeriesDataRecorder):
     def __init__(self,
-                 entity_type='stock',
+                 entity_type: EntityType = EntityType.Stock,
                  exchanges=['sh', 'sz'],
                  entity_ids=None,
                  codes=None,
@@ -530,9 +530,9 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
                  kdata_use_begin_time=False,
                  one_day_trading_minutes=24 * 60,
                  share_para=None) -> None:
-        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
-                         default_size, real_time, fix_duplicate_way, start_timestamp, end_timestamp, close_hour,
-                         close_minute, share_para=share_para)
+        super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, 
+                         sleeping_time, default_size, real_time, fix_duplicate_way, start_timestamp, 
+                         end_timestamp, close_hour, close_minute, share_para=share_para)
 
         self.level = IntervalLevel(level)
         self.kdata_use_begin_time = kdata_use_begin_time
@@ -634,7 +634,7 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
 class TimestampsDataRecorder(TimeSeriesDataRecorder):
 
     def __init__(self,
-                 entity_type='stock',
+                 entity_type: EntityType = EntityType.Stock,
                  exchanges=['sh', 'sz'],
                  entity_ids=None,
                  codes=None,

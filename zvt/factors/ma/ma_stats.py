@@ -7,7 +7,7 @@ import pandas as pd
 from zvt.api import Stock
 from zvt.api.quote import get_ma_state_stats_schema
 from zvt.contract import IntervalLevel, EntityMixin
-from zvt.contract.common import Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.contract.api import get_entities
 from zvt.factors.algorithm import MaTransformer
 from zvt.factors.factor import Accumulator, Transformer
@@ -128,7 +128,7 @@ class MaAccumulator(Accumulator):
 
 class MaStateStatsFactor(TechnicalFactor):
 
-    def __init__(self, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
@@ -142,14 +142,14 @@ class MaStateStatsFactor(TechnicalFactor):
                  # added fields
                  short_window: int = 5,
                  long_window: int = 10) -> None:
-        self.factor_schema = get_ma_state_stats_schema(entity_type=entity_schema.__name__, level=level)
+        self.factor_schema = get_ma_state_stats_schema(entity_type=EntityType(entity_schema.__name__), level=level)
         self.short_window = short_window
         self.long_window = long_window
 
         transformer: Transformer = MaTransformer(windows=[short_window, long_window], cal_change_pct=True)
         accumulator = MaAccumulator(short_window=short_window, long_window=long_window)
 
-        super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
+        super().__init__(region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
                          accumulator, need_persist, dry_run)
@@ -184,13 +184,14 @@ if __name__ == '__main__':
     start = args.start
     end = args.end
 
-    entities = get_entities(provider=Provider.JoinQuant, entity_type='stock', 
+    entities = get_entities(provider=Provider.JoinQuant, 
+                            entity_type=EntityType.Stock, 
                             columns=[Stock.entity_id, Stock.code],
                             filters=[Stock.code >= start, Stock.code < end])
 
     codes = entities.index.to_list()
 
-    factor = MaStateStatsFactor(codes=codes, start_timestamp='2005-01-01',
+    factor = MaStateStatsFactor(region=Region.CHN, codes=codes, start_timestamp='2005-01-01',
                                 end_timestamp='2020-04-01', need_persist=True,
                                 level=level)
     print(factor.factor_df)

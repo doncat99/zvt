@@ -49,6 +49,7 @@ class DataReader(object):
     def __init__(self,
                  data_schema: Mixin,
                  entity_schema: EntityMixin,
+                 region: Region,
                  provider: Provider = Provider.Default,
                  entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None,
@@ -56,7 +57,7 @@ class DataReader(object):
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
-                 end_timestamp: Union[str, pd.Timestamp] = now_pd_timestamp(Region.CHN),
+                 end_timestamp: Union[str, pd.Timestamp] = None,
                  columns: List = None,
                  filters: List = None,
                  order: object = None,
@@ -70,8 +71,12 @@ class DataReader(object):
         self.data_schema = data_schema
         self.entity_schema = entity_schema
 
+        self.region = region
         self.provider = provider
         self.entity_provider = entity_provider
+
+        if end_timestamp is None:
+            end_timestamp = now_pd_timestamp(self.region)
 
         self.the_timestamp = the_timestamp
         if the_timestamp:
@@ -222,7 +227,8 @@ class DataReader(object):
 
                 added_df = self.data_schema.query_data(provider=self.provider,
                                                        columns=self.columns,
-                                                       end_timestamp=to_timestamp, filters=filters, level=self.level,
+                                                       end_timestamp=to_timestamp, 
+                                                       filters=filters, level=self.level,
                                                        index=[self.category_field, self.time_field])
 
                 if pd_is_not_null(added_df):
@@ -242,10 +248,11 @@ class DataReader(object):
                         has_got.append(entity_id)
                         dfs.append(df)
                         self.logger.warning(
-                            'category:{} level:{} getting data timeout,to_timestamp:{},now:{}'.format(entity_id,
-                                                                                                      self.level,
-                                                                                                      to_timestamp,
-                                                                                                      now_pd_timestamp(Region.CHN)))
+                            'category:{} level:{} getting data timeout,to_timestamp:{},now:{}'.format(
+                                entity_id,
+                                self.level,
+                                to_timestamp,
+                                now_pd_timestamp(self.region)))
                         continue
 
             if len(has_got) == len(self.data_df.index.levels[0]):
@@ -280,7 +287,10 @@ __all__ = ['DataListener', 'DataReader']
 if __name__ == '__main__':
     from zvt.domain import Stock1dKdata, Stock
 
-    data_reader = DataReader(codes=['002572', '000338'], data_schema=Stock1dKdata, entity_schema=Stock,
+    data_reader = DataReader(region=Region.CHN, 
+                             codes=['002572', '000338'], 
+                             data_schema=Stock1dKdata, 
+                             entity_schema=Stock,
                              start_timestamp='2017-01-01',
                              end_timestamp='2019-06-10')
 

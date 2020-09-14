@@ -8,13 +8,13 @@ from sqlalchemy.engine.reflection import Inspector
 
 from zvt.contract import EntityMixin, zvt_context, Mixin
 from zvt.contract.api import get_db_engine, get_db_session_factory
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.utils.utils import add_to_map_list
 
 logger = logging.getLogger(__name__)
 
 
-def register_entity(entity_type: str = None):
+def register_entity(entity_type: EntityType = None):
     """
     function for register entity type
 
@@ -29,7 +29,7 @@ def register_entity(entity_type: str = None):
         if issubclass(cls, EntityMixin):
             entity_type_ = entity_type
             if not entity_type:
-                entity_type_ = cls.__name__.lower()
+                entity_type_ = EntityType(cls.__name__.lower())
 
             if entity_type_ not in zvt_context.entity_types:
                 zvt_context.entity_types.append(entity_type_)
@@ -45,7 +45,7 @@ def register_schema(regions: List[Region],
                     providers: List[Provider],
                     db_name: str,
                     schema_base: DeclarativeMeta,
-                    entity_type: str = 'stock'):
+                    entity_type: EntityType = EntityType.Stock):
     """
     function for register schema,please declare them before register
 

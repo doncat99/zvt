@@ -7,7 +7,7 @@ import pandas as pd
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.domain import Stock, StockDetail
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.recorders.consts import YAHOO_STOCK_LIST_HEADER
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
@@ -39,7 +39,7 @@ class ExchangeUsStockListRecorder(Recorder):
 
             df['list_date'] = df['list_date'].apply(lambda x: to_pd_timestamp(x))
             df['exchange'] = exchange
-            df['entity_type'] = 'stock'
+            df['entity_type'] = EntityType.Stock.value
             df['id'] = df[['entity_type', 'exchange', 'code']].apply(lambda x: '_'.join(x.astype(str)), axis=1)
             df['entity_id'] = df['id'].str.strip()
             df['timestamp'] = df['list_date']

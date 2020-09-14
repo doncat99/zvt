@@ -8,7 +8,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.api.quote import china_stock_code_to_id
 from zvt.domain import BlockStock, BlockCategory, Block
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.request_utils import get_http_session, request_get
 
@@ -43,7 +43,7 @@ class SinaChinaBlockRecorder(Recorder):
                 the_list.append({
                     'id': entity_id,
                     'entity_id': entity_id,
-                    'entity_type': 'block',
+                    'entity_type': EntityType.Block.value,
                     'exchange': 'cn',
                     'code': code,
                     'name': name,
@@ -67,7 +67,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
     # 用于抓取行业包含的股票
     category_stocks_url = 'http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page={}&num=5000&sort=symbol&asc=1&node={}&symbol=&_s_r_a=page'
 
-    def __init__(self, entity_type='block', exchanges=None, entity_ids=None, codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.Block, exchanges=None, entity_ids=None, codes=None, batch_size=10,
                  force_update=True, sleeping_time=5, default_size=2000, real_time=False, fix_duplicate_way='add',
                  start_timestamp=None, end_timestamp=None, close_hour=0, close_minute=0) -> None:
         super().__init__(entity_type, exchanges, entity_ids, codes, batch_size, force_update, sleeping_time,
@@ -89,7 +89,7 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
                     the_list.append({
                         'id': '{}_{}'.format(block_id, stock_id),
                         'entity_id': block_id,
-                        'entity_type': 'block',
+                        'entity_type': EntityType.Block.value,
                         'exchange': entity.exchange,
                         'code': entity.code,
                         'name': entity.name,

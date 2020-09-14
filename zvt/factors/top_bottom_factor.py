@@ -5,7 +5,7 @@ import pandas as pd
 
 from zvt.api import AdjustType
 from zvt.contract import IntervalLevel, EntityMixin
-from zvt.contract.common import Provider
+from zvt.contract.common import Region, Provider
 from zvt.contract.reader import DataReader
 from zvt.domain import Stock, Stock1dKdata
 from zvt.drawer.drawer import Drawer
@@ -33,7 +33,7 @@ class TopBottomTransformer(Transformer):
 
 
 class TopBottomFactor(TechnicalFactor):
-    def __init__(self, entity_schema: EntityMixin = Stock, 
+    def __init__(self, region: Region, entity_schema: EntityMixin = Stock, 
                  provider: Provider = Provider.Default, entity_provider: Provider = Provider.Default,
                  entity_ids: List[str] = None, exchanges: List[str] = None, codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None, start_timestamp: Union[str, pd.Timestamp] = None,
@@ -49,20 +49,22 @@ class TopBottomFactor(TechnicalFactor):
 
         transformer = TopBottomTransformer(window=window)
 
-        super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
+        super().__init__(region, entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
                          accumulator, need_persist, dry_run, adjust_type)
 
 
 if __name__ == '__main__':
-    from zvt.contract.common import Region
-    factor = TopBottomFactor(codes=['601318'], start_timestamp='2005-01-01',
-                             end_timestamp=now_pd_timestamp(Region.CHN),
+    region = Region.CHN
+    factor = TopBottomFactor(region=region, 
+                             codes=['601318'], 
+                             start_timestamp='2005-01-01',
+                             end_timestamp=now_pd_timestamp(region),
                              level=IntervalLevel.LEVEL_1DAY, window=120)
     print(factor.factor_df)
 
-    data_reader1 = DataReader(codes=['601318'], data_schema=Stock1dKdata, entity_schema=Stock)
+    data_reader1 = DataReader(region=region, codes=['601318'], data_schema=Stock1dKdata, entity_schema=Stock)
 
     drawer = Drawer(main_df=data_reader1.data_df, factor_df=factor.factor_df[['top', 'bottom']])
     drawer.draw_kline()

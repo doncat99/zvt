@@ -8,14 +8,14 @@ from sqlalchemy import exists, and_
 
 from zvt.api import AdjustType
 from zvt.contract import IntervalLevel
-from zvt.contract.common import Provider
+from zvt.contract.common import Provider, EntityType
 from zvt.contract.api import decode_entity_id, get_schema_by_name
 from zvt.domain import *
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
 
 
-def get_kdata_schema(entity_type: str,
+def get_kdata_schema(entity_type: EntityType,
                      level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY,
                      adjust_type: Union[AdjustType, str] = None):
     if type(level) == str:
@@ -26,34 +26,34 @@ def get_kdata_schema(entity_type: str,
     # kdata schema rule
     # 1)name:{SecurityType.value.capitalize()}{IntervalLevel.value.upper()}Kdata
     if adjust_type and (adjust_type != AdjustType.qfq):
-        schema_str = '{}{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize(),
+        schema_str = '{}{}{}Kdata'.format(entity_type.value.capitalize(), level.value.capitalize(),
                                           adjust_type.value.capitalize())
     else:
-        schema_str = '{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize())
+        schema_str = '{}{}Kdata'.format(entity_type.value.capitalize(), level.value.capitalize())
     try:
         return eval(schema_str)
     except:
         return get_schema_by_name(schema_str)
 
 
-def get_ma_state_stats_schema(entity_type: str,
+def get_ma_state_stats_schema(entity_type: EntityType,
                               level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY):
     if type(level) == str:
         level = IntervalLevel(level)
 
     # ma state stats schema rule
     # 1)name:{SecurityType.value.capitalize()}{IntervalLevel.value.upper()}MaStateStats
-    schema_str = '{}{}MaStateStats'.format(entity_type.capitalize(), level.value.capitalize())
+    schema_str = '{}{}MaStateStats'.format(entity_type.value.capitalize(), level.value.capitalize())
 
     return eval(schema_str)
 
 
-def get_ma_factor_schema(entity_type: str,
+def get_ma_factor_schema(entity_type: EntityType,
                          level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY):
     if type(level) == str:
         level = IntervalLevel(level)
 
-    schema_str = '{}{}MaFactor'.format(entity_type.capitalize(), level.value.capitalize())
+    schema_str = '{}{}MaFactor'.format(entity_type.value.capitalize(), level.value.capitalize())
 
     return eval(schema_str)
 
@@ -163,7 +163,7 @@ def to_high_level_kdata(kdata_df: pd.DataFrame, to_level: IntervalLevel):
     df: pd.DataFrame = None
     if to_level == IntervalLevel.LEVEL_1WEEK:
         # loffset='-2'　用周五作为时间标签
-        if entity_type == 'stock':
+        if entity_type == EntityType.Stock:
             df = kdata_df.resample('W', loffset=pd.DateOffset(days=-2)).apply({'close': to_close,
                                                                                'open': to_open,
                                                                                'high': to_high,
@@ -246,7 +246,7 @@ def get_kdata(entity_id=None, entity_ids=None, level=IntervalLevel.LEVEL_1DAY.va
     else:
         entity_ids = [entity_id]
 
-    entity_type, exchange, code = decode_entity_id(entity_id)
+    entity_type, _, _ = decode_entity_id(entity_id)
     data_schema: Mixin = get_kdata_schema(entity_type, level=level, adjust_type=adjust_type)
 
     return data_schema.query_data(entity_ids=entity_ids, level=level, provider=provider,
@@ -261,9 +261,9 @@ if __name__ == '__main__':
     df = get_etf_stocks(timestamp=now_pd_timestamp(Region.CHN), code='510050', provider=Provider.JoinQuant)
     print(df)
 
-    # assert get_kdata_schema(entity_type='stock', level=IntervalLevel.LEVEL_1DAY) == Stock1dKdata
-    # assert get_kdata_schema(entity_type='stock', level=IntervalLevel.LEVEL_15MIN) == Stock15mKdata
-    # assert get_kdata_schema(entity_type='stock', level=IntervalLevel.LEVEL_1HOUR) == Stock1hKdata
+    # assert get_kdata_schema(entity_type=EntityType.Stock, level=IntervalLevel.LEVEL_1DAY) == Stock1dKdata
+    # assert get_kdata_schema(entity_type=EntityType.Stock, level=IntervalLevel.LEVEL_15MIN) == Stock15mKdata
+    # assert get_kdata_schema(entity_type=EntityType.Stock, level=IntervalLevel.LEVEL_1HOUR) == Stock1hKdata
     #
-    # assert get_kdata_schema(entity_type='coin', level=IntervalLevel.LEVEL_1DAY) == Coin1dKdata
-    # assert get_kdata_schema(entity_type='coin', level=IntervalLevel.LEVEL_1MIN) == Coin1mKdata
+    # assert get_kdata_schema(entity_type=EntityType.Stock, level=IntervalLevel.LEVEL_1DAY) == Coin1dKdata
+    # assert get_kdata_schema(entity_type=EntityType.Stock, level=IntervalLevel.LEVEL_1MIN) == Coin1mKdata
