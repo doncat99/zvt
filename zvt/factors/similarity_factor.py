@@ -6,13 +6,13 @@ import pandas as pd
 
 from zvt.api import AdjustType, get_kdata, get_kdata_schema
 from zvt.contract import EntityMixin, IntervalLevel
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.domain import Stock
 from zvt.factors import TechnicalFactor, Transformer, Accumulator
 
 
 def get_ref_vector(entity_id, end, window=100, level=IntervalLevel.LEVEL_1DAY, entity_schema=Stock):
-    data_schema = get_kdata_schema(entity_schema.__name__, level=level)
+    data_schema = get_kdata_schema(EntityType(entity_schema.__name__.lower()), level=level)
 
     df = get_kdata(entity_id=entity_id, level=level, end_timestamp=end, order=data_schema.timestamp.desc(),
                    limit=window,

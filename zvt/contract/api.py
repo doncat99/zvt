@@ -400,7 +400,7 @@ def get_group(provider: Provider, data_schema, column, group_func=func.count, se
 
 def decode_entity_id(entity_id: str):
     result = entity_id.split('_')
-    entity_type = EntityType(result[0])
+    entity_type = EntityType(result[0].lower())
     exchange = result[1]
     code = ''.join(result[2:])
     return entity_type, exchange, code

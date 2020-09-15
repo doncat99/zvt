@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from zvt.api import get_kdata, get_kdata_schema
 from zvt.contract import IntervalLevel
+from zvt.contract.common import EntityType
 from zvt.domain import Stock
 
 
@@ -19,7 +20,7 @@ class WindowState(object):
         self.entity_id = entity_id
         self.window = window
 
-        data_schema = get_kdata_schema(entity_schema.__name__, level=level)
+        data_schema = get_kdata_schema(EntityType(entity_schema.__name__.lower()), level=level)
 
         self.df = get_kdata(entity_id=entity_id, level=level, end_timestamp=timestamp,
                             order=data_schema.timestamp.desc(),

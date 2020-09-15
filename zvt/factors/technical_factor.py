@@ -6,7 +6,7 @@ import pandas as pd
 from zvt.api import AdjustType
 from zvt.api.quote import get_kdata_schema, Stock
 from zvt.contract import IntervalLevel, EntityMixin
-from zvt.contract.common import Region, Provider
+from zvt.contract.common import Region, Provider, EntityType
 from zvt.factors.algorithm import MacdTransformer, consecutive_count
 from zvt.factors.factor import Factor, Transformer, Accumulator
 
@@ -40,7 +40,7 @@ class TechnicalFactor(Factor):
                  dry_run: bool = False,
                  adjust_type: Union[AdjustType, str] = None) -> None:
         self.adjust_type = adjust_type
-        self.data_schema = get_kdata_schema(entity_schema.__name__, level=level, adjust_type=adjust_type)
+        self.data_schema = get_kdata_schema(EntityType(entity_schema.__name__.lower()), level=level, adjust_type=adjust_type)
 
         if transformer:
             self.indicator_cols = transformer.indicators

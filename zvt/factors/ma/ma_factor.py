@@ -33,7 +33,7 @@ class MaFactor(TechnicalFactor):
                  windows=[5, 10, 34, 55, 89, 144, 120, 250],
                  adjust_type: Union[AdjustType, str] = None) -> None:
         self.adjust_type = adjust_type
-        self.factor_schema = get_ma_factor_schema(entity_type=EntityType(entity_schema.__name__), level=level)
+        self.factor_schema = get_ma_factor_schema(entity_type=EntityType(entity_schema.__name__.lower()), level=level)
         self.windows = windows
 
         transformer: Transformer = MaTransformer(windows=windows)

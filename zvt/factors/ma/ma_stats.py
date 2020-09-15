@@ -142,7 +142,7 @@ class MaStateStatsFactor(TechnicalFactor):
                  # added fields
                  short_window: int = 5,
                  long_window: int = 10) -> None:
-        self.factor_schema = get_ma_state_stats_schema(entity_type=EntityType(entity_schema.__name__), level=level)
+        self.factor_schema = get_ma_state_stats_schema(entity_type=EntityType(entity_schema.__name__.lower()), level=level)
         self.short_window = short_window
         self.long_window = long_window
 
