@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import numbers
-from decimal import *
+from decimal import getcontext, Decimal
 from enum import Enum
 
 import pandas as pd
