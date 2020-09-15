@@ -26,6 +26,7 @@ class Trader(object):
     entity_schema: EntityMixin = None
 
     def __init__(self,
+                 region: Region,
                  entity_ids: List[str] = None,
                  exchanges: List[str] = None,
                  codes: List[str] = None,
@@ -56,6 +57,7 @@ class Trader(object):
         self.exchanges = exchanges
         self.codes = codes
 
+        self.region = region
         self.provider = provider
         # make sure the min level selector correspond to the provider and level
         self.level = IntervalLevel(level)
@@ -73,7 +75,7 @@ class Trader(object):
         if real_time:
             logger.info(
                 'real_time mode, end_timestamp should be future,you could set it big enough for running forever')
-            assert self.end_timestamp >= now_pd_timestamp(Region.CHN)
+            assert self.end_timestamp >= now_pd_timestamp(self.region)
 
         self.kdata_use_begin_time = kdata_use_begin_time
         self.draw_result = draw_result
@@ -88,7 +90,7 @@ class Trader(object):
 
         self.register_trading_signal_listener(self.account_service)
 
-        self.init_selectors(entity_ids=entity_ids, entity_schema=self.entity_schema, exchanges=self.exchanges,
+        self.init_selectors(region=self.region, entity_ids=entity_ids, entity_schema=self.entity_schema, exchanges=self.exchanges,
                             codes=self.codes, start_timestamp=self.start_timestamp, end_timestamp=self.end_timestamp)
 
         if self.selectors:
@@ -148,7 +150,7 @@ class Trader(object):
         self.session.add(sim_account)
         self.session.commit()
 
-    def init_selectors(self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp):
+    def init_selectors(self, region, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp):
         """
         overwrite it to init selectors if you want to use selector/factor computing model or just write strategy in on_time
 
@@ -344,7 +346,7 @@ class Trader(object):
             l.on_trading_error(timestamp, error)
 
     def run(self):
-        now = now_pd_timestamp(Region.CHN)
+        now = now_pd_timestamp(self.region)
         # iterate timestamp of the min level,e.g,9:30,9:35,9.40...for 5min level
         # timestamp represents the timestamp in kdata
         for timestamp in self.entity_schema.get_interval_timestamps(start_date=self.start_timestamp,
