@@ -1,12 +1,14 @@
+from zvt.api.data_type import Region, Provider
+from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement, CashFlowStatement
+from zvt.contract.api import get_db_session
+from zvt.utils.time_utils import to_time_str
 from ..context import init_test_context
 
 init_test_context()
 
-from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement, CashFlowStatement
-from zvt.contract.api import get_db_session
-from zvt.utils.time_utils import to_time_str
-
-session = get_db_session(provider='eastmoney', db_name='finance')  # type: sqlalchemy.orm.Session
+session = get_db_session(region=Region.CHN,
+                         provider=Provider.EastMoney,
+                         db_name='finance')
 
 
 # 银行指标
@@ -27,7 +29,7 @@ def test_000001_finance_factor():
                           '1997-06-30', '1996-12-31', '1996-06-30', '1995-12-31', '1995-06-30', '1994-12-31',
                           '1994-06-30', '1993-12-31', '1993-06-30', '1992-12-31', '1991-12-31', '1990-12-31',
                           '1989-12-31']
-    result = FinanceFactor.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = FinanceFactor.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                       codes=['000001'], end_timestamp='2018-12-30',
                                       order=FinanceFactor.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -85,7 +87,7 @@ def test_000001_balance_sheet():
                           '1999-06-30', '1998-12-31', '1998-06-30', '1997-12-31', '1997-06-30', '1996-12-31',
                           '1996-06-30', '1995-12-31', '1995-06-30', '1994-12-31', '1994-06-30', '1993-12-31',
                           '1992-12-31', '1991-12-31', '1990-12-31', '1989-12-31']
-    result = BalanceSheet.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = BalanceSheet.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                      codes=['000001'], end_timestamp='2018-12-30',
                                      order=BalanceSheet.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -158,7 +160,7 @@ def test_000001_income_statement():
                           '1997-12-31', '1997-06-30', '1996-12-31', '1996-06-30', '1995-12-31', '1995-06-30',
                           '1994-12-31', '1994-06-30', '1993-12-31', '1993-06-30', '1992-12-31', '1991-12-31',
                           '1990-12-31', '1989-12-31']
-    result = IncomeStatement.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = IncomeStatement.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                         codes=['000001'], end_timestamp='2018-12-30',
                                         order=IncomeStatement.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -204,7 +206,7 @@ def test_000001_cash_flow_statement():
                           '2003-12-31', '2003-09-30', '2003-06-30', '2003-03-31', '2002-12-31', '2002-06-30',
                           '2001-12-31', '2001-06-30', '2000-12-31', '2000-06-30', '1999-12-31', '1999-06-30',
                           '1998-12-31', '1998-06-30']
-    result = CashFlowStatement.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = CashFlowStatement.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                           codes=['000001'], end_timestamp='2018-12-30',
                                           order=CashFlowStatement.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -271,7 +273,7 @@ def test_000778_finance_factor():
                           '2002-03-31', '2001-12-31', '2001-06-30', '2000-12-31', '2000-06-30', '1999-12-31',
                           '1999-06-30', '1998-12-31', '1998-06-30', '1997-12-31', '1997-06-30', '1996-12-31',
                           '1995-12-31', '1994-12-31']
-    result = FinanceFactor.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = FinanceFactor.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                       codes=['000778'], end_timestamp='2018-12-30',
                                       order=FinanceFactor.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -337,7 +339,7 @@ def test_000778_balance_sheet():
                           '2002-03-31', '2001-12-31', '2001-06-30', '2000-12-31', '2000-06-30', '1999-12-31',
                           '1999-06-30', '1998-12-31', '1998-06-30', '1997-12-31', '1997-06-30', '1996-12-31',
                           '1995-12-31', '1994-12-31']
-    result = BalanceSheet.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = BalanceSheet.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                      codes=['000778'], end_timestamp='2018-12-30',
                                      order=BalanceSheet.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -414,7 +416,7 @@ def test_000778_income_statement():
                           '2002-03-31', '2001-12-31', '2001-06-30', '2000-12-31', '2000-06-30', '1999-12-31',
                           '1999-06-30', '1998-12-31', '1998-06-30', '1997-12-31', '1997-06-30', '1996-12-31',
                           '1995-12-31', '1994-12-31']
-    result = IncomeStatement.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = IncomeStatement.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                         codes=['000778'], end_timestamp='2018-12-30',
                                         order=IncomeStatement.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)
@@ -471,7 +473,7 @@ def test_000778_cash_flow_statement():
                           '2005-03-31', '2004-12-31', '2004-09-30', '2004-06-30', '2004-03-31', '2003-12-31',
                           '2003-09-30', '2003-06-30', '2003-03-31', '2002-12-31', '2002-06-30', '2001-12-31',
                           '2001-06-30', '2000-12-31', '2000-06-30', '1999-12-31', '1998-12-31', '1998-06-30']
-    result = CashFlowStatement.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = CashFlowStatement.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                           codes=['000778'], end_timestamp='2018-12-30',
                                           order=CashFlowStatement.report_date.desc(), time_field='report_date')
     assert len(correct_timestamps) == len(result)

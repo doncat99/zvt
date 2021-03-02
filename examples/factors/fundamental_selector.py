@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from zvt.api.data_type import Region, Provider
 from zvt.domain import BalanceSheet
-from zvt.factors import GoodCompanyFactor
+from zvt.factors.fundamental import GoodCompanyFactor
 from zvt.factors.target_selector import TargetSelector
 
 
@@ -9,23 +10,23 @@ class FundamentalSelector(TargetSelector):
                      level):
         # 核心资产=(高ROE 高现金流 高股息 低应收 低资本开支 低财务杠杆 有增长)
         # 高roe 高现金流 低财务杠杆 有增长
-        factor1 = GoodCompanyFactor(entity_ids=entity_ids, codes=codes, the_timestamp=the_timestamp,
-                                    start_timestamp=start_timestamp, end_timestamp=end_timestamp, provider='eastmoney')
+        factor1 = GoodCompanyFactor(region=self.region, entity_ids=entity_ids, codes=codes, the_timestamp=the_timestamp,
+                                    start_timestamp=start_timestamp, end_timestamp=end_timestamp, provider=Provider.EastMoney)
 
         self.filter_factors.append(factor1)
 
         # 高股息 低应收
-        factor2 = GoodCompanyFactor(data_schema=BalanceSheet, entity_ids=entity_ids, codes=codes,
+        factor2 = GoodCompanyFactor(region=self.region, data_schema=BalanceSheet, entity_ids=entity_ids, codes=codes,
                                     the_timestamp=the_timestamp,
                                     columns=[BalanceSheet.accounts_receivable],
                                     filters=[
                                         BalanceSheet.accounts_receivable <= 0.3 * BalanceSheet.total_current_assets],
-                                    start_timestamp=start_timestamp, end_timestamp=end_timestamp, provider='eastmoney',
+                                    start_timestamp=start_timestamp, end_timestamp=end_timestamp, provider=Provider.EastMoney,
                                     col_period_threshold=None)
         self.filter_factors.append(factor2)
 
 
 if __name__ == '__main__':
-    selector: TargetSelector = FundamentalSelector(start_timestamp='2015-01-01', end_timestamp='2019-06-30')
+    selector: TargetSelector = FundamentalSelector(region=Region.CHN, start_timestamp='2015-01-01', end_timestamp='2019-06-30')
     selector.run()
     print(selector.get_targets('2019-06-30'))

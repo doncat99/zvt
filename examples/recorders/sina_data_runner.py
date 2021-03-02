@@ -5,8 +5,9 @@ import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from zvt import init_log
+from zvt.api.data_type import Region, Provider
 from zvt.domain import *
-from zvt.informer.informer import EmailInformer
+from zvt.utils.inform_utils import EmailInformer
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,8 @@ def record_block():
         email_action = EmailInformer()
 
         try:
-            Block.record_data(provider='sina')
-            BlockStock.record_data(provider='sina')
+            Block.record_data(provider=Provider.Sina)
+            BlockStock.record_data(provider=Provider.Sina)
 
             email_action.send_message("5533061@qq.com", 'sina block finished', '')
             break
@@ -38,7 +39,7 @@ def record_money_flow():
         email_action = EmailInformer()
 
         try:
-            BlockMoneyFlow.record_data(provider='sina')
+            BlockMoneyFlow.record_data(provider=Provider.Sina)
 
             email_action.send_message("5533061@qq.com", 'sina money flow finished', '')
             break

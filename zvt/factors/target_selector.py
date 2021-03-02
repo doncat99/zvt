@@ -6,11 +6,11 @@ from typing import List
 import pandas as pd
 from pandas import DataFrame
 
+from zvt.api.data_type import Region, Provider
+from zvt.domain.meta.stock_meta import Stock
 from zvt.contract import IntervalLevel
-from zvt.drawer.drawer import Drawer
-from zvt.factors.factor import FilterFactor, ScoreFactor, Factor, StateFactor
-from zvt.domain.meta.stock_meta import Stock, Etf, Block, Index
-from zvt.contract.common import Region, Provider
+from zvt.contract.drawer import Drawer
+from zvt.contract.factor import FilterFactor, ScoreFactor, Factor
 from zvt.utils.pd_utils import index_df, pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
@@ -25,6 +25,7 @@ class TargetType(Enum):
 
 class TargetSelector(object):
     def __init__(self,
+                 region: Region,
                  entity_ids=None,
                  entity_schema=Stock,
                  exchanges=None,
@@ -35,17 +36,13 @@ class TargetSelector(object):
                  long_threshold=0.8,
                  short_threshold=0.2,
                  level=IntervalLevel.LEVEL_1DAY,
-                 provider: Provider=Provider.Default,
-                 portfolio_selector=None) -> None:
+                 provider: Provider = Provider.Default) -> None:
         self.entity_ids = entity_ids
         self.entity_schema = entity_schema
         self.exchanges = exchanges
         self.codes = codes
+        self.region = region
         self.provider = provider
-        self.portfolio_selector: TargetSelector = portfolio_selector
-
-        if self.portfolio_selector:
-            assert self.portfolio_selector.entity_schema in [Etf, Block, Index]
 
         if the_timestamp:
             self.the_timestamp = to_pd_timestamp(the_timestamp)
@@ -57,7 +54,7 @@ class TargetSelector(object):
             if end_timestamp:
                 self.end_timestamp = to_pd_timestamp(end_timestamp)
             else:
-                self.end_timestamp = now_pd_timestamp(Region.CHN)
+                self.end_timestamp = now_pd_timestamp(self.region)
 
         self.long_threshold = long_threshold
         self.short_threshold = short_threshold
@@ -65,7 +62,6 @@ class TargetSelector(object):
 
         self.filter_factors: List[FilterFactor] = []
         self.score_factors: List[ScoreFactor] = []
-        self.state_factors: List[StateFactor] = []
         self.filter_result = None
         self.score_result = None
 
@@ -78,7 +74,7 @@ class TargetSelector(object):
 
     def init_factors(self, entity_ids, entity_schema, exchanges, codes, the_timestamp, start_timestamp, end_timestamp,
                      level):
-        pass
+        raise NotImplementedError
 
     def add_filter_factor(self, factor: FilterFactor):
         self.check_factor(factor)
@@ -94,10 +90,6 @@ class TargetSelector(object):
         assert factor.level == self.level
 
     def move_on(self, to_timestamp=None, kdata_use_begin_time=False, timeout=20):
-        if self.portfolio_selector:
-            self.portfolio_selector.move_on(to_timestamp=to_timestamp, kdata_use_begin_time=kdata_use_begin_time,
-                                            timeout=timeout)
-
         if self.score_factors:
             for factor in self.score_factors:
                 factor.move_on(to_timestamp, timeout=timeout)
@@ -165,21 +157,6 @@ class TargetSelector(object):
     def get_open_short_targets(self, timestamp):
         return self.get_targets(timestamp=timestamp, target_type=TargetType.open_short)
 
-    def in_block(self, df, target_type: TargetType = TargetType.open_long):
-        se = pd.Series(index=df.index)
-        for index, row in df.iterrows():
-            portfolios = self.portfolio_selector.get_targets(index[1], target_type=target_type)
-
-            se[index] = False
-            if portfolios:
-                stock_df = self.portfolio_selector.entity_schema.get_stocks(provider=self.portfolio_selector.provider,
-                                                                            ids=portfolios,
-                                                                            timestamp=index[1])
-                if index[0] in stock_df['stock_id']:
-                    se[index] = True
-
-        return se
-
     # overwrite it to generate targets
     def generate_targets(self):
         if pd_is_not_null(self.filter_result) and pd_is_not_null(self.score_result):
@@ -195,16 +172,8 @@ class TargetSelector(object):
             long_result = self.score_result[self.score_result.score >= self.long_threshold]
             short_result = self.score_result[self.score_result.score <= self.short_threshold]
         else:
-            long_result = self.filter_result[self.filter_result.score == True]
-            short_result = self.filter_result[self.filter_result.score == False]
-
-        # filter in blocks
-        if self.portfolio_selector:
-            if pd_is_not_null(self.portfolio_selector.open_long_df):
-                long_result = long_result[lambda df: self.in_block(long_result, target_type=TargetType.open_long)]
-
-            if pd_is_not_null(self.portfolio_selector.open_short_df):
-                short_result = short_result[lambda df: self.in_block(short_result, target_type=TargetType.open_short)]
+            long_result = self.filter_result[self.filter_result.score is True]
+            short_result = self.filter_result[self.filter_result.score is False]
 
         self.open_long_df = self.normalize_result_df(long_result)
         self.open_short_df = self.normalize_result_df(short_result)
@@ -242,3 +211,7 @@ class TargetSelector(object):
 
             drawer.draw_table(width=width, height=height, title=title,
                               keep_ui_state=keep_ui_state)
+
+
+# the __all__ is generated
+__all__ = ['TargetType', 'TargetSelector']

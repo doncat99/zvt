@@ -5,8 +5,9 @@ import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from zvt import init_log
+from zvt.api.data_type import Region, Provider
 from zvt.domain import *
-from zvt.informer.informer import EmailInformer
+from zvt.utils.inform_utils import EmailInformer
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,11 @@ def run():
         email_action = EmailInformer()
 
         try:
-            DividendFinancing.record_data(provider='eastmoney')
-            HolderTrading.record_data(provider='eastmoney')
-            ManagerTrading.record_data(provider='eastmoney')
-            TopTenHolder.record_data(provider='eastmoney')
-            TopTenTradableHolder.record_data(provider='eastmoney')
+            DividendFinancing.record_data(provider=Provider.EastMoney)
+            HolderTrading.record_data(provider=Provider.EastMoney)
+            ManagerTrading.record_data(provider=Provider.EastMoney)
+            TopTenHolder.record_data(provider=Provider.EastMoney)
+            TopTenTradableHolder.record_data(provider=Provider.EastMoney)
 
             email_action.send_message("5533061@qq.com", 'eastmoney runner2 finished', '')
             break

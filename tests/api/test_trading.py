@@ -1,18 +1,21 @@
+from typing import List
+
+from zvt.api.data_type import Region, Provider
+from zvt.domain import HolderTrading, ManagerTrading
 from zvt.contract.api import get_db_session
 from ..context import init_test_context
 
 init_test_context()
 
-from typing import List
-
-from zvt.domain import HolderTrading, ManagerTrading
-
-session = get_db_session(provider='eastmoney', db_name='trading')  # type: sqlalchemy.orm.Session
+session = get_db_session(region=Region.CHN,
+                         provider=Provider.EastMoney,
+                         db_name='trading')
 
 
 # 股东交易
 def test_000778_holder_trading():
-    result: List[HolderTrading] = HolderTrading.query_data(session=session, provider='eastmoney',
+    result: List[HolderTrading] = HolderTrading.query_data(region=Region.CHN, session=session,
+                                                           provider=Provider.EastMoney,
                                                            return_type='domain',
                                                            codes=['000778'],
                                                            end_timestamp='2018-09-30',
@@ -27,7 +30,8 @@ def test_000778_holder_trading():
 
 # 高管交易
 def test_000778_manager_trading():
-    result: List[ManagerTrading] = ManagerTrading.query_data(session=session, provider='eastmoney',
+    result: List[ManagerTrading] = ManagerTrading.query_data(region=Region.CHN, session=session,
+                                                             provider=Provider.EastMoney,
                                                              return_type='domain',
                                                              codes=['000778'],
                                                              end_timestamp='2018-09-30',
@@ -36,7 +40,7 @@ def test_000778_manager_trading():
     assert len(result) == 1
     assert result[0].trading_person == '巩国平'
     assert result[0].volume == 8400
-    assert result[0].price == None
+    assert result[0].price is None
     assert result[0].holding == 18700
     assert result[0].trading_way == '增持'
     assert result[0].manager_position == '职工监事'

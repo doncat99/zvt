@@ -8,11 +8,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from examples.reports import get_subscriber_emails
 from zvt import init_log
+from zvt.api.data_type import Region, Provider
+from zvt.domain import Stock, StockValuation, Stock1dHfqKdata
 from zvt.contract.api import get_entities
-from zvt.domain import Stock, Stock1dKdata, StockValuation
-from zvt.factors.ma.ma_factor import ImprovedMaFactor
+from zvt.factors import VolumeUpMaFactor
 from zvt.factors.target_selector import TargetSelector
-from zvt.informer.informer import EmailInformer
+from zvt.utils.inform_utils import EmailInformer
 
 logger = logging.getLogger(__name__)
 
@@ -20,24 +21,24 @@ sched = BackgroundScheduler()
 
 
 @sched.scheduled_job('cron', hour=19, minute=0, day_of_week='mon-fri')
-def report_vol_up_250():
+def report_vol_up_250(region: Region):
     while True:
         error_count = 0
         email_action = EmailInformer()
 
         try:
             # 抓取k线数据
-            # StockTradeDay.record_data(provider='joinquant')
-            # Stock1dKdata.record_data(provider='joinquant')
+            # StockTradeDay.record_data(provider=Provider.JoinQuant)
+            # Stock1dKdata.record_data(provider=Provider.JoinQuant)
 
-            latest_day: Stock1dKdata = Stock1dKdata.query_data(order=Stock1dKdata.timestamp.desc(), limit=1,
-                                                               return_type='domain')
+            latest_day: Stock1dHfqKdata = Stock1dHfqKdata.query_data(region=region, order=Stock1dHfqKdata.timestamp.desc(), limit=1,
+                                                                     return_type='domain')
             target_date = latest_day[0].timestamp
 
             # 计算均线
-            my_selector = TargetSelector(start_timestamp='2018-10-01', end_timestamp=target_date)
+            my_selector = TargetSelector(region=region, start_timestamp='2018-10-01', end_timestamp=target_date)
             # add the factors
-            factor1 = ImprovedMaFactor(start_timestamp='2018-10-01', end_timestamp=target_date)
+            factor1 = VolumeUpMaFactor(region=region, start_timestamp='2018-10-01', end_timestamp=target_date)
 
             my_selector.add_filter_factor(factor1)
 
@@ -50,22 +51,23 @@ def report_vol_up_250():
             # 过滤亏损股
             # check StockValuation data
             pe_date = target_date - datetime.timedelta(10)
-            if StockValuation.query_data(start_timestamp=pe_date, limit=1, return_type='domain'):
-                positive_df = StockValuation.query_data(provider='joinquant', entity_ids=long_stocks,
+            if StockValuation.query_data(region=region, start_timestamp=pe_date, limit=1, return_type='domain'):
+                positive_df = StockValuation.query_data(region=region, provider=Provider.JoinQuant,
+                                                        entity_ids=long_stocks,
                                                         start_timestamp=pe_date,
                                                         filters=[StockValuation.pe > 0],
                                                         columns=['entity_id'])
                 bad_stocks = set(long_stocks) - set(positive_df['entity_id'].tolist())
                 if bad_stocks:
-                    stocks = get_entities(provider='joinquant', entity_schema=Stock, entity_ids=bad_stocks,
-                                          return_type='domain')
+                    stocks = get_entities(region=region, provider=Provider.JoinQuant, entity_schema=Stock,
+                                          entity_ids=bad_stocks, return_type='domain')
                     info = [f'{stock.name}({stock.code})' for stock in stocks]
                     msg = '亏损股:' + ' '.join(info) + '\n'
 
                 long_stocks = set(positive_df['entity_id'].tolist())
 
             if long_stocks:
-                stocks = get_entities(provider='joinquant', entity_schema=Stock, entity_ids=long_stocks,
+                stocks = get_entities(region=region, provider=Provider.JoinQuant, entity_schema=Stock, entity_ids=long_stocks,
                                       return_type='domain')
                 # add them to eastmoney
                 try:
@@ -100,7 +102,7 @@ def report_vol_up_250():
 if __name__ == '__main__':
     init_log('report_vol_up_250.log')
 
-    report_vol_up_250()
+    report_vol_up_250(region=Region.CHN)
 
     sched.start()
 

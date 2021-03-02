@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from zvt.api.data_type import Region, Provider
 from zvt.api.quote import get_kdata
 from zvt.contract import IntervalLevel
 
 
 def test_jq_1mon_kdata():
-    df = get_kdata(entity_id='stock_sz_000338', provider='joinquant', level=IntervalLevel.LEVEL_1MON)
+    df = get_kdata(region=Region.CHN, entity_id='stock_sz_000338',
+                   provider=Provider.JoinQuant, level=IntervalLevel.LEVEL_1MON)
     se = df.loc['2010-01-29']
     # make sure our fq is ok
     assert round(se['open'], 2) <= 5.44
@@ -14,12 +16,14 @@ def test_jq_1mon_kdata():
 
 
 def test_jq_1wk_kdata():
-    df = get_kdata(entity_id='stock_sz_000338', provider='joinquant', level=IntervalLevel.LEVEL_1WEEK)
+    df = get_kdata(region=Region.CHN, entity_id='stock_sz_000338',
+                   provider=Provider.JoinQuant, level=IntervalLevel.LEVEL_1WEEK)
     print(df)
 
 
 def test_jq_1d_kdata():
-    df = get_kdata(entity_id='stock_sz_000338', provider='joinquant', level=IntervalLevel.LEVEL_1DAY)
+    df = get_kdata(region=Region.CHN, entity_id='stock_sz_000338',
+                   provider=Provider.JoinQuant, level=IntervalLevel.LEVEL_1DAY)
     print(df)
 
     se = df.loc['2019-04-08']
@@ -31,7 +35,9 @@ def test_jq_1d_kdata():
 
 
 def test_jq_1d_hfq_kdata():
-    df = get_kdata(entity_id='stock_sz_000338', provider='joinquant', level=IntervalLevel.LEVEL_1DAY, adjust_type='hfq')
+    df = get_kdata(region=Region.CHN, entity_id='stock_sz_000338',
+                   provider=Provider.JoinQuant, level=IntervalLevel.LEVEL_1DAY, 
+                   adjust_type='hfq')
     se = df.loc['2019-04-08']
     print(se)
     assert round(se['open'], 2) == 249.29

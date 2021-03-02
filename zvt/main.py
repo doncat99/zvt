@@ -1,44 +1,52 @@
-import logging
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+from dash.dependencies import Input, Output
 
-from zvt.app import app
-from zvt.apps.trader_app import serve_layout
-
-app.layout = serve_layout
-
-import pluggy
-
-from zvt import impls, zvt_env, specs
-
-logger = logging.getLogger(__name__)
+from zvt import init_plugins
+from zvt.ui import zvt_app
+from zvt.ui.apps import factor_app
 
 
-def get_plugin_manager():
-    pm = pluggy.PluginManager("zvt")
-    pm.add_hookspecs(specs)
-    pm.load_setuptools_entrypoints("zvt")
-    pm.register(impls)
-    return pm
+def serve_layout():
+    layout = html.Div(
+        children=[
+            # banner
+            html.Div(
+                className="zvt-banner",
+                children=html.H2(className="h2-title", children="ZVT")
+            ),
+            dbc.CardHeader(
+                dbc.Tabs(
+                    [
+                        dbc.Tab(label="factor", tab_id="tab-factor", label_style={}, tab_style={"width": "100px"})
+                    ],
+                    id="card-tabs",
+                    card=True,
+                    active_tab="tab-factor",
+                )
+            ),
+            dbc.CardBody(html.P(id="card-content", className="card-text")),
+        ]
+    )
+
+    return layout
 
 
-class ZvtRunner:
+@zvt_app.callback(
+    Output("card-content", "children"), [Input("card-tabs", "active_tab")]
+)
+def tab_content(active_tab):
+    if 'tab-factor' == active_tab:
+        return factor_app.factor_layout()
 
-    def __init__(self, hook):
-        self.hook = hook
 
-    def run(self):
-        # setup the plugin config
-        self.hook.zvt_setup_env(config=zvt_env)
+zvt_app.layout = serve_layout
 
 
 def main():
-    try:
-        pm = get_plugin_manager()
-        runner = ZvtRunner(pm.hook)
-        runner.run()
-    except Exception as e:
-        logger.warning(e)
-
-    app.run_server()
+    init_plugins()
+    zvt_app.run_server(debug=True)
+    # zvt_app.run_server()
 
 
 if __name__ == '__main__':

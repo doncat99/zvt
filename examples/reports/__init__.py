@@ -5,6 +5,7 @@ import os
 
 from sqlalchemy import or_
 
+from zvt.api.data_type import Region
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_time_str
 from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement
@@ -24,27 +25,26 @@ def risky_company(the_date=to_pd_timestamp(now_time_str()), income_yoy=-0.1, pro
                          FinanceFactor.net_profit_growth_yoy <= profit_yoy,
                          FinanceFactor.current_ratio < 0.7,
                          FinanceFactor.quick_ratio < 0.5)
-    df = FinanceFactor.query_data(entity_ids=entity_ids, start_timestamp=start_timestamp, filters=[finance_filter],
+    df = FinanceFactor.query_data(region=Region.CHN, entity_ids=entity_ids, start_timestamp=start_timestamp, filters=[finance_filter],
                                   columns=['code'])
     if pd_is_not_null(df):
         codes = codes + df.code.tolist()
 
     # 高应收，高存货，高商誉
-    balance_filter = (BalanceSheet.accounts_receivable + BalanceSheet.inventories + BalanceSheet.goodwill) \
-                     > BalanceSheet.total_equity
-    df = BalanceSheet.query_data(entity_ids=entity_ids, start_timestamp=start_timestamp, filters=[balance_filter],
+    balance_filter = (BalanceSheet.accounts_receivable + BalanceSheet.inventories + BalanceSheet.goodwill) > BalanceSheet.total_equity
+    df = BalanceSheet.query_data(region=Region.CHN, entity_ids=entity_ids, start_timestamp=start_timestamp, filters=[balance_filter],
                                  columns=['code'])
     if pd_is_not_null(df):
         codes = codes + df.code.tolist()
 
     # 应收>利润*1/2
-    df1 = BalanceSheet.query_data(entity_ids=entity_ids, start_timestamp=start_timestamp,
+    df1 = BalanceSheet.query_data(region=Region.CHN, entity_ids=entity_ids, start_timestamp=start_timestamp,
                                   columns=[BalanceSheet.code, BalanceSheet.accounts_receivable])
     if pd_is_not_null(df1):
         df1.drop_duplicates(subset='code', keep='last', inplace=True)
         df1 = df1.set_index('code', drop=True).sort_index()
 
-    df2 = IncomeStatement.query_data(entity_ids=entity_ids, start_timestamp=start_timestamp,
+    df2 = IncomeStatement.query_data(region=Region.CHN, entity_ids=entity_ids, start_timestamp=start_timestamp,
                                      columns=[IncomeStatement.code,
                                               IncomeStatement.net_profit])
     if pd_is_not_null(df2):

@@ -1,18 +1,19 @@
+from zvt.api.data_type import Region, Provider
+from zvt.domain import SpoDetail, RightsIssueDetail, DividendFinancing
+from zvt.contract.api import get_db_session
+from zvt.utils.time_utils import to_pd_timestamp
 from ..context import init_test_context
 
 init_test_context()
 
-from zvt.domain import SpoDetail, RightsIssueDetail, DividendFinancing
-from zvt.contract.api import get_db_session
-from zvt.utils.time_utils import to_pd_timestamp
-
-session = get_db_session(provider='eastmoney',
-                         db_name='dividend_financing')  # type: sqlalchemy.orm.Session
+session = get_db_session(region=Region.CHN,
+                         provider=Provider.EastMoney,
+                         db_name='dividend_financing')
 
 
 # 增发详情
 def test_000778_spo_detial():
-    result = SpoDetail.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = SpoDetail.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                   codes=['000778'], end_timestamp='2018-09-30',
                                   order=SpoDetail.timestamp.desc())
     assert len(result) == 4
@@ -25,7 +26,7 @@ def test_000778_spo_detial():
 
 # 配股详情
 def test_000778_rights_issue_detail():
-    result = RightsIssueDetail.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = RightsIssueDetail.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                           codes=['000778'], end_timestamp='2018-09-30',
                                           order=RightsIssueDetail.timestamp.desc())
     assert len(result) == 2
@@ -38,7 +39,7 @@ def test_000778_rights_issue_detail():
 
 # 分红融资
 def test_000778_dividend_financing():
-    result = DividendFinancing.query_data(session=session, provider='eastmoney', return_type='domain',
+    result = DividendFinancing.query_data(region=Region.CHN, session=session, provider=Provider.EastMoney, return_type='domain',
                                           codes=['000778'], end_timestamp='2018-09-30',
                                           order=DividendFinancing.timestamp.desc())
     assert len(result) == 22

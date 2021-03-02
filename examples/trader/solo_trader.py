@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from zvt.api.data_type import Region
 from zvt.domain import ManagerTrading
 from zvt.trader.trader import StockTrader
 from zvt.utils.pd_utils import pd_is_not_null
@@ -8,11 +8,11 @@ from zvt.utils.pd_utils import pd_is_not_null
 class MySoloTrader(StockTrader):
     def on_time(self, timestamp):
         # 增持5000股以上
-        long_df = ManagerTrading.query_data(start_timestamp=timestamp, end_timestamp=timestamp,
+        long_df = ManagerTrading.query_data(region=self.region, start_timestamp=timestamp, end_timestamp=timestamp,
                                             filters=[ManagerTrading.volume > 5000], columns=[ManagerTrading.entity_id],
                                             order=ManagerTrading.volume.desc(), limit=10)
         # 减持5000股以上
-        short_df = ManagerTrading.query_data(start_timestamp=timestamp, end_timestamp=timestamp,
+        short_df = ManagerTrading.query_data(region=self.region, start_timestamp=timestamp, end_timestamp=timestamp,
                                              filters=[ManagerTrading.volume < -5000],
                                              columns=[ManagerTrading.entity_id],
                                              order=ManagerTrading.volume.asc(), limit=10)
@@ -26,5 +26,5 @@ class MySoloTrader(StockTrader):
 
 
 if __name__ == '__main__':
-    trader = MySoloTrader(start_timestamp='2015-01-01', end_timestamp='2016-01-01')
+    trader = MySoloTrader(region=Region.CHN, start_timestamp='2015-01-01', end_timestamp='2016-01-01')
     trader.run()

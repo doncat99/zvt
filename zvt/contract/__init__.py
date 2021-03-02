@@ -97,8 +97,18 @@ class IntervalLevel(enum.Enum):
         return NotImplemented
 
 
+class AdjustType(enum.Enum):
+    # 这里用拼音，因为英文不直观 split-adjusted？wtf?
+    # 不复权
+    bfq = 'bfq'
+    # 前复权
+    qfq = ''
+    # 后复权
+    hfq = 'hfq'
+
+
 from . import zvt_context
+from .schema import Mixin, NormalMixin, EntityMixin, NormalEntityMixin, PortfolioStock, Portfolio, PortfolioStockHistory
 
-from .schema import Mixin, NormalMixin, EntityMixin, NormalEntityMixin
-
-__all__ = ['IntervalLevel', 'Mixin', 'NormalMixin', 'EntityMixin', 'NormalEntityMixin', 'zvt_context']
+__all__ = ['IntervalLevel', 'Mixin', 'NormalMixin', 'EntityMixin', 'NormalEntityMixin', 'zvt_context', 'AdjustType',
+           'Portfolio', 'PortfolioStock', 'PortfolioStockHistory']

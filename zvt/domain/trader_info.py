@@ -3,9 +3,10 @@ from sqlalchemy import Column, String, DateTime, Boolean, Float, Integer, Foreig
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from zvt.api.data_type import Region, Provider
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
-from zvt.contract.common import Region, Provider
+from zvt.utils.decorator import to_string
 
 TraderBase = declarative_base()
 
@@ -26,9 +27,11 @@ class TraderInfo(TraderBase, Mixin):
     level = Column(String(length=32))
     real_time = Column(Boolean)
     kdata_use_begin_time = Column(Boolean)
+    kdata_adjust_type = Column(String(length=32))
 
 
 # account stats of every day
+@to_string
 class AccountStats(TraderBase, Mixin):
     __tablename__ = 'account_stats'
 
@@ -45,6 +48,11 @@ class AccountStats(TraderBase, Mixin):
     # 市值+cash
     all_value = Column(Float)
 
+    # 盈亏
+    profit = Column(Float)
+    # 盈亏比例
+    profit_rate = Column(Float)
+
     # 收盘计算
     closing = Column(Boolean)
 
@@ -56,7 +64,7 @@ class Position(TraderBase, Mixin):
     # 机器人名字
     trader_name = Column(String(length=128))
     # 账户id
-    account_stats_id = Column(String(length=64), ForeignKey('account_stats.id'))
+    account_stats_id = Column(String, ForeignKey('account_stats.id'))
     account_stats = relationship("AccountStats", back_populates="positions")
 
     # 做多数量
@@ -73,7 +81,10 @@ class Position(TraderBase, Mixin):
     # 平均做空价格
     average_short_price = Column(Float)
 
+    # 盈亏
     profit = Column(Float)
+    # 盈亏比例
+    profit_rate = Column(Float)
     # 市值 或者 占用的保证金(方便起见，总是100%)
     value = Column(Float)
     # 交易类型(0代表T+0,1代表T+1)
@@ -99,8 +110,12 @@ class Order(TraderBase, Mixin):
     level = Column(String(length=32))
 
 
-register_schema(regions=[Region.CHN, Region.US], 
-                providers=[Provider.ZVT], 
-                db_name='trader_info', schema_base=TraderBase)
+register_schema(regions=[Region.CHN, Region.US],
+                providers={Region.CHN: [Provider.ZVT],
+                           Region.US: [Provider.ZVT]},
+                db_name='trader_info',
+                schema_base=TraderBase)
 
+
+# the __all__ is generated
 __all__ = ['TraderInfo', 'AccountStats', 'Position', 'Order']

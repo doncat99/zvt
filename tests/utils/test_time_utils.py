@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
-from zvt.utils.time_utils import evaluate_size_from_timestamp, next_timestamp, to_pd_timestamp, \
+from zvt.utils.time_utils import eval_size_of_timestamp, next_timestamp, to_pd_timestamp, \
     is_finished_kdata_timestamp
 
 
 def test_evaluate_size_from_timestamp():
-    size = evaluate_size_from_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
+    size = eval_size_of_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
                                         level=IntervalLevel.LEVEL_1MON, one_day_trading_minutes=4 * 60)
 
     assert size == 2
 
-    size = evaluate_size_from_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
+    size = eval_size_of_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
                                         level=IntervalLevel.LEVEL_1WEEK, one_day_trading_minutes=4 * 60)
 
     assert size == 2
 
-    size = evaluate_size_from_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
+    size = eval_size_of_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
                                         level=IntervalLevel.LEVEL_1DAY, one_day_trading_minutes=4 * 60)
 
     assert size == 2
 
-    size = evaluate_size_from_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
+    size = eval_size_of_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
                                         level=IntervalLevel.LEVEL_1HOUR, one_day_trading_minutes=4 * 60)
 
     assert size == 9
 
-    size = evaluate_size_from_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
+    size = eval_size_of_timestamp(start_timestamp='2019-01-01', end_timestamp='2019-01-02',
                                         level=IntervalLevel.LEVEL_1MIN, one_day_trading_minutes=4 * 60)
 
     assert size == 481
