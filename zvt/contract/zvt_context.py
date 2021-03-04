@@ -15,12 +15,6 @@ entity_schema_map = {}
 # global sessions
 sessions = {}
 
-# region_dbname -> engine
-db_region_map = {}
-
-# provider_dbname -> engine
-db_engine_map = {}
-
 # provider_dbname -> session
 db_session_map = {}
 

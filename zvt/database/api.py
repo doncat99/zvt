@@ -12,12 +12,13 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.pool import QueuePool, NullPool
 
 from zvt import zvt_config
-from zvt.api.data_type import Region
-from zvt.contract import zvt_context
-
+from zvt.api.data_type import Region, Provider
 
 logger = logging.getLogger(__name__)
 logger_time = logging.getLogger("zvt.sqltime")
+
+# provider_dbname -> engine
+db_engine_map = {}
 
 
 @event.listens_for(Engine, "before_cursor_execute")
@@ -52,15 +53,9 @@ def profiled():
 
 
 def build_engine(region: Region):
-    logger.info(f"start connecting {region} database engine...")
-    database = zvt_context.db_engine_map.get(region)
-    if database:
-        logger.info(f"{region} engine connect successed")
-        return database
-
     logger.info(f"start building {region} database engine...")
 
-    # database = await asyncpg.create_pool(
+    # engine = await asyncpg.create_pool(
     #     host=zvt_config['db_host'],
     #     port=zvt_config['db_port'],
     #     database="{}_{}".format(zvt_config['db_name'], region.value),
@@ -71,19 +66,18 @@ def build_engine(region: Region):
     db_name = "{}_{}".format(zvt_config['db_name'], region.value)
     link = 'postgresql+psycopg2://{}:{}@{}:{}/{}'.format(
         zvt_config['db_user'], zvt_config['db_pass'], zvt_config['db_host'], zvt_config['db_port'], db_name)
-    database = create_engine(link,
-                             encoding='utf-8',
-                             echo=False,
-                             poolclass=NullPool,
-                            #  pool_size=25,
-                            #  pool_recycle=7200,
-                            #  pool_pre_ping=True,
-                            #  max_overflow=0,
-                            #  server_side_cursors=True,
-                             executemany_mode='values',
-                             executemany_values_page_size=10000,
-                             executemany_batch_page_size=500,
-                             )
+    engine = create_engine(link,
+                           encoding='utf-8',
+                           echo=False,
+                           poolclass=NullPool,
+                        #    pool_size=25,
+                        #    pool_recycle=7200,
+                        #    pool_pre_ping=True,
+                        #    max_overflow=0,
+                        #    server_side_cursors=True,
+                           executemany_mode='values',
+                           executemany_values_page_size=10000,
+                           executemany_batch_page_size=500)
 
     try:
         with psycopg2.connect(database='postgres', user=zvt_config['db_user'], password=zvt_config['db_pass'],
@@ -103,8 +97,7 @@ def build_engine(region: Region):
 
     logger.info(f"{region} engine connect successed")
 
-    zvt_context.db_engine_map[region] = database
-    return database
+    return engine
 
 
 def to_postgresql(region: Region, df, tablename):
@@ -112,7 +105,7 @@ def to_postgresql(region: Region, df, tablename):
     df.to_csv(output, sep='\t', index=False, header=False, encoding='utf-8')
     output.seek(0)
 
-    db_engine = zvt_context.db_engine_map[region]
+    db_engine = db_engine_map.get(region)
     connection = db_engine.raw_connection()
     cursor = connection.cursor()
     try:
@@ -128,22 +121,18 @@ def to_postgresql(region: Region, df, tablename):
     connection.close()
     return 0
 
-# async def db_save_table(region: Region, df, tablename):
-#     db_engine = zvt_context.db_engine_map[region]
 
-#     async with db_engine.acquire() as conn:
-#          async with conn.transaction():
-#              tuples = [tuple(x) for x in df.values]
-#              await conn.copy_records_to_table(tablename, records=tuples, columns=list(df.columns), timeout=10)
+def get_db_engine(region: Region,
+                  provider: Provider,
+                  db_name: str = None) -> Engine:
+    db_engine = db_engine_map.get(region)
+    if db_engine:
+        logger.debug("engine cache hit: engine key: {}".format(db_name))
+        return db_engine
 
-
-# async def db_delete(region: Region, data_schema: Type[Mixin], filters: List):
-#     db_engine = zvt_context.db_engine_map[region]
-
-#     async with db_engine.acquire() as conn:
-#         async with conn.transaction():
-#             sql = f"delete from {data_schema.__tablename__} where id = '{ids[0]}'"
-#             conn.execute(sql)
+    logger.debug("create engine key: {}".format(db_name))
+    db_engine_map[region] = build_engine(region)
+    return db_engine_map[region]
 
 
 # the __all__ is generated

@@ -9,7 +9,8 @@ from sqlalchemy.engine.reflection import Inspector
 from zvt import zvt_config
 from zvt.api.data_type import Region, Provider, EntityType
 from zvt.contract import EntityMixin, zvt_context, Mixin
-from zvt.contract.api import get_db_engine, get_db_session_factory
+from zvt.contract.api import get_db_session_factory
+from zvt.database.api import get_db_engine
 from zvt.utils.utils import add_to_map_list
 
 logger = logging.getLogger(__name__)
