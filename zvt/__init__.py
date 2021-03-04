@@ -17,7 +17,7 @@ import pandas as pd
 import pkg_resources
 # from pkg_resources import get_distribution, DistributionNotFound
 
-from zvt.consts import DATA_SAMPLE_ZIP_PATH, ZVT_TEST_HOME, ZVT_HOME, ZVT_TEST_DATA_PATH, ZVT_TEST_ZIP_DATA_PATH
+from zvt.consts import ZVT_HOME
 
 # try:
 #     dist_name = __name__
@@ -111,7 +111,7 @@ def init_env(zvt_home: str, **kwargs) -> dict:
     # path for storing cache
     zvt_env['cache_path'] = os.path.join(zvt_home, 'cache')
     if not os.path.exists(zvt_env['cache_path']):
-        os.makedirs(zvt_env['cache_path'])  
+        os.makedirs(zvt_env['cache_path'])
 
     # pprint.pprint(zvt_env)
 
@@ -146,7 +146,7 @@ def init_config(pkg_name: str = None, current_config: dict = None, **kwargs) -> 
             sample_config = pkg_resources.resource_filename(pkg_name, 'config.json')
             if os.path.exists(sample_config):
                 copyfile(sample_config, config_path)
-        except Exception as _:
+        except:
             logger.warning(f'could not load config.json from package {pkg_name}')
 
     if os.path.exists(config_path):
@@ -177,30 +177,33 @@ def init_plugins():
     logger.info(f'loaded plugins:{_plugins}')
 
 
-if os.getenv('TESTING_ZVT'):
-    init_env(zvt_home=ZVT_TEST_HOME)
+# if os.getenv('TESTING_ZVT'):
+#     init_env(zvt_home=ZVT_TEST_HOME)
 
-    # init the sample data if need
-    same = False
-    if os.path.exists(ZVT_TEST_ZIP_DATA_PATH):
-        import filecmp
+#     # init the sample data if need
+#     same = False
+#     if os.path.exists(ZVT_TEST_ZIP_DATA_PATH):
+#         import filecmp
 
-        same = filecmp.cmp(ZVT_TEST_ZIP_DATA_PATH, DATA_SAMPLE_ZIP_PATH)
+#         same = filecmp.cmp(ZVT_TEST_ZIP_DATA_PATH, DATA_SAMPLE_ZIP_PATH)
 
-    if not same:
-        from shutil import copyfile
-        from zvt.contract import *
-        from zvt.utils.zip_utils import unzip
+#     if not same:
+#         from shutil import copyfile
+#         from zvt.contract import *
+#         from zvt.utils.zip_utils import unzip
 
-        copyfile(DATA_SAMPLE_ZIP_PATH, ZVT_TEST_ZIP_DATA_PATH)
-        unzip(ZVT_TEST_ZIP_DATA_PATH, ZVT_TEST_DATA_PATH)
+#         copyfile(DATA_SAMPLE_ZIP_PATH, ZVT_TEST_ZIP_DATA_PATH)
+#         unzip(ZVT_TEST_ZIP_DATA_PATH, ZVT_TEST_DATA_PATH)
 
-else:
-    init_env(zvt_home=ZVT_HOME)
+# else:
+#     init_env(zvt_home=ZVT_HOME)
+init_env(zvt_home=ZVT_HOME)
+
 
 # register to meta
 import zvt.contract as zvt_contract
 import zvt.recorders as zvt_recorders
 import zvt.factors as zvt_factors
+
 
 __all__ = ['zvt_env', 'zvt_config', 'init_log', 'init_env', 'init_config', '__version__']

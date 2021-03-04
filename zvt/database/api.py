@@ -82,11 +82,6 @@ def build_engine(region: Region) -> Engine:
                            encoding='utf-8',
                            echo=False,
                            poolclass=NullPool,
-                        #    pool_size=25,
-                        #    pool_recycle=7200,
-                        #    pool_pre_ping=True,
-                        #    max_overflow=0,
-                        #    server_side_cursors=True,
                            executemany_mode='values',
                            executemany_values_page_size=10000,
                            executemany_batch_page_size=500)
