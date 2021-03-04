@@ -6,69 +6,17 @@ from typing import List, Union, Type
 import pandas as pd
 
 from sqlalchemy import func
-from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import DeclarativeMeta
-from sqlalchemy.orm import Query, Session, sessionmaker
-from sqlalchemy_batch_inserts import enable_batch_inserting
+from sqlalchemy.orm import Query, Session
 
-from zvt import zvt_env, zvt_config
+from zvt import zvt_config
 from zvt.api.data_type import Region, Provider, EntityType
 from zvt.contract import zvt_context, IntervalLevel, EntityMixin, Mixin
-from zvt.database.api import build_engine, to_postgresql, profiled
+from zvt.database.api import get_db_session, to_postgresql, profiled
 from zvt.utils.pd_utils import pd_is_not_null, index_df
 from zvt.utils.time_utils import to_pd_timestamp
 
 logger = logging.getLogger(__name__)
-
-
-def get_db_name(data_schema: DeclarativeMeta) -> str:
-    """
-    get db name of the domain schema
-
-    :param data_schema:
-    :type data_schema:
-    :return:
-    :rtype:
-    """
-    for db_name, base in zvt_context.dbname_map_base.items():
-        if issubclass(data_schema, base):
-            return db_name
-
-
-def get_db_session(region: Region,
-                   provider: Provider,
-                   db_name: str = None,
-                   data_schema: object = None,
-                   force_new: bool = False) -> Session:
-    if data_schema:
-        db_name = get_db_name(data_schema=data_schema)
-
-    session_key = '{}_{}_{}'.format(region.value, provider.value, db_name)
-
-    if force_new:
-        return get_db_session_factory(region, provider, db_name, data_schema)()
-
-    session = zvt_context.sessions.get(session_key)
-    if not session:
-        session = get_db_session_factory(region, provider, db_name, data_schema)()
-        enable_batch_inserting(session)
-        zvt_context.sessions[session_key] = session
-    return session
-
-
-def get_db_session_factory(region: Region,
-                           provider: Provider,
-                           db_name: str = None,
-                           data_schema: object = None):
-    if data_schema:
-        db_name = get_db_name(data_schema=data_schema)
-
-    session_key = '{}_{}_{}'.format(region.value, provider.value, db_name)
-    session = zvt_context.db_session_map.get(session_key)
-    if not session:
-        session = sessionmaker()
-        zvt_context.db_session_map[session_key] = session
-    return session
 
 
 def get_schema_by_name(name: str) -> DeclarativeMeta:
@@ -427,4 +375,3 @@ def get_entities(
                     code=code, level=None, provider=provider, columns=columns, col_label=col_label,
                     return_type=return_type, start_timestamp=start_timestamp, end_timestamp=end_timestamp,
                     filters=filters, session=session, order=order, limit=limit, index=index)
-

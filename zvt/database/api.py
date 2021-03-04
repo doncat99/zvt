@@ -9,7 +9,10 @@ import contextlib
 import psycopg2
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.pool import QueuePool, NullPool
+from sqlalchemy.pool import NullPool
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy_batch_inserts import enable_batch_inserting
 
 from zvt import zvt_config
 from zvt.api.data_type import Region, Provider
@@ -19,6 +22,15 @@ logger_time = logging.getLogger("zvt.sqltime")
 
 # provider_dbname -> engine
 db_engine_map = {}
+
+# provider_dbname -> session
+db_session_map = {}
+
+# global sessions
+sessions = {}
+
+# db_name -> [declarative_base1,declarative_base2...]
+dbname_map_base = {}
 
 
 @event.listens_for(Engine, "before_cursor_execute")
@@ -52,7 +64,7 @@ def profiled():
     logger_time.info(s.getvalue())
 
 
-def build_engine(region: Region):
+def build_engine(region: Region) -> Engine:
     logger.info(f"start building {region} database engine...")
 
     # engine = await asyncpg.create_pool(
@@ -133,6 +145,48 @@ def get_db_engine(region: Region,
     logger.debug("create engine key: {}".format(db_name))
     db_engine_map[region] = build_engine(region)
     return db_engine_map[region]
+
+
+def get_db_session_factory(region: Region,
+                           provider: Provider,
+                           db_name: str = None):
+    session_key = '{}_{}_{}'.format(region.value, provider.value, db_name)
+    session = db_session_map.get(session_key)
+    if not session:
+        session = sessionmaker()
+        db_session_map[session_key] = session
+    return session
+
+
+def get_db_session(region: Region,
+                   provider: Provider,
+                   db_name: str = None,
+                   data_schema: object = None,
+                   force_new: bool = False) -> Session:
+    if data_schema:
+        db_name = get_db_name(data_schema=data_schema)
+
+    session_key = '{}_{}_{}'.format(region.value, provider.value, db_name)
+
+    if force_new:
+        return get_db_session_factory(region, provider, db_name)()
+
+    session = sessions.get(session_key)
+    if not session:
+        session = get_db_session_factory(region, provider, db_name)()
+        enable_batch_inserting(session)
+        sessions[session_key] = session
+    return session
+
+
+def get_db_name(data_schema: DeclarativeMeta) -> str:
+    for db_name, base in dbname_map_base.items():
+        if issubclass(data_schema, base):
+            return db_name
+
+
+def set_db_name(db_name, schema_base) -> str:
+    dbname_map_base[db_name] = schema_base
 
 
 # the __all__ is generated

@@ -94,11 +94,11 @@ class AMP(multiprocessing.Process):
         self.mode = mode
         self.prog_count = prog_count
 
-    # async def aioprocess(self, ticker: str, session: ClientSession) -> str:
+    # async def aioprocess(self, ticker: str, http_session: ClientSession) -> str:
     #     """Issue GET for the ticker and write to file."""
     #     logger.debug(f'{self.name} processing_ticker {ticker}')
     #     fname = f'{self.odir}/{ticker}.csv'
-    #     res = await self.get(ticker=ticker, session=session)
+    #     res = await self.get(ticker=ticker, http_session=http_session)
     #     if not res:
     #         return f'{ticker} fetch failed'
     #     async with aiofiles.open(fname, "a") as f:
@@ -113,8 +113,8 @@ class AMP(multiprocessing.Process):
         # time.sleep(0.01)
 
     async def async_process(self, entities, prog_count):
-        """Create session to concurrently fetch tickers."""
-        logger.info(f'{self.name} session for {len(entities)} entities')
+        """Create http_session to concurrently fetch tickers."""
+        logger.info(f'{self.name} http_session for {len(entities)} entities')
         http_session = get_http_session(self.mode)
 
         tasks = []

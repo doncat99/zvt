@@ -11,10 +11,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.api.data_type import Region, Provider
 from zvt.contract import IntervalLevel, EntityMixin, Mixin
-from zvt.contract.api import get_data, df_to_db, get_db_session, del_data
+from zvt.contract.api import get_data, df_to_db, del_data
 from zvt.contract.reader import DataReader, DataListener
 from zvt.contract.register import register_schema
 from zvt.contract.zvt_context import factor_cls_registry
+from zvt.database.api import get_db_session
 from zvt.utils.pd_utils import pd_is_not_null
 
 

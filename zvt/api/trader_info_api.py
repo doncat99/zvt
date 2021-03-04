@@ -7,9 +7,10 @@ from zvt.api.data_type import Region, Provider
 from zvt.api.normal_data import NormalData
 from zvt.domain import AccountStats, Order, trader_info
 from zvt.contract import IntervalLevel
-from zvt.contract.api import get_data, get_db_session
+from zvt.contract.api import get_data
 from zvt.contract.reader import DataReader
 from zvt.contract.drawer import Drawer
+from zvt.database.api import get_db_session
 
 
 def get_trader_info(region: Region, trader_name=None, return_type='df', start_timestamp=None, end_timestamp=None,

@@ -11,9 +11,9 @@ from zvt.api.quote import get_kdata, decode_entity_id, get_kdata_schema
 from zvt.api.trader_info_api import get_trader_info
 from zvt.domain.trader_info import AccountStats, Position, Order, TraderInfo
 from zvt.contract import IntervalLevel, EntityMixin, AdjustType
-from zvt.contract.api import get_db_session
 from zvt.trader import TradingSignalType, TradingListener, TradingSignal
 from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError, WrongKdataError
+from zvt.database.api import get_db_session
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_ISO8601, is_same_date
 from zvt.utils.utils import fill_domain_from_dict

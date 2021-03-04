@@ -11,11 +11,11 @@ from zvt.api.normal_data import NormalData
 from zvt.api.trader_info_api import AccountStatsReader
 from zvt.domain import Stock, TraderInfo, AccountStats, Position
 from zvt.contract import IntervalLevel, EntityMixin, AdjustType
-from zvt.contract.api import get_db_session
 from zvt.contract.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
 from zvt.trader import TradingSignal, TradingSignalType, TradingListener
 from zvt.trader.account import SimAccountService
+from zvt.database.api import get_db_session
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str, is_same_date
 
 
