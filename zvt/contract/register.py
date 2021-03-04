@@ -68,6 +68,9 @@ def register_schema(regions: List[Region],
                 schemas.append(cls)
 
         for provider in providers[region]:
+            if provider == Provider.Default:
+                continue
+
             # track in in  _providers
             if region in zvt_context.providers.keys():
                 if provider not in zvt_context.providers[region]:
@@ -84,15 +87,11 @@ def register_schema(regions: List[Region],
             engine = get_db_engine(region, provider, db_name=db_name)
             if engine is None:
                 continue
-            schema_base.metadata.create_all(engine)
 
+            schema_base.metadata.create_all(engine)
             session_fac = get_db_session_factory(region, provider, db_name=db_name)
             session_fac.configure(bind=engine)
 
-        for provider in providers[region]:
-            engine = get_db_engine(region, provider, db_name=db_name)
-            if engine is None:
-                continue
             inspector = Inspector.from_engine(engine)
 
             # create index for 'id', 'timestamp', 'entity_id', 'code', 'report_period', 'updated_timestamp

@@ -46,18 +46,21 @@ def get_db_engine(region: Region,
     engine_key = '{}_{}_{}'.format(region.value, provider.value, db_name)
     db_engine = zvt_context.db_engine_map.get(engine_key)
 
-    if not db_engine:
-        # logger.info("engine key: {}".format(engine_key))
-        region_key = '{}'.format(region.value)
+    if db_engine:
+        logger.debug("engine cache hit: engine key: {}".format(engine_key))
+        return db_engine
 
-        db_engine = zvt_context.db_region_map.get(region_key)
-        if not db_engine:
-            # logger.info("region key: {}".format(region_key))
-            db_engine = build_engine(region)
-            zvt_context.db_region_map[region_key] = db_engine
-
+    region_key = '{}'.format(region.value)
+    db_engine = zvt_context.db_region_map.get(region_key)
+    if db_engine:
+        logger.debug("region cache hit: engine key: {}".format(engine_key))
         zvt_context.db_engine_map[engine_key] = db_engine
+        return db_engine
 
+    logger.debug("create engine key: {}".format(region_key))
+    db_engine = build_engine(region)
+    zvt_context.db_region_map[region_key] = db_engine
+    zvt_context.db_engine_map[engine_key] = db_engine
     return db_engine
 
 
