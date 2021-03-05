@@ -134,10 +134,10 @@ def get_db_engine(region: Region,
                   db_name: str = None) -> Engine:
     db_engine = db_engine_map.get(region)
     if db_engine:
-        logger.debug("engine cache hit: engine key: {}".format(db_name))
+        logger.debug("engine cache hit: engine key: {}_{}".format(region.value, db_name))
         return db_engine
 
-    logger.debug("create engine key: {}".format(db_name))
+    logger.debug("create engine key: {}_{}".format(region.value, db_name))
     db_engine_map[region] = build_engine(region)
     return db_engine_map[region]
 
