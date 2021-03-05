@@ -6,20 +6,6 @@ from datetime import datetime
 from tqdm.auto import tqdm
 
 from zvt.api.data_type import Region, Provider, RunMode
-# from zvt.domain import Stock, Etf, Index, StockTradeDay, StockSummary, StockDetail, FinanceFactor, \
-#                        BalanceSheet, IncomeStatement, CashFlowStatement, StockMoneyFlow, \
-#                        DividendFinancing, DividendDetail, RightsIssueDetail, SpoDetail, \
-#                        MarginTradingSummary, CrossMarketSummary, HolderTrading, TopTenHolder, \
-#                        TopTenTradableHolder, StockValuation, EtfStock, EtfValuation, Etf1dKdata, \
-#                        Stock1dKdata,   Stock1dHfqKdata,   Stock1dBfqKdata, \
-#                        Stock1wkKdata,  Stock1wkHfqKdata,  Stock1wkBfqKdata, \
-#                        Stock1monKdata, Stock1monHfqKdata, Stock1monBfqKdata, \
-#                        Stock1mKdata,   Stock1mHfqKdata,   Stock1mBfqKdata, \
-#                        Stock5mKdata,   Stock5mHfqKdata,   Stock5mBfqKdata, \
-#                        Stock15mKdata,  Stock15mHfqKdata,  Stock15mBfqKdata, \
-#                        Stock30mKdata,  Stock30mHfqKdata,  Stock30mBfqKdata, \
-#                        Stock1hKdata,   Stock1hHfqKdata,   Stock1hBfqKdata
-# from zvt.recorders.hardcode import init_main_index
 from zvt.utils.cache_utils import valid, get_cache, dump_cache
 
 logger = logging.getLogger(__name__)

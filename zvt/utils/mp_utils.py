@@ -19,8 +19,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 def create_mp_share_value():
-    manager = multiprocessing.Manager()
-    return manager.Value('i', 0)
+    return multiprocessing.Value('i', 0)
 
 
 def progress_count(total_count, desc, prog_count):
@@ -36,7 +35,9 @@ def progress_count(total_count, desc, prog_count):
 def run_amp(mode, process_cnt, func, entities, desc, prog_count):
     entity_cnt = len(entities)
 
-    progress = multiprocessing.Process(name='ProgressBar', target=progress_count, args=(entity_cnt, desc, prog_count))
+    ctx = multiprocessing.get_context('spawn')
+
+    progress = ctx.Process(name='ProgressBar', target=progress_count, args=(entity_cnt, desc, prog_count))
     progress.start()
 
     # spawning multiprocessing limited by the available cores
