@@ -102,7 +102,7 @@ class AdjustType(enum.Enum):
     # 不复权
     bfq = 'bfq'
     # 前复权
-    qfq = ''
+    qfq = 'qfq'
     # 后复权
     hfq = 'hfq'
 

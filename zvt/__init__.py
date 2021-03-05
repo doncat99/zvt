@@ -17,6 +17,7 @@ import pandas as pd
 import pkg_resources
 # from pkg_resources import get_distribution, DistributionNotFound
 
+# from zvt.consts import DATA_SAMPLE_ZIP_PATH, ZVT_TEST_HOME, ZVT_HOME, ZVT_TEST_DATA_PATH, ZVT_TEST_ZIP_DATA_PATH
 from zvt.consts import ZVT_HOME
 
 # try:
