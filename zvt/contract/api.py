@@ -69,8 +69,8 @@ def del_data(region: Region, data_schema: Type[Mixin], filters: List = None, pro
     session.commit()
 
 
-def get_data(data_schema,
-             region: Region,
+def get_data(region: Region,
+             data_schema,
              ids: List[str] = None,
              entity_ids: List[str] = None,
              entity_id: str = None,
