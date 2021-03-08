@@ -61,9 +61,6 @@ def register_schema(regions: List[Region],
     :return:
     :rtype:
     """
-    if dbname_map_schemas.get(db_name):
-        return
-
     schemas = []
     for region in regions:
         for item in schema_base._decl_class_registry.items():

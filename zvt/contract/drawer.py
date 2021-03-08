@@ -124,6 +124,7 @@ class Draw(object):
                         type="date"
                     ),
                     legend_orientation="h",
+                    hoverlabel={"namelength": -1},
                     **layout_params)
 
 
@@ -532,6 +533,11 @@ def annotations(annotation_df: pd.DataFrame, yref='y'):
         return annotations
     return None
 
+
+def distribute(df, col):
+    import plotly.express as px
+    fig = px.histogram(df, x=col)
+    fig.show()
 
 if __name__ == '__main__':
     from zvt.factors.zen import ZenFactor

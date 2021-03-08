@@ -57,7 +57,7 @@ nohup python examples/recorders/finance_recorder.py  >/dev/null 2>&1 &
 ```
 In [3]: CoinTickKdata.record_data(entity_ids=['coin_binance_BTC/USDT'],real_time=True,force_update=False)
 CoinTickKdata registered recorders:[<class 'zvt.recorders.ccxt.coin_tick_recorder.CoinTickRecorder'>]
-INFO  MainThread  2019-12-25 18:18:31,928  CoinTickRecorder:recorder.py:349  run  entity_id:coin_binance_BTC/USDT,eval_fetch_timestamps result:2019-12-25 18:10:33.018000,None,97,None
+INFO  MainThread  2019-12-25 18:18:31,928  CoinTickRecorder:recorder.py:349  run  entity_id:coin_binance_BTC/USDT,evaluate_start_end_size_timestamps result:2019-12-25 18:10:33.018000,None,97,None
 INFO  MainThread  2019-12-25 18:18:33,908  CoinTickRecorder:recorder.py:313  persist  persist <class 'zvt.domain.quotes.coin.coin_tick_kdata.CoinTickKdata'> for entity_id:coin_binance_BTC/USDT,time interval:[2019-12-25 18:18:04.353000,2019-12-25 18:18:33.311000]
 ```
 

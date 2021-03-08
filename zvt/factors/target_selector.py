@@ -74,7 +74,7 @@ class TargetSelector(object):
 
     def init_factors(self, entity_ids, entity_schema, exchanges, codes, the_timestamp, start_timestamp, end_timestamp,
                      level):
-        raise NotImplementedError
+        pass
 
     def add_filter_factor(self, factor: FilterFactor):
         self.check_factor(factor)
