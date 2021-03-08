@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
+from tqdm.auto import tqdm
 
 from zvt.consts import SAMPLE_STOCK_CODES
 from zvt.domain import RightsIssueDetail, DividendFinancing
@@ -52,21 +53,25 @@ class RightsIssueDetailRecorder(EastmoneyPageabeDataRecorder):
                                                     filters=[DividendFinancing.rights_raising_fund.is_(None)],
                                                     end_timestamp=last_year)
 
-        for item in need_filleds:
-            df = RightsIssueDetail.query_data(region=self.region,
-                                              provider=self.provider,
-                                              entity_id=item.entity_id,
-                                              columns=[RightsIssueDetail.id,
-                                                       RightsIssueDetail.timestamp,
-                                                       RightsIssueDetail.rights_raising_fund],
-                                              start_timestamp=item.timestamp,
-                                              end_timestamp="{}-12-31".format(item.timestamp.year))
-            if pd_is_not_null(df):
-                item.rights_raising_fund = df['rights_raising_fund'].sum()
-                session = get_db_session(region=self.region,
-                                         provider=self.provider,
-                                         data_schema=self.data_schema)
-                session.commit()
+        desc = RightsIssueDetail.__name__ + "on_finish"
+        with tqdm(total=len(need_filleds), ncols=80, desc=desc, position=0, leave=True) as pbar:
+            session = get_db_session(region=self.region,
+                                     provider=self.provider,
+                                     data_schema=self.data_schema)
+
+            for item in need_filleds:
+                df = RightsIssueDetail.query_data(region=self.region,
+                                                  provider=self.provider,
+                                                  entity_id=item.entity_id,
+                                                  columns=[RightsIssueDetail.id,
+                                                           RightsIssueDetail.timestamp,
+                                                           RightsIssueDetail.rights_raising_fund],
+                                                  start_timestamp=item.timestamp,
+                                                  end_timestamp="{}-12-31".format(item.timestamp.year))
+                if pd_is_not_null(df):
+                    item.rights_raising_fund = df['rights_raising_fund'].sum()
+                    session.commit()
+                pbar.update()
 
         super().on_finish()
 

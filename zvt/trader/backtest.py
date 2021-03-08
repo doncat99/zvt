@@ -1,8 +1,6 @@
 import pandas as pd
 
-from pyfolio import timeseries 
 import pyfolio
-import matplotlib.pyplot as plt
 
 from zvt.api.data_type import Region, Provider
 from zvt.domain import Stock1dKdata, Stock
@@ -13,7 +11,7 @@ def BackTestStats(account_value):
     df = account_value.copy()
     df = get_daily_return(df)
     DRL_strat = backtest_strat(df)
-    perf_func = timeseries.perf_stats
+    perf_func = pyfolio.timeseries.perf_stats
     perf_stats_all = perf_func(returns=DRL_strat,
                                factor_returns=DRL_strat,
                                positions=None, transactions=None, turnover_denom="AGB")
@@ -30,7 +28,7 @@ def BaselineStats(region=Region.US,
                                     ticker=baseline_ticker,
                                     start=baseline_start,
                                     end=baseline_end)
-    perf_func = timeseries.perf_stats
+    perf_func = pyfolio.timeseries.perf_stats
     perf_stats_all = perf_func(returns=dow_strat,
                                factor_returns=dow_strat,
                                positions=None, transactions=None, turnover_denom="AGB")
