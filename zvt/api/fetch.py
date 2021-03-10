@@ -362,7 +362,7 @@ def fetch_data(region: Region):
     cache = get_cache()
     data_set = [item for item in data_set if not valid(region, item[0].__name__, item[Para.Cache.value], cache)]
 
-    with tqdm(total=len(data_set), ncols=120, desc="total", position=0, leave=True) as pbar:
+    with tqdm(total=len(data_set), ncols=90, desc="total", position=0, leave=True) as pbar:
         for item in data_set:
             result = loop_data_set([region, item])
             if result is not None:

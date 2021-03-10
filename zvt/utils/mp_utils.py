@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-import time
+# import time
 import random
 import functools
 import multiprocessing
@@ -15,7 +15,16 @@ from zvt.api.data_type import RunMode
 from zvt.networking.request import get_http_session
 
 logger = logging.getLogger(__name__)
+
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+# pool = None
+
+
+# def get_pool():
+#     global pool
+#     if pool is None:
+#         pool = multiprocessing.Pool(8)
+#     return pool
 
 
 def create_mp_share_value():
@@ -23,79 +32,116 @@ def create_mp_share_value():
 
 
 def progress_count(total_count, desc, prog_count):
-    pbar = tqdm(total=total_count, desc=desc, ncols=120, leave=True)
+    pbar = tqdm(total=total_count, desc=desc, ncols=90, position=1, leave=True)
     while True:
+        if pbar.n >= total_count:
+            break
         update_cnt = prog_count.value - pbar.n
         if update_cnt > 0:
             pbar.update(update_cnt)
-        if pbar.n >= total_count:
-            break
 
 
-def run_amp(mode, process_cnt, func, entities, desc, prog_count):
-    entity_cnt = len(entities)
+# def run_func(self, task_queue, func, prog_count):
+#     http_session = get_http_session(self.mode)
 
-    progress_bar = multiprocessing.Process(
-        name='ProgressBar', target=progress_count, args=(entity_cnt, desc, prog_count))
-    progress_bar.start()
+#     while True:
+#         # logger.info(f'{self.name} running, task empty: {self.task_queue.empty()}')
+#         if task_queue.empty():
+#             # logger.info(f'{self.name} break loop')
+#             return
+#         entity = task_queue.get()
+#         task_queue.task_done()
 
-    # spawning multiprocessing limited by the available cores
-    if zvt_config['debug']:
-        processes = 1
-    else:
-        if process_cnt != 0:
-            # processes = min(zvt_config['processes'], multiprocessing.cpu_count(), entity_cnt, process_cnt)
-            processes = min(zvt_config['processes'], entity_cnt, process_cnt)
-        else:
-            # processes = min(zvt_config['processes'], multiprocessing.cpu_count(), entity_cnt)
-            processes = min(zvt_config['processes'], entity_cnt)
+#         try:
+#             func(entity, http_session)
+#         except Exception as e:
+#             logger.error(f'{self.func.__name__} entity:{entity} error {e}')
+#         # symbol = entity if isinstance(entity, str) else entity.code
+#         # self.result_queue.put(f'{symbol} done')
+#         prog_count.value += 1
 
+
+# def run_amp(mode, cpu_cnt, func, entities, desc, prog_count):
+#     # # Task queue is used to send the entities to processes
+#     # # Result queue is used to get the result from processes
+#     tq = multiprocessing.JoinableQueue()   # task queue
+#     # rq = multiprocessing.Queue()           # result queue
+
+#     entities = entities[:100]
+#     entity_cnt = len(entities)
+
+#     # spawning multiprocessing limited by the available cores
+#     if zvt_config['debug']:
+#         cpus = 1
+#     else:
+#         if cpu_cnt != 0:
+#             cpus = min(zvt_config['processes'], multiprocessing.cpu_count() * 2, entity_cnt, cpu_cnt)
+#         else:
+#             cpus = min(zvt_config['processes'], multiprocessing.cpu_count() * 2, entity_cnt)
+
+#     random.shuffle(entities)
+#     [tq.put(entity) for entity in entities]
+
+#     pbar = multiprocessing.Process(name='pbar', target=progress_count, args=(entity_cnt, desc, prog_count))
+#     pbar.daemon = True
+#     pbar.start()
+
+#     pool = get_pool()
+
+#     for _ in range(cpus):
+#         pool.apply_async(run_func, (tq, func, prog_count, ))
+
+#     tq.join()
+#     logger.info('task queue joined')
+
+#     pbar.terminate()
+
+
+def run_amp(mode, cpu_cnt, func, entities, desc, prog_count):
     # # Task queue is used to send the entities to processes
     # # Result queue is used to get the result from processes
     tq = multiprocessing.JoinableQueue()   # task queue
-    rq = multiprocessing.Queue()           # result queue
+    # rq = multiprocessing.Queue()           # result queue
 
-    multiprocesses = [AMP(tq, rq, func, mode, prog_count) for i in range(processes)]
-    for process in multiprocesses:
-        logger.info(f'{process.name} process start')
-        process.start()
+    entity_cnt = len(entities)
+
+    # spawning multiprocessing limited by the available cores
+    if zvt_config['debug']:
+        cpus = 1
+    else:
+        if cpu_cnt != 0:
+            cpus = min(zvt_config['processes'], multiprocessing.cpu_count() * 2, entity_cnt, cpu_cnt)
+        else:
+            cpus = min(zvt_config['processes'], multiprocessing.cpu_count() * 2, entity_cnt)
+
+    pbar = multiprocessing.Process(name='pbar', target=progress_count, args=(entity_cnt, desc, prog_count))
+    pbar.daemon = True
+    pbar.start()
 
     random.shuffle(entities)
     [tq.put(entity) for entity in entities]
-    [tq.put(None) for _ in range(processes)]
+
+    multiprocesses = [AMP(tq, func, mode, prog_count) for i in range(cpus)]
+    [process.start() for process in multiprocesses]
 
     tq.join()
-    logger.info('task queue joined, processes finished')
+    logger.info('task queue joined')
 
-    time.sleep(1)
+    [process.join() for process in multiprocesses]
 
-    logger.info('join processes start')
-    for process in multiprocesses:
-        process.terminate()
-        time.sleep(0.1)
-        if not process.is_alive():
-            logger.info(f'{process.name} process join start')
-            process.join(timeout=1.0)
-            logger.info(f'{process.name} process join done')
-
-    prog_count.value = entity_cnt
-
-    progress_bar.terminate()
-    logger.info('progressbar terminated')
-    time.sleep(0.1)
-    progress_bar.join(timeout=1.0)
-    logger.info('progressbar joined')
+    pbar.terminate()
 
 
 class AMP(multiprocessing.Process):
     ''' Ticker class fetches stocker ticker daily data. '''
-    def __init__(self, task_queue, result_queue, func, mode, prog_count):
+    def __init__(self, task_queue, func, mode, prog_count):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
-        self.result_queue = result_queue
+        # self.result_queue = result_queue
         self.func = func
         self.mode = mode
         self.prog_count = prog_count
+        # self.daemon = True
 
     # async def aioprocess(self, ticker: str, http_session: ClientSession) -> str:
     #     """Issue GET for the ticker and write to file."""
@@ -136,40 +182,31 @@ class AMP(multiprocessing.Process):
         # Get all tasks
         while True:
             entity = self.task_queue.get()
-            if entity is None:
-                logger.info(f'{self.name} Received all allocated entities')
-                break
             entities_allocated.append(entity)
             self.task_queue.task_done()
 
         logger.info(f'processing {self.mode} {len(entities_allocated)} entities')
-
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.async_process(entities_allocated, self.prog_count))
-
-        # Respond to None received in task_queue
-        self.task_queue.task_done()
 
     def run_sync(self):
         http_session = get_http_session(self.mode)
 
         # Get all tasks
         while True:
+            # logger.info(f'{self.name} running, task empty: {self.task_queue.empty()}')
+            if self.task_queue.empty():
+                # logger.info(f'{self.name} break loop')
+                return
             entity = self.task_queue.get()
-            if entity is None:
-                logger.info(f'{self.name} Received all allocated entities')
-                break
+            self.task_queue.task_done()
             try:
                 self.func(entity, http_session)
             except Exception as e:
                 logger.error(f'{self.func.__name__} entity:{entity} error {e}')
-            symbol = entity if isinstance(entity, str) else entity.code
-            self.result_queue.put(f'{symbol} done')
+            # symbol = entity if isinstance(entity, str) else entity.code
+            # self.result_queue.put(f'{symbol} done')
             self.prog_count.value += 1
-            self.task_queue.task_done()
-
-        # Respond to None received in task_queue
-        self.task_queue.task_done()
 
     def run(self):
         self.mode = RunMode.Sync

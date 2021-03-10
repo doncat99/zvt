@@ -44,11 +44,11 @@ def checkout(dbapi_connection, connection_record, connection_proxy):
     pid = os.getpid()
     if connection_record.info['pid'] != pid:
         connection_record.connection = connection_proxy.connection = None
-        raise exc.DisconnectionError(
-                "Connection record belongs to pid %s, "
-                "attempting to check out in pid %s" %
-                (connection_record.info['pid'], pid)
-        )
+        # raise exc.DisconnectionError(
+        #         "Connection record belongs to pid %s, "
+        #         "attempting to check out in pid %s" %
+        #         (connection_record.info['pid'], pid)
+        # )
 
 
 @event.listens_for(Engine, "before_cursor_execute")
@@ -83,7 +83,7 @@ def profiled():
 
 
 def build_engine(region: Region) -> Engine:
-    logger.info(f"start building {region} database engine...")
+    logger.debug(f"start building {region} database engine...")
 
     # engine = await asyncpg.create_pool(
     #     host=zvt_config['db_host'],
@@ -125,7 +125,7 @@ def build_engine(region: Region) -> Engine:
     except:
         pass
 
-    logger.info(f"{region} engine connect successed")
+    logger.debug(f"{region} engine connect successed")
 
     return engine
 
@@ -153,6 +153,7 @@ def to_postgresql(region: Region, df, tablename):
 
 
 def get_db_engine(region: Region,
+                  schema_base: DeclarativeMeta,
                   db_name: str = None) -> Engine:
     db_engine = db_engine_map.get(region)
     if db_engine:
@@ -161,6 +162,7 @@ def get_db_engine(region: Region,
 
     logger.debug("create engine key: {}_{}".format(region.value, db_name))
     db_engine_map[region] = build_engine(region)
+    schema_base.metadata.create_all(db_engine_map[region])
     return db_engine_map[region]
 
 
